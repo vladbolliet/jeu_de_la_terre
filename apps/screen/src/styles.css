@@ -331,28 +331,18 @@ aside {
   height: 84vh;
   left: 27vw;
   top: 4vh;
-  opacity: 0.5;
+  opacity: 0.7;
   pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #123a4d, #06121b 75%);
+  box-shadow: inset 0 0 0 2px rgb(60 195 211 / 0.35);
+  will-change: contents;
   animation: fade-in-slow 3s ease-out both;
 }
 @keyframes fade-in-slow {
   from {
     opacity: 0;
   }
-}
-.globe-sphere {
-  stroke: rgb(60 195 211 / 0.35);
-  stroke-width: 2;
-}
-.globe-graticule {
-  fill: none;
-  stroke: rgb(60 195 211 / 0.12);
-  stroke-width: 1;
-}
-.globe-land {
-  fill: rgb(60 195 211 / 0.16);
-  stroke: rgb(60 195 211 / 0.55);
-  stroke-width: 1.5;
 }
 .lobby-main {
   grid-area: main;

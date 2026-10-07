@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Factory, House, Landmark, Megaphone, type LucideIcon } from 'lucide-react';
-import { geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
+import { geoEquirectangular, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import type { Role, ScreenView } from '@jdlt/shared';
@@ -85,48 +85,150 @@ export function Lobby({ view }: { view: ScreenView }) {
 
 const landTopo = land110m as unknown as Topology<{ land: GeometryCollection }>;
 const LAND = feature(landTopo, landTopo.objects.land);
-const GRATICULE = geoGraticule10();
-const GLOBE_SIZE = 1000;
 const DEG_PER_SECOND = 4;
+const TILT_DEG = 18;
+const DOT_STEP_DEG = 1.8;
+const MAX_BACKING_PX = 900;
+const RAD = Math.PI / 180;
 
-/** Slowly spinning orthographic globe, drawn in outline behind the lobby. */
+/** Unit vector for a lon/lat point: x right, y up, z towards the viewer at lon 0. */
+function toVec(lon: number, lat: number, out: number[]) {
+  const c = Math.cos(lat * RAD);
+  out.push(c * Math.sin(lon * RAD), Math.sin(lat * RAD), c * Math.cos(lon * RAD));
+}
+
+/**
+ * Land as evenly spaced dots. Land is rasterised once on a small offscreen
+ * equirectangular canvas and sampled, which is far cheaper than geoContains.
+ */
+function landDots(): Float32Array {
+  const W = 720;
+  const H = 360;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+  const path = geoPath(geoEquirectangular().fitSize([W, H], { type: 'Sphere' }), ctx);
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  path(LAND);
+  ctx.fill();
+  const px = ctx.getImageData(0, 0, W, H).data;
+  const out: number[] = [];
+  for (let lat = -85; lat <= 85; lat += DOT_STEP_DEG) {
+    const lonStep = DOT_STEP_DEG / Math.max(0.2, Math.cos(lat * RAD));
+    for (let lon = -180; lon < 180; lon += lonStep) {
+      const x = Math.floor(((lon + 180) / 360) * W);
+      const y = Math.floor(((90 - lat) / 180) * H);
+      if (px[(y * W + x) * 4 + 3]! > 127) toVec(lon, lat, out);
+    }
+  }
+  return new Float32Array(out);
+}
+
+/** Meridians and parallels every 20°, as polylines of unit vectors. */
+function graticuleLines(): Float32Array[] {
+  const lines: Float32Array[] = [];
+  for (let lon = -180; lon < 180; lon += 20) {
+    const l: number[] = [];
+    for (let lat = -80; lat <= 80; lat += 4) toVec(lon, lat, l);
+    lines.push(new Float32Array(l));
+  }
+  for (let lat = -60; lat <= 60; lat += 20) {
+    const l: number[] = [];
+    for (let lon = -180; lon <= 180; lon += 4) toVec(lon, lat, l);
+    lines.push(new Float32Array(l));
+  }
+  return lines;
+}
+
+/**
+ * Slowly spinning dotted globe behind the lobby. Points are precomputed as 3D
+ * unit vectors; each frame is only a rotation, drawn on a canvas in a
+ * requestAnimationFrame loop, so the spin is smooth even on weak laptops.
+ */
 function Globe() {
-  const [rotation, setRotation] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    const dots = landDots();
+    const lines = graticuleLines();
+    const sinT = Math.sin(TILT_DEG * RAD);
+    const cosT = Math.cos(TILT_DEG * RAD);
+    let size = 0;
+    let unit = 1;
+
+    const resize = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      size = Math.min(MAX_BACKING_PX, Math.round(canvas.clientWidth * dpr));
+      unit = size / canvas.clientWidth || 1;
+      canvas.width = canvas.height = size;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
     const start = performance.now();
-    // ~20 fps is plenty for a slow spin and spares the projector laptop.
-    const id = setInterval(
-      () => setRotation(((performance.now() - start) / 1000) * DEG_PER_SECOND),
-      50,
-    );
-    return () => clearInterval(id);
+    let frame = 0;
+    const draw = (now: number) => {
+      const a = ((now - start) / 1000) * DEG_PER_SECOND * RAD;
+      const sinA = Math.sin(a);
+      const cosA = Math.cos(a);
+      const r = size / 2 - 2 * unit;
+      const c = size / 2;
+      // Rotate around the polar axis, then tilt the north pole towards the viewer.
+      const project = (v: Float32Array, i: number) => {
+        const x = v[i]! * cosA + v[i + 2]! * sinA;
+        const z1 = -v[i]! * sinA + v[i + 2]! * cosA;
+        const y = v[i + 1]! * cosT - z1 * sinT;
+        const z = v[i + 1]! * sinT + z1 * cosT;
+        return [c + r * x, c - r * y, z] as const;
+      };
+
+      ctx.clearRect(0, 0, size, size);
+
+      ctx.strokeStyle = 'rgb(60 195 211 / 0.18)';
+      ctx.lineWidth = unit;
+      ctx.beginPath();
+      for (const line of lines) {
+        let pen = false;
+        for (let i = 0; i < line.length; i += 3) {
+          const [x, y, z] = project(line, i);
+          if (z <= 0) pen = false;
+          else if (pen) ctx.lineTo(x, y);
+          else {
+            ctx.moveTo(x, y);
+            pen = true;
+          }
+        }
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#5fd6e3';
+      const d = 3.4 * unit;
+      for (let i = 0; i < dots.length; i += 3) {
+        const [x, y, z] = project(dots, i);
+        if (z <= 0) continue;
+        // Fade towards the limb for depth.
+        ctx.globalAlpha = 0.25 + 0.75 * z;
+        ctx.fillRect(x - d / 2, y - d / 2, d, d);
+      }
+      ctx.globalAlpha = 1;
+
+      frame = requestAnimationFrame(draw);
+    };
+    frame = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', resize);
+    };
   }, []);
 
-  const projection = geoOrthographic()
-    .scale(GLOBE_SIZE / 2 - 4)
-    .translate([GLOBE_SIZE / 2, GLOBE_SIZE / 2])
-    .rotate([-rotation, -18]);
-  const path = geoPath(projection);
-
-  return (
-    <svg className="lobby-globe" viewBox={`0 0 ${GLOBE_SIZE} ${GLOBE_SIZE}`} aria-hidden>
-      <defs>
-        <radialGradient id="globe-shade" cx="38%" cy="32%" r="75%">
-          <stop offset="0%" stopColor="#123a4d" />
-          <stop offset="100%" stopColor="#06121b" />
-        </radialGradient>
-      </defs>
-      <circle
-        cx={GLOBE_SIZE / 2}
-        cy={GLOBE_SIZE / 2}
-        r={GLOBE_SIZE / 2 - 4}
-        fill="url(#globe-shade)"
-        className="globe-sphere"
-      />
-      <path d={path(GRATICULE) ?? ''} className="globe-graticule" />
-      <path d={path(LAND) ?? ''} className="globe-land" />
-    </svg>
-  );
+  return <canvas ref={canvasRef} className="lobby-globe" aria-hidden />;
 }
 
 // ---------- warming stripes ----------
