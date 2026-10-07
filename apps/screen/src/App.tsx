@@ -7,6 +7,7 @@ import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
 import { ChoicesPanel, VotePanel } from './PhasePanels.tsx';
 import { Feedback } from './Feedback.tsx';
+import { Ending } from './Ending.tsx';
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
@@ -35,11 +36,15 @@ export function App() {
       </>
     );
 
-  if (view.phase === 'feedback')
+  if (view.phase === 'feedback' || view.phase === 'ended')
     return (
-      <div className="layout feedback-layout">
+      <div className="layout full-layout">
         <PhaseHeader view={view} />
-        <Feedback view={view} voteOptions={voteOptions.current} />
+        {view.phase === 'feedback' ? (
+          <Feedback view={view} voteOptions={voteOptions.current} />
+        ) : (
+          <Ending view={view} />
+        )}
         {hostKey && <HostBar view={view} />}
       </div>
     );
@@ -61,38 +66,10 @@ export function App() {
       </section>
       <aside>
         <Indicators world={view.world} />
-        <ResultPanel view={view} />
       </aside>
       {hostKey && <HostBar view={view} />}
     </div>
   );
-}
-
-function ResultPanel({ view }: { view: ScreenView }) {
-  switch (view.phase) {
-    case 'lobby':
-    case 'choices':
-    case 'conflicts':
-      return null;
-    case 'feedback':
-      return null;
-    case 'ended':
-      return (
-        <div className="panel">
-          {view.lastVoteResult && (
-            <p>
-              Vote « {view.lastVoteResult.title} » →{' '}
-              <strong>{view.lastVoteResult.winner.label}</strong>
-            </p>
-          )}
-          {view.newTippingPoints.map((t) => (
-            <p key={t} className="alert">
-              ⚠️ Point de bascule franchi : {t}
-            </p>
-          ))}
-        </div>
-      );
-  }
 }
 
 function HostBar({ view }: { view: ScreenView }) {

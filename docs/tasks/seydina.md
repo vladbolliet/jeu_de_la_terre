@@ -19,7 +19,7 @@ Chaque tâche est finie quand : `pnpm typecheck` passe + le critère « Fini qua
 
 - [x] **S5. Carte dynamique.** Dans `WorldMap.tsx` : (a) teinte de chaleur par latitude (les pôles et tropiques chauffent plus vite) selon `climate.temperature` ; (b) forêts : points/hachures verts sur les zones forestières (Amazonie, Congo, Bornéo, Sibérie) qui disparaissent avec `climate.forest` ; (c) montée des eaux : contour côtier bleu qui s'épaissit avec `climate.seaLevel` (0 → 100 cm) ; (d) icônes sur la carte pour chaque point de bascule franchi (`world.tippingPoints` : arctic_ice → Arctique, permafrost → Sibérie, amazon → Amazonie, coral_reefs → Grande Barrière). Transitions animées (2 s) entre ères.
 - [x] **S6. Bilan d'ère (`feedback`).** Plein écran pendant la phase : « 1920 → 1940 », variations des indicateurs, résultat du vote (`lastVoteResult`, avec le décompte), alerte animée et texte explicatif pour chaque nouveau point de bascule (`newTippingPoints`), et les événements globaux de l'ère (`view.events` : titre + texte, en grand, un par un s'il y en a plusieurs).
-- [ ] **S7. Écran de fin (`ended`).** Courbes 1900→2100 (température, CO₂, biodiversité) depuis `world.history`, classement (`leaderboard`) et un message de conclusion pédagogique (texte à demander aux designers, en attendant un placeholder).
+- [x] **S7. Écran de fin (`ended`).** Courbes 1900→2100 (température, CO₂, biodiversité) depuis `world.history`, classement (`leaderboard`) et un message de conclusion pédagogique (texte à demander aux designers, en attendant un placeholder).
 
 ## J3
 

@@ -524,11 +524,11 @@ aside {
   background: var(--bg);
 }
 /* Feedback phase (S6): full-screen era summary. */
-.feedback-layout {
-  grid-template: 'header' auto 'feedback' 1fr / 1fr;
+.full-layout {
+  grid-template: 'header' auto 'full' 1fr / 1fr;
 }
 .feedback {
-  grid-area: feedback;
+  grid-area: full;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -703,4 +703,142 @@ aside {
   50% {
     box-shadow: 0 0 32px 4px rgb(239 68 68 / 0.6);
   }
+}
+/* Ended phase (S7): curves, leaderboard, conclusion. */
+.ending {
+  grid-area: full;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  min-height: 0;
+  animation: fade-in 0.8s ease-out both;
+}
+.ending-curves {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.chart {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  background: var(--panel);
+  border-radius: 16px;
+  position: relative;
+}
+.chart svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.chart-title {
+  font-size: 26px;
+  font-weight: 800;
+  fill: var(--fg);
+}
+.chart .baseline {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+.chart .tick {
+  font-size: 20px;
+  fill: var(--muted);
+  text-anchor: middle;
+}
+.chart .ref {
+  stroke: var(--warn);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+  opacity: 0.8;
+}
+.chart .ref-label {
+  font-size: 18px;
+  font-weight: 700;
+  fill: var(--muted);
+}
+.chart .curve {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-dasharray: 2000;
+  animation: draw 3s ease-out both;
+}
+.chart .end-dot {
+  fill: var(--fg);
+  stroke: var(--panel);
+  stroke-width: 3;
+}
+.chart .end-label {
+  font-size: 28px;
+  font-weight: 800;
+  fill: var(--fg);
+}
+.chart .start-label {
+  font-size: 20px;
+  font-weight: 600;
+  fill: var(--muted);
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 2000;
+  }
+}
+.ending-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+.leaderboard {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.leaderboard ol {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.leaderboard li {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 1.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.leaderboard .rank {
+  color: var(--muted);
+  font-weight: 800;
+  text-align: right;
+}
+.leaderboard li:first-child {
+  font-size: 2.4rem;
+}
+.leaderboard .who {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.leaderboard .role {
+  font-size: 0.7em;
+  color: var(--muted);
+}
+.leaderboard .score {
+  font-weight: 800;
+}
+.conclusion p {
+  font-size: 2rem;
 }
