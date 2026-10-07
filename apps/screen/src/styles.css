@@ -1,17 +1,19 @@
 :root {
-  --bg: #0b1120;
-  --fg: #e2e8f0;
-  --muted: #94a3b8;
-  --panel: #111827;
-  --alert: #f97316;
-  --urgent: #ef4444;
-  --ok: #22c55e;
-  --warn: #f59e0b;
+  /* Palette « Terre » : deep ocean night, sand, and warming-stripes accents. */
+  --bg: #06121b;
+  --panel: #0e2230;
+  --fg: #f3ebdd;
+  --sand: #f3ebdd;
+  --muted: #93a9b5;
+  --ocean: #3cc3d3;
+  --ok: #5fd08a;
+  --warn: #f2a93b;
+  --urgent: #f0533a;
+  --alert: var(--warn);
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-body: 'Figtree Variable', system-ui, sans-serif;
   color-scheme: dark;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-body);
 }
 * {
   box-sizing: border-box;
@@ -81,7 +83,9 @@ body {
   height: 100%;
   background: var(--fg);
   transform-origin: left;
-  transition: transform 0.1s linear, background-color 0.3s;
+  transition:
+    transform 0.1s linear,
+    background-color 0.3s;
 }
 .phase-header.urgent .timer {
   color: var(--urgent);
@@ -302,86 +306,286 @@ aside {
   padding: 8px 14px;
   font-size: 1rem;
 }
-/* Lobby: full screen, QR readable from the back of the room. */
+/* ---------- Lobby ---------- */
 .lobby {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template:
+    'main join' 1fr
+    'stripes stripes' auto / 1.15fr 1fr;
+  gap: 32px 64px;
+  padding: 56px 72px 40px;
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 30%, rgb(60 195 211 / 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 10% 100%, rgb(240 83 58 / 0.1), transparent 70%), var(--bg);
+}
+/* Film grain for depth (inline SVG noise). */
+.lobby::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.reveal {
+  animation: reveal 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+.lobby-globe {
+  position: absolute;
+  width: 88vh;
+  height: 88vh;
+  left: 36vw;
+  top: 2vh;
+  opacity: 0.5;
+  pointer-events: none;
+  animation: fade-in-slow 3s ease-out both;
+}
+@keyframes fade-in-slow {
+  from {
+    opacity: 0;
+  }
+}
+.globe-sphere {
+  stroke: rgb(60 195 211 / 0.35);
+  stroke-width: 2;
+}
+.globe-graticule {
+  fill: none;
+  stroke: rgb(60 195 211 / 0.12);
+  stroke-width: 1;
+}
+.globe-land {
+  fill: rgb(60 195 211 / 0.16);
+  stroke: rgb(60 195 211 / 0.55);
+  stroke-width: 1.5;
+}
+.lobby-main {
+  grid-area: main;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  padding: 32px 48px 72px;
-  gap: 24px;
+  justify-content: center;
+  min-height: 0;
+}
+.lobby-kicker {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ocean);
 }
 .lobby-title {
-  margin: 0;
-  text-align: center;
-  font-size: 5rem;
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-size: 9.5rem;
   font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'opsz' 144;
 }
-.lobby-body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 64px;
+.lobby-title em {
+  font-style: italic;
+  font-weight: 600;
+  background: linear-gradient(
+    100deg,
+    var(--ocean) 0%,
+    #9ecae1 35%,
+    var(--warn) 70%,
+    var(--urgent) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.08em;
 }
-.lobby-qr {
-  height: 100%;
-  max-height: 70vh;
-  aspect-ratio: 1;
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
-}
-.lobby-qr svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.lobby-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-.lobby-info p {
-  margin: 0;
-}
-.lobby-label {
-  font-size: 2rem;
+.lobby-lede {
+  margin: 20px 0 0;
+  font-size: 2.4rem;
   color: var(--muted);
-}
-.lobby-url {
-  font-size: 3rem;
-  font-weight: 700;
-  overflow-wrap: anywhere;
+  max-width: 22ch;
+  line-height: 1.25;
 }
 .lobby-count {
-  font-size: 2.5rem;
-  margin-top: 24px !important;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 44px;
 }
-.lobby-count strong {
-  font-size: 4.5rem;
-  font-variant-numeric: tabular-nums;
+.lobby-count-number {
+  font-family: var(--font-display);
+  font-size: 8rem;
+  font-weight: 700;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--sand);
+  animation: pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+}
+.lobby-count-label {
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--muted);
 }
 .lobby-roles {
   list-style: none;
-  margin: 0;
+  margin: 32px 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px 32px;
-  font-size: 2rem;
+  gap: 14px 18px;
+  max-width: 900px;
 }
 .lobby-roles li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: rgb(14 34 48 / 0.75);
+  border: 2px solid var(--role-color);
+  backdrop-filter: blur(6px);
+  font-size: 1.9rem;
+}
+.role-elite {
+  --role-color: #c08457;
+}
+.role-citoyen {
+  --role-color: var(--ocean);
+}
+.role-politique {
+  --role-color: #b9a6e8;
+}
+.role-militant {
+  --role-color: var(--ok);
+}
+.role-icon {
+  font-size: 1.8rem;
+}
+.role-label {
+  font-weight: 600;
+}
+.role-count {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch;
+  text-align: right;
+  animation: pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.lobby-join {
+  grid-area: join;
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 54vh);
+  padding: 28px 36px 26px;
+  border-radius: 32px;
+  background: var(--sand);
+  color: var(--bg);
+  box-shadow:
+    0 40px 80px -20px rgb(0 0 0 / 0.7),
+    0 0 0 10px rgb(243 235 221 / 0.06);
+}
+.lobby-join p {
+  margin: 0;
+  text-align: center;
+}
+.join-title {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 700;
+  font-style: italic;
+}
+.join-qr {
+  width: 100%;
+  aspect-ratio: 1;
+}
+.join-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.join-url {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+.join-hint {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #3d5563;
+  line-height: 1.25;
+}
+.stripes {
+  grid-area: stripes;
+  position: relative;
+  z-index: 1;
+}
+.stripes-band {
+  display: flex;
+  height: 7vh;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.stripe {
+  flex: 1;
+  animation: stripe-in 0.6s ease-out both;
+  transform-origin: bottom;
+}
+.stripe.future {
+  background: repeating-linear-gradient(
+    135deg,
+    rgb(147 169 181 / 0.18) 0 6px,
+    rgb(147 169 181 / 0.06) 6px 12px
+  );
+}
+@keyframes stripe-in {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+.stripes-labels {
+  position: relative;
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  background: var(--panel);
-  border-radius: 12px;
-  padding: 12px 20px;
+  margin-top: 10px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--muted);
 }
-.lobby-roles strong {
-  font-variant-numeric: tabular-nums;
+.stripes-labels .now {
+  position: absolute;
+  left: 62.5%;
+  transform: translateX(-50%);
+}
+.stripes-labels .future-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--sand);
 }
 /* Shared gauge (choices made, ballots cast). */
 .gauge-row {
