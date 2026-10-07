@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
-import type { ScreenView } from '@jdlt/shared';
+import { useEffect, useRef, useState } from 'react';
+import type { OptionView, ScreenView } from '@jdlt/shared';
 import { hostCommand, hostKey, socket } from './socket.ts';
 import { PhaseHeader } from './PhaseHeader.tsx';
 import { WorldMap } from './WorldMap.tsx';
 import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
 import { ChoicesPanel, VotePanel } from './PhasePanels.tsx';
+import { Feedback } from './Feedback.tsx';
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
+  // Option labels of the current vote, kept for the feedback phase (see Feedback.tsx).
+  const voteOptions = useRef<OptionView[]>([]);
+  if (view?.vote) voteOptions.current = view.vote.options;
 
   useEffect(() => {
     socket.on('connect', () => socket.emit('screen:join'));
@@ -29,6 +33,15 @@ export function App() {
         <Lobby view={view} />
         {hostKey && <HostBar view={view} />}
       </>
+    );
+
+  if (view.phase === 'feedback')
+    return (
+      <div className="layout feedback-layout">
+        <PhaseHeader view={view} />
+        <Feedback view={view} voteOptions={voteOptions.current} />
+        {hostKey && <HostBar view={view} />}
+      </div>
     );
 
   return (
@@ -62,6 +75,7 @@ function ResultPanel({ view }: { view: ScreenView }) {
     case 'conflicts':
       return null;
     case 'feedback':
+      return null;
     case 'ended':
       return (
         <div className="panel">

@@ -2,11 +2,13 @@ import type { Climate, Society, World } from '@jdlt/shared';
 
 type Severity = 'ok' | 'warn' | 'bad';
 
-interface Indicator<T> {
+export interface Indicator<T> {
   key: keyof T;
   label: string;
   unit: string;
   digits: number;
+  /** Direction in which a change is bad news. */
+  worse: 'up' | 'down';
   /** Severity of the current value; omitted for neutral indicators. */
   severity?: (v: number) => Severity;
 }
@@ -18,18 +20,18 @@ const above = (warn: number, bad: number) => (v: number) =>
 const below = (warn: number, bad: number) => (v: number) =>
   v <= bad ? 'bad' : v <= warn ? 'warn' : 'ok';
 
-const CLIMATE: Indicator<Climate>[] = [
-  { key: 'temperature', label: 'Température', unit: ' °C', digits: 2, severity: above(1, 2) },
-  { key: 'co2', label: 'CO₂', unit: ' ppm', digits: 0, severity: above(350, 450) },
-  { key: 'seaLevel', label: 'Niveau de la mer', unit: ' cm', digits: 0, severity: above(20, 50) },
-  { key: 'forest', label: 'Forêts', unit: ' %', digits: 0, severity: below(85, 65) },
-  { key: 'biodiversity', label: 'Biodiversité', unit: ' %', digits: 0, severity: below(85, 65) },
+export const CLIMATE: Indicator<Climate>[] = [
+  { key: 'temperature', label: 'Température', unit: ' °C', digits: 2, worse: 'up', severity: above(1, 2) },
+  { key: 'co2', label: 'CO₂', unit: ' ppm', digits: 0, worse: 'up', severity: above(350, 450) },
+  { key: 'seaLevel', label: 'Niveau de la mer', unit: ' cm', digits: 0, worse: 'up', severity: above(20, 50) },
+  { key: 'forest', label: 'Forêts', unit: ' %', digits: 0, worse: 'down', severity: below(85, 65) },
+  { key: 'biodiversity', label: 'Biodiversité', unit: ' %', digits: 0, worse: 'down', severity: below(85, 65) },
 ];
 
-const SOCIETY: Indicator<Society>[] = [
-  { key: 'gdp', label: 'PIB', unit: '', digits: 0 },
-  { key: 'wellbeing', label: 'Bien-être', unit: '', digits: 0 },
-  { key: 'awareness', label: 'Sensibilisation', unit: '', digits: 0 },
+export const SOCIETY: Indicator<Society>[] = [
+  { key: 'gdp', label: 'PIB', unit: '', digits: 0, worse: 'down' },
+  { key: 'wellbeing', label: 'Bien-être', unit: '', digits: 0, worse: 'down' },
+  { key: 'awareness', label: 'Sensibilisation', unit: '', digits: 0, worse: 'down' },
 ];
 
 export function Indicators({ world }: { world: World }) {
@@ -82,13 +84,19 @@ function Tile<T>({
         {value.toFixed(ind.digits)}
         <span className="tile-unit">{ind.unit}</span>
       </div>
-      {prev !== undefined && <Delta delta={value - prev} digits={ind.digits} />}
+      {prev !== undefined && (
+        // Delta of the displayed (rounded) values.
+        <Delta
+          delta={Number(value.toFixed(ind.digits)) - Number(prev.toFixed(ind.digits))}
+          digits={ind.digits}
+        />
+      )}
     </div>
   );
 }
 
 function Delta({ delta, digits }: { delta: number; digits: number }) {
-  const shown = Number(delta.toFixed(digits));
+  const shown = Number(delta.toFixed(digits)) || 0;
   if (shown === 0) return <div className="tile-delta">=</div>;
   return (
     <div className="tile-delta">
