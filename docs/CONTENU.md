@@ -7,9 +7,10 @@ content/
   roles.yaml       les 4 rôles, leur objectif affiché, leur proportion, leur poids dans les votes
   cards/*.yaml     les cartes de microchoix (un fichier par thème ou par rôle, au choix)
   votes/*.yaml     les votes collectifs (phase « conflits »)
+  events/*.yaml    les événements globaux automatiques (crises, catastrophes…)
 ```
 
-`content/cards/exemples.yaml` et `content/votes/exemples.yaml` sont des exemples à remplacer.
+Les fichiers `exemples.yaml` de chaque dossier sont des exemples à remplacer.
 
 ## Une carte
 
@@ -61,6 +62,24 @@ Une option peut envoyer une carte à un joueur au hasard d'un autre rôle :
 
 La carte reçue doit exister et avoir `interactionOnly: true` si elle ne doit sortir que par ce biais. Le joueur qui la reçoit voit « De la part de <prénom> ».
 
+### Réponse à l'expéditeur (`reply`)
+
+Sur une carte reçue via `sends`, une option peut renvoyer un message au joueur qui l'a envoyée. Il le voit avec ses retours de l'ère.
+
+```yaml
+- id: politique_pot_de_vin
+  roles: [politique]
+  interactionOnly: true
+  ...
+  options:
+    - id: accepter
+      label: Accepter discrètement
+      reply: L'élu·e a accepté ton enveloppe.        # message pour l'élite qui a envoyé la carte
+    - id: denoncer
+      label: Dénoncer publiquement
+      reply: L'élu·e a dénoncé ta tentative de corruption.
+```
+
 ## Un vote
 
 ```yaml
@@ -80,6 +99,19 @@ La carte reçue doit exister et avoir `interactionOnly: true` si elle ne doit so
 ```
 
 À chaque ère, **le premier vote** (dans l'ordre des fichiers) dont `eras` et `when` correspondent est joué. Les effets d'un vote s'appliquent **en entier** (pas moyennés) : un vote pèse autant que tous les joueurs choisissant la même chose.
+
+## Un événement global
+
+Fichiers `content/events/*.yaml`. Un événement (crise, catastrophe, découverte) s'applique **automatiquement** à la fin d'une ère si `eras` et `when` correspondent, et s'affiche sur l'écran pendant le bilan. Chaque événement ne se produit **qu'une seule fois** par partie (la première ère où la condition est vraie). Ses effets s'appliquent en entier, comme un vote.
+
+```yaml
+- id: canicule
+  when: { indicator: temperature, gt: 1.4 }   # optionnel ; mêmes indicateurs que pour les votes
+  eras: [2000, 2020, 2040]                    # optionnel
+  title: Canicule historique
+  text: Une vague de chaleur record…
+  effects: { wellbeing: -4, awareness: 5 }
+```
 
 ## Tester ce qu'on écrit
 

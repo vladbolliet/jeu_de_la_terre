@@ -41,3 +41,45 @@ Tous les réglages sont dans `packages/engine/src/config.ts`.
 ## Protocole
 
 Défini dans `packages/shared/src/protocol.ts`. **Le modifier = PR relue par les 3 devs.**
+
+## Variables d'environnement du serveur
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `PORT` | 3000 | Port HTTP |
+| `HOST_KEY` | `dev` | Clé des contrôles hôte (`/screen/?key=…`) — **à changer en prod** |
+| `PUBLIC_URL` | — | URL publique, affichée en QR code dans le lobby |
+| `CHOICES_S` / `CONFLICTS_S` / `FEEDBACK_S` | 60 / 40 / 20 | Durée des phases (s) |
+| `MAX_PLAYERS` | 200 | Au-delà, « La partie est complète » (les joueurs connus peuvent toujours revenir) |
+| `STATE_FILE` | `./game-state.json` | Fichier de sauvegarde ; vide = désactivé |
+| `CONTENT_DIR` | `content/` | Dossier du contenu YAML |
+
+Chaque socket est limité à 10 événements/s (au-delà ils sont ignorés). Un payload invalide renvoie `{ ok: false, error }` sans jamais faire planter le serveur.
+
+## Sauvegarde de l'état
+
+Le serveur écrit l'état complet de la partie dans `STATE_FILE` (défaut `./game-state.json`) toutes les 2 s si quelque chose a changé (écriture atomique). Au démarrage, il recharge ce fichier s'il a moins de 2 h ; la phase en cours reprend avec au moins 10 s restantes, et les téléphones se reconnectent avec leur token. `reset` (hôte) supprime le fichier. `STATE_FILE=` (vide) désactive la sauvegarde.
+Attention : sur Render, le disque est effacé quand le conteneur redémarre (sauf avec un disque persistant, payant). La sauvegarde protège donc surtout le plan B local.
+
+## Déploiement
+
+URL de production : **à compléter après le premier déploiement**.
+
+Render (fichier `render.yaml` à la racine) :
+1. https://dashboard.render.com → **New → Blueprint** → choisir le repo GitHub `jeu_de_la_terre`. Render lit `render.yaml`, construit le `Dockerfile` et déploie la branche `main` à chaque merge.
+2. Une fois l'URL connue (ex. `https://jeu-de-la-terre.onrender.com`), la mettre dans la variable d'environnement `PUBLIC_URL` du service (Environment) → redéploiement automatique.
+3. `HOST_KEY` est générée par Render (Environment → afficher). Écran hôte : `<URL>/screen/?key=<HOST_KEY>`.
+4. Vérifier : `<URL>/health` répond `{"ok":true,...}` ; puis `pnpm loadtest --url <URL> --bots 150`.
+
+Plan gratuit : le service s'endort après 15 min sans trafic (premier chargement ~1 min). **Le jour J**, passer en plan Starter (pas de mise en veille) ou ouvrir `<URL>/health` 5 min avant.
+Le serveur garde tout en mémoire : **une seule instance**, ne jamais activer l'autoscaling.
+
+## Plan B : tout sur un portable
+
+Si le Wi-Fi de l'amphi ou l'hébergeur lâche :
+1. Avant le jour J, sur le portable : `git pull`, `pnpm install`, `pnpm build`.
+2. Activer le partage de connexion d'un téléphone (ou un routeur de poche), y connecter le portable, noter son IP (`ipconfig` sous Windows, `ip addr` sous Linux/WSL, `ipconfig getifaddr en0` sous macOS).
+3. `HOST_KEY=<secret> PUBLIC_URL=http://<ip>:3000 pnpm start`
+4. Les joueurs rejoignent le même réseau et ouvrent `http://<ip>:3000` (QR code à l'écran) ; l'écran projeté ouvre `http://localhost:3000/screen/?key=<secret>`.
+5. Sous WSL, le port n'est pas exposé au réseau par défaut : lancer plutôt depuis Windows/macOS/Linux natif, ou activer le mode réseau « mirrored » de WSL.
+Limite : un partage de connexion de téléphone accepte souvent ~10–15 appareils seulement ; pour 100 joueurs il faut un vrai point d'accès (routeur Wi-Fi).

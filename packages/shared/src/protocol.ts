@@ -82,6 +82,8 @@ export interface ScreenView {
   newTippingPoints: TippingPointId[];
   leaderboard: { role: Role; name: string; score: number }[];
   roleStats: Record<Role, RoleEraStats>;
+  /** Global events that fired at the end of the last resolved era (shown during feedback). */
+  events: { id: string; title: string; text: string }[];
   /** URL players should open (for the QR code). Null if PUBLIC_URL is not set on the server. */
   joinUrl: string | null;
 }
@@ -106,5 +108,7 @@ export interface ClientToServerEvents {
 
 export interface ServerToClientEvents {
   'player:state': (s: PlayerView) => void;
+  /** The game was reset by the host: forget the saved token and go back to the join screen. */
+  'player:kicked': () => void;
   'screen:state': (s: ScreenView) => void;
 }
