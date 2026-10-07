@@ -1,49 +1,99 @@
-import type { World } from '@jdlt/shared';
+import type { Climate, Society, World } from '@jdlt/shared';
 
-const ROWS: { label: string; get: (w: World) => number; unit: string; digits: number }[] = [
-  { label: 'CO₂', get: (w) => w.climate.co2, unit: ' ppm', digits: 0 },
-  { label: 'Température', get: (w) => w.climate.temperature, unit: ' °C', digits: 2 },
-  { label: 'Niveau de la mer', get: (w) => w.climate.seaLevel, unit: ' cm', digits: 0 },
-  { label: 'Biodiversité', get: (w) => w.climate.biodiversity, unit: ' %', digits: 0 },
-  { label: 'Forêts', get: (w) => w.climate.forest, unit: ' %', digits: 0 },
-  { label: 'PIB', get: (w) => w.society.gdp, unit: '', digits: 0 },
-  { label: 'Bien-être', get: (w) => w.society.wellbeing, unit: '', digits: 0 },
-  { label: 'Sensibilisation', get: (w) => w.society.awareness, unit: '', digits: 0 },
+type Severity = 'ok' | 'warn' | 'bad';
+
+interface Indicator<T> {
+  key: keyof T;
+  label: string;
+  unit: string;
+  digits: number;
+  /** Severity of the current value; omitted for neutral indicators. */
+  severity?: (v: number) => Severity;
+}
+
+/** Higher is worse. */
+const above = (warn: number, bad: number) => (v: number) =>
+  v >= bad ? 'bad' : v >= warn ? 'warn' : 'ok';
+/** Lower is worse. */
+const below = (warn: number, bad: number) => (v: number) =>
+  v <= bad ? 'bad' : v <= warn ? 'warn' : 'ok';
+
+const CLIMATE: Indicator<Climate>[] = [
+  { key: 'temperature', label: 'Température', unit: ' °C', digits: 2, severity: above(1, 2) },
+  { key: 'co2', label: 'CO₂', unit: ' ppm', digits: 0, severity: above(350, 450) },
+  { key: 'seaLevel', label: 'Niveau de la mer', unit: ' cm', digits: 0, severity: above(20, 50) },
+  { key: 'forest', label: 'Forêts', unit: ' %', digits: 0, severity: below(85, 65) },
+  { key: 'biodiversity', label: 'Biodiversité', unit: ' %', digits: 0, severity: below(85, 65) },
+];
+
+const SOCIETY: Indicator<Society>[] = [
+  { key: 'gdp', label: 'PIB', unit: '', digits: 0 },
+  { key: 'wellbeing', label: 'Bien-être', unit: '', digits: 0 },
+  { key: 'awareness', label: 'Sensibilisation', unit: '', digits: 0 },
 ];
 
 export function Indicators({ world }: { world: World }) {
+  // history[last] is the world at the start of the previous era.
+  const prev = world.history.at(-1);
   return (
-    <table className="indicators">
-      <tbody>
-        {ROWS.map((r) => (
-          <tr key={r.label}>
-            <td>{r.label}</td>
-            <td className="value">
-              {r.get(world).toFixed(r.digits)}
-              {r.unit}
-            </td>
-            <td>
-              <Sparkline
-                values={[...world.history.map((h) => r.get({ ...world, ...h })), r.get(world)]}
-              />
-            </td>
-          </tr>
+    <div className="indicators">
+      <div className="climate-tiles">
+        {CLIMATE.map((ind) => (
+          <Tile
+            key={ind.key}
+            ind={ind}
+            value={world.climate[ind.key]}
+            prev={prev?.climate[ind.key]}
+            className="tile climate"
+          />
         ))}
-      </tbody>
-    </table>
+      </div>
+      <div className="society-tiles">
+        {SOCIETY.map((ind) => (
+          <Tile
+            key={ind.key}
+            ind={ind}
+            value={world.society[ind.key]}
+            prev={prev?.society[ind.key]}
+            className="tile society"
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
-function Sparkline({ values }: { values: number[] }) {
-  if (values.length < 2) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const pts = values
-    .map((v, i) => `${(i / (values.length - 1)) * 100},${20 - ((v - min) / (max - min || 1)) * 20}`)
-    .join(' ');
+function Tile<T>({
+  ind,
+  value,
+  prev,
+  className,
+}: {
+  ind: Indicator<T>;
+  value: number;
+  prev: number | undefined;
+  className: string;
+}) {
+  const severity = ind.severity?.(value);
   return (
-    <svg viewBox="0 0 100 20" width="100" height="20">
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
+    <div className={`${className}${severity ? ` sev-${severity}` : ''}`}>
+      <div className="tile-label">{ind.label}</div>
+      <div className="tile-value">
+        {value.toFixed(ind.digits)}
+        <span className="tile-unit">{ind.unit}</span>
+      </div>
+      {prev !== undefined && <Delta delta={value - prev} digits={ind.digits} />}
+    </div>
+  );
+}
+
+function Delta({ delta, digits }: { delta: number; digits: number }) {
+  const shown = Number(delta.toFixed(digits));
+  if (shown === 0) return <div className="tile-delta">=</div>;
+  return (
+    <div className="tile-delta">
+      {shown > 0 ? '▲ +' : '▼ '}
+      {shown.toFixed(digits)}
+    </div>
   );
 }

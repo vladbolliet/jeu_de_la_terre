@@ -5,6 +5,8 @@
   --panel: #111827;
   --alert: #f97316;
   --urgent: #ef4444;
+  --ok: #22c55e;
+  --warn: #f59e0b;
   color-scheme: dark;
   font-family:
     system-ui,
@@ -103,19 +105,84 @@ aside {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  font-size: 1.3rem;
+  min-height: 0;
+  font-size: 1.75rem;
 }
 .indicators {
-  width: 100%;
-  border-collapse: collapse;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.indicators td {
-  padding: 4px 6px;
+.climate-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
-.indicators .value {
-  text-align: right;
+/* Temperature spans the full width: it is the headline indicator. */
+.climate-tiles .tile:first-child {
+  grid-column: 1 / -1;
+}
+.society-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.tile {
+  background: var(--panel);
+  border-radius: 12px;
+  border-left: 8px solid var(--muted);
+  padding: 8px 14px;
   font-variant-numeric: tabular-nums;
+}
+.tile-label {
+  font-size: 1.75rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+.tile-value {
+  font-weight: 800;
+  line-height: 1.1;
+  transition: color 0.6s;
+}
+.tile.climate .tile-value {
+  font-size: 3rem;
+}
+.tile.society .tile-value {
+  font-size: 2rem;
+}
+.tile-unit {
+  font-size: 0.55em;
   font-weight: 600;
+}
+.tile-delta {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+.tile.society {
+  border-left-width: 0;
+  padding: 6px 12px;
+}
+.tile.society .tile-delta {
+  font-size: 1.75rem;
+  color: var(--muted);
+}
+.sev-ok {
+  border-left-color: var(--ok);
+}
+.sev-ok .tile-value {
+  color: var(--ok);
+}
+.sev-warn {
+  border-left-color: var(--warn);
+}
+.sev-warn .tile-value {
+  color: var(--warn);
+}
+.sev-bad {
+  border-left-color: var(--urgent);
+}
+.sev-bad .tile-value {
+  color: var(--urgent);
 }
 .panel {
   background: var(--panel);
