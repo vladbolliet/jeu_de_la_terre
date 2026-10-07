@@ -1,18 +1,10 @@
 import { useEffect, useState } from 'react';
 import type { ScreenView } from '@jdlt/shared';
 import { hostCommand, hostKey, socket } from './socket.ts';
-import { useCountdown } from './useCountdown.ts';
+import { PhaseHeader } from './PhaseHeader.tsx';
 import { WorldMap } from './WorldMap.tsx';
 import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
-
-const PHASE_LABEL: Record<ScreenView['phase'], string> = {
-  lobby: 'En attente des joueurs',
-  choices: 'Phase 1 · Microchoix',
-  conflicts: 'Phase 2 · Conflits',
-  feedback: 'Phase 3 · Bilan',
-  ended: 'Fin de la partie',
-};
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
@@ -28,7 +20,6 @@ export function App() {
     };
   }, []);
 
-  const seconds = useCountdown(view?.phaseEndsAt ?? null);
   if (!view) return <div className="loading">Connexion au serveur…</div>;
 
   if (view.phase === 'lobby')
@@ -41,11 +32,7 @@ export function App() {
 
   return (
     <div className="layout">
-      <header>
-        <div className="year">{view.year}</div>
-        <div className="phase">{PHASE_LABEL[view.phase]}</div>
-        <div className="timer">{seconds !== null ? `${seconds}s` : ''}</div>
-      </header>
+      <PhaseHeader view={view} />
       <section className="map">
         <WorldMap world={view.world} />
       </section>
