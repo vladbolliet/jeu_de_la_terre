@@ -105,11 +105,90 @@ body {
 .map {
   flex: 1;
   min-height: 0;
-  display: grid;
-  place-items: center;
+  position: relative;
 }
+/* Absolute so the SVG always fits the box (viewBox keeps the aspect ratio). */
 .map svg {
-  max-height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* World map (S5): every change animates over 2 s between eras. */
+.world-map .coast {
+  fill: none;
+  stroke: #38bdf8;
+  stroke-linejoin: round;
+  transition:
+    stroke-width 2s,
+    stroke-opacity 2s;
+}
+.world-map .country {
+  stroke: #0f172a;
+  stroke-width: 0.5;
+  transition: fill 2s;
+}
+.world-map .forest circle {
+  fill: #14532d;
+  stroke: #86efac;
+  stroke-width: 1;
+  transition:
+    opacity 2s,
+    transform 2s;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.world-map .forest circle.gone {
+  opacity: 0;
+  transform: scale(0.2);
+}
+.world-map .tipping {
+  animation: tipping-in 2s ease-out both;
+}
+.world-map .tipping-disc {
+  fill: #0b1120;
+  stroke: var(--urgent);
+  stroke-width: 3;
+}
+.world-map .tipping-ring {
+  fill: none;
+  stroke: var(--urgent);
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tipping-pulse 2s ease-out infinite;
+}
+.world-map {
+  overflow: visible;
+}
+.world-map .tipping-icon {
+  font-size: 24px;
+  text-anchor: middle;
+}
+.world-map .tipping-label {
+  font-size: 22px;
+  font-weight: 800;
+  text-anchor: middle;
+  fill: #fff;
+  paint-order: stroke;
+  stroke: #0b1120;
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+@keyframes tipping-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tipping-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 aside {
   grid-area: aside;
