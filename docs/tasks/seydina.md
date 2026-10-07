@@ -13,7 +13,7 @@ Chaque tâche est finie quand : `pnpm typecheck` passe + le critère « Fini qua
   Fini quand : un téléphone peut scanner le QR projeté et rejoindre.
 - [x] **S2. Bandeau de phase.** En-tête : année en très grand, nom de la phase, compte à rebours (`phaseEndsAt`) qui devient rouge sous 10 s, barre de progression de la phase.
 - [x] **S3. Indicateurs.** Refaire `Indicators.tsx` : 5 indicateurs climat (CO₂, température, mer, forêts, biodiversité) en grandes tuiles avec valeur, variation depuis l'ère précédente (`world.history`) et couleur selon la gravité ; 3 indicateurs société plus petits. Températures : vert < 1 °C, orange < 2 °C, rouge au-delà.
-- [ ] **S4. Phase choix et vote.** `choices` : jauge `choicesMade / cardsDealt` et, par rôle (`roleStats`), une barre « plus/moins polluant » (`meanEmissions`, −10…+10) sans chiffres. `conflicts` : titre + texte du vote en grand, nombre de votes (`vote.ballots`).
+- [x] **S4. Phase choix et vote.** `choices` : jauge `choicesMade / cardsDealt` et, par rôle (`roleStats`), une barre « plus/moins polluant » (`meanEmissions`, −10…+10) sans chiffres. `conflicts` : titre + texte du vote en grand, nombre de votes (`vote.ballots`).
 
 ## J2 — Carte vivante et bilans
 

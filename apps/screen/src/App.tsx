@@ -5,6 +5,7 @@ import { PhaseHeader } from './PhaseHeader.tsx';
 import { WorldMap } from './WorldMap.tsx';
 import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
+import { ChoicesPanel, VotePanel } from './PhasePanels.tsx';
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
@@ -33,44 +34,33 @@ export function App() {
   return (
     <div className="layout">
       <PhaseHeader view={view} />
-      <section className="map">
-        <WorldMap world={view.world} />
+      <section className="stage">
+        {view.phase === 'conflicts' ? (
+          <VotePanel view={view} />
+        ) : (
+          <>
+            <div className="map">
+              <WorldMap world={view.world} />
+            </div>
+            {view.phase === 'choices' && <ChoicesPanel view={view} />}
+          </>
+        )}
       </section>
       <aside>
         <Indicators world={view.world} />
-        <PhasePanel view={view} />
+        <ResultPanel view={view} />
       </aside>
       {hostKey && <HostBar view={view} />}
     </div>
   );
 }
 
-function PhasePanel({ view }: { view: ScreenView }) {
+function ResultPanel({ view }: { view: ScreenView }) {
   switch (view.phase) {
     case 'lobby':
-      return null;
     case 'choices':
-      return (
-        <div className="panel">
-          <h2>
-            {view.choicesMade} / {view.cardsDealt} choix
-          </h2>
-        </div>
-      );
     case 'conflicts':
-      return (
-        <div className="panel">
-          {view.vote ? (
-            <>
-              <h2>🗳️ {view.vote.title}</h2>
-              <p>{view.vote.text}</p>
-              <p>{view.vote.ballots} votes</p>
-            </>
-          ) : (
-            <h2>Pas de vote cette ère</h2>
-          )}
-        </div>
-      );
+      return null;
     case 'feedback':
     case 'ended':
       return (

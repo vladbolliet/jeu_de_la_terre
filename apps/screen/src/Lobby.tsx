@@ -1,13 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react';
 import type { Role, ScreenView } from '@jdlt/shared';
-
-// Display names mirror content/roles.yaml (not part of ScreenView).
-const ROLE_LABEL: Record<Role, string> = {
-  elite: 'Élite industrielle',
-  citoyen: 'Citoyen·ne',
-  politique: 'Politique',
-  militant: 'Militant·e',
-};
+import { ROLE_LABEL } from './roles.ts';
 
 export function Lobby({ view }: { view: ScreenView }) {
   const joinUrl = view.joinUrl ?? location.origin;
