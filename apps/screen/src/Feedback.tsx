@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CircleCheck, Newspaper, TriangleAlert, Vote } from 'lucide-react';
 import type { OptionView, ScreenView } from '@jdlt/shared';
 import { CLIMATE, SOCIETY, type Indicator } from './Indicators.tsx';
 import { TIPPING } from './tipping.ts';
@@ -44,9 +45,11 @@ export function Feedback({ view, voteOptions }: { view: ScreenView; voteOptions:
         <div className="feedback-cards">
           {view.newTippingPoints.map((id) => (
             <div key={id} className="card tipping-alert">
-              <div className="card-kicker">⚠️ Point de bascule franchi</div>
+              <div className="card-kicker">
+                <TriangleAlert className="icon" /> Point de bascule franchi
+              </div>
               <h2>
-                {TIPPING[id].icon} {TIPPING[id].label}
+                <TippingTitle id={id} />
               </h2>
               <p>{TIPPING[id].explanation}</p>
             </div>
@@ -109,7 +112,8 @@ function Events({ events }: { events: ScreenView['events'] }) {
   return (
     <div key={event.id} className="card event">
       <div className="card-kicker">
-        📰 Événement{events.length > 1 && ` ${index + 1} / ${events.length}`}
+        <Newspaper className="icon" /> Événement
+        {events.length > 1 && ` ${index + 1} / ${events.length}`}
       </div>
       <h2>{event.title}</h2>
       <p>{event.text}</p>
@@ -130,8 +134,12 @@ function VoteResultCard({
   const total = entries.reduce((sum, [, n]) => sum + n, 0);
   return (
     <div className="card vote-result">
-      <div className="card-kicker">🗳️ Vote · {result.title}</div>
-      <h2>✅ {result.winner.label}</h2>
+      <div className="card-kicker">
+        <Vote className="icon" /> Vote · {result.title}
+      </div>
+      <h2>
+        <CircleCheck className="icon winner-icon" /> {result.winner.label}
+      </h2>
       {total === 0 ? (
         <p>Personne n'a voté : l'option par défaut s'applique.</p>
       ) : (
@@ -148,5 +156,14 @@ function VoteResultCard({
         </ul>
       )}
     </div>
+  );
+}
+
+function TippingTitle({ id }: { id: keyof typeof TIPPING }) {
+  const { icon: Icon, label } = TIPPING[id];
+  return (
+    <>
+      <Icon className="icon" /> {label}
+    </>
   );
 }

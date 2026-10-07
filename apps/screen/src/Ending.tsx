@@ -1,3 +1,4 @@
+import { Trophy } from 'lucide-react';
 import type { Climate, ScreenView, World } from '@jdlt/shared';
 import { ROLE_LABEL } from './roles.ts';
 
@@ -39,7 +40,9 @@ export function Ending({ view }: { view: ScreenView }) {
       </div>
       <div className="ending-side">
         <div className="card leaderboard">
-          <div className="card-kicker">🏆 Classement</div>
+          <div className="card-kicker">
+            <Trophy className="icon" /> Classement
+          </div>
           <ol>
             {view.leaderboard.map((p, i) => (
               <li key={i}>
@@ -101,11 +104,7 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
           <g key={r.value}>
             <line className="ref" x1={x(X0)} x2={x(X1)} y1={y(r.value)} y2={y(r.value)} />
             {/* Lowest reference labelled under its line, the others above, away from the start label. */}
-            <text
-              className="ref-label"
-              x={x(1945)}
-              y={i === 0 ? y(r.value) + 22 : y(r.value) - 8}
-            >
+            <text className="ref-label" x={x(1945)} y={i === 0 ? y(r.value) + 22 : y(r.value) - 8}>
               {r.label}
             </text>
           </g>

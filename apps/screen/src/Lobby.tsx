@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { Factory, House, Landmark, Megaphone, type LucideIcon } from 'lucide-react';
 import { geoGraticule10, geoOrthographic, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
@@ -7,11 +8,11 @@ import type { Role, ScreenView } from '@jdlt/shared';
 import land110m from 'world-atlas/land-110m.json';
 import { ROLES, ROLE_LABEL } from './roles.ts';
 
-const ROLE_ICON: Record<Role, string> = {
-  elite: '🏭',
-  citoyen: '🏠',
-  politique: '🏛️',
-  militant: '📣',
+const ROLE_ICON: Record<Role, LucideIcon> = {
+  elite: Factory,
+  citoyen: House,
+  politique: Landmark,
+  militant: Megaphone,
 };
 
 export function Lobby({ view }: { view: ScreenView }) {
@@ -44,15 +45,18 @@ export function Lobby({ view }: { view: ScreenView }) {
         </div>
 
         <ul className="lobby-roles reveal" style={{ animationDelay: '0.7s' }}>
-          {ROLES.map((role) => (
-            <li key={role} className={`role-${role}`}>
-              <span className="role-icon">{ROLE_ICON[role]}</span>
-              <span className="role-label">{ROLE_LABEL[role]}</span>
-              <span key={view.roleCounts[role]} className="role-count">
-                {view.roleCounts[role]}
-              </span>
-            </li>
-          ))}
+          {ROLES.map((role) => {
+            const Icon = ROLE_ICON[role];
+            return (
+              <li key={role} className={`role-${role}`}>
+                <Icon className="role-icon" strokeWidth={2.2} />
+                <span className="role-label">{ROLE_LABEL[role]}</span>
+                <span key={view.roleCounts[role]} className="role-count">
+                  {view.roleCounts[role]}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 

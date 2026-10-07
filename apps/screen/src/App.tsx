@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { OptionView, ScreenView } from '@jdlt/shared';
-import { hostCommand, hostKey, socket } from './socket.ts';
+import { hostKey, socket } from './socket.ts';
+import { HostBar } from './HostBar.tsx';
 import { PhaseHeader } from './PhaseHeader.tsx';
 import { WorldMap } from './WorldMap.tsx';
 import { Indicators } from './Indicators.tsx';
@@ -68,24 +69,6 @@ export function App() {
         <Indicators world={view.world} />
       </aside>
       {hostKey && <HostBar view={view} />}
-    </div>
-  );
-}
-
-function HostBar({ view }: { view: ScreenView }) {
-  return (
-    <div className="hostbar">
-      <span>
-        Hôte · {view.connectedCount}/{view.playerCount} connectés
-      </span>
-      {view.phase === 'lobby' && <button onClick={() => hostCommand('start')}>Lancer</button>}
-      <button onClick={() => hostCommand('next')}>Phase suivante</button>
-      <button onClick={() => hostCommand(view.phaseEndsAt ? 'pause' : 'resume')}>
-        {view.phaseEndsAt ? 'Pause' : 'Reprendre'}
-      </button>
-      <button onClick={() => confirm('Réinitialiser la partie ?') && hostCommand('reset')}>
-        Reset
-      </button>
     </div>
   );
 }

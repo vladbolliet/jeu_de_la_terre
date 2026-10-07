@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Pause } from 'lucide-react';
 import type { ScreenView } from '@jdlt/shared';
 
 const PHASE_LABEL: Record<ScreenView['phase'], string> = {
@@ -57,7 +58,11 @@ export function PhaseHeader({ view }: { view: ScreenView }) {
       <div className="phase-row">
         <div className="year">{view.year}</div>
         <div className="phase">{PHASE_LABEL[view.phase]}</div>
-        {paused && <div className="paused">⏸ Pause</div>}
+        {paused && (
+          <div className="paused">
+            <Pause className="icon" /> Pause
+          </div>
+        )}
         {seconds !== null && <div className="timer">{formatTime(seconds)}</div>}
       </div>
       {progress !== null && (

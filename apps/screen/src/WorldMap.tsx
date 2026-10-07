@@ -110,15 +110,13 @@ export function WorldMap({ world }: { world: World }) {
 }
 
 function TippingMarker({ id }: { id: TippingPointId }) {
-  const { label, icon, lonLat } = TIPPING[id];
+  const { label, icon: Icon, lonLat } = TIPPING[id];
   const [x, y] = projection(lonLat)!;
   return (
     <g className="tipping" transform={`translate(${x} ${y})`}>
       <circle r={24} className="tipping-ring" />
       <circle r={21} className="tipping-disc" />
-      <text className="tipping-icon" dy="0.35em">
-        {icon}
-      </text>
+      <Icon className="tipping-icon" x={-13} y={-13} width={26} height={26} strokeWidth={2.4} />
       <text className="tipping-label" y={44}>
         {label}
       </text>

@@ -21,11 +21,32 @@ const below = (warn: number, bad: number) => (v: number) =>
   v <= bad ? 'bad' : v <= warn ? 'warn' : 'ok';
 
 export const CLIMATE: Indicator<Climate>[] = [
-  { key: 'temperature', label: 'Température', unit: ' °C', digits: 2, worse: 'up', severity: above(1, 2) },
+  {
+    key: 'temperature',
+    label: 'Température',
+    unit: ' °C',
+    digits: 2,
+    worse: 'up',
+    severity: above(1, 2),
+  },
   { key: 'co2', label: 'CO₂', unit: ' ppm', digits: 0, worse: 'up', severity: above(350, 450) },
-  { key: 'seaLevel', label: 'Niveau de la mer', unit: ' cm', digits: 0, worse: 'up', severity: above(20, 50) },
+  {
+    key: 'seaLevel',
+    label: 'Niveau de la mer',
+    unit: ' cm',
+    digits: 0,
+    worse: 'up',
+    severity: above(20, 50),
+  },
   { key: 'forest', label: 'Forêts', unit: ' %', digits: 0, worse: 'down', severity: below(85, 65) },
-  { key: 'biodiversity', label: 'Biodiversité', unit: ' %', digits: 0, worse: 'down', severity: below(85, 65) },
+  {
+    key: 'biodiversity',
+    label: 'Biodiversité',
+    unit: ' %',
+    digits: 0,
+    worse: 'down',
+    severity: below(85, 65),
+  },
 ];
 
 export const SOCIETY: Indicator<Society>[] = [

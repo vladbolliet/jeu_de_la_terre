@@ -1,3 +1,4 @@
+import { Vote } from 'lucide-react';
 import type { ScreenView } from '@jdlt/shared';
 import { ROLES, ROLE_LABEL } from './roles.ts';
 
@@ -10,10 +11,7 @@ const MIN_SCALE = 4;
 
 export function ChoicesPanel({ view }: { view: ScreenView }) {
   const ratio = view.cardsDealt ? Math.min(1, view.choicesMade / view.cardsDealt) : 0;
-  const scale = Math.max(
-    MIN_SCALE,
-    ...ROLES.map((r) => Math.abs(view.roleStats[r].meanEmissions)),
-  );
+  const scale = Math.max(MIN_SCALE, ...ROLES.map((r) => Math.abs(view.roleStats[r].meanEmissions)));
   return (
     <div className="panel choices-panel">
       <div className="gauge-row">
@@ -67,7 +65,9 @@ export function VotePanel({ view }: { view: ScreenView }) {
   const ratio = view.connectedCount ? Math.min(1, vote.ballots / view.connectedCount) : 0;
   return (
     <div className="vote-panel">
-      <div className="vote-kicker">🗳️ Vote collectif</div>
+      <div className="vote-kicker">
+        <Vote className="icon" /> Vote collectif
+      </div>
       <h2 className="vote-title">{vote.title}</h2>
       <p className="vote-text">{vote.text}</p>
       <ul className="vote-options">
