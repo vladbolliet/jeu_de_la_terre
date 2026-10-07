@@ -4,6 +4,7 @@ import { hostCommand, hostKey, socket } from './socket.ts';
 import { useCountdown } from './useCountdown.ts';
 import { WorldMap } from './WorldMap.tsx';
 import { Indicators } from './Indicators.tsx';
+import { Lobby } from './Lobby.tsx';
 
 const PHASE_LABEL: Record<ScreenView['phase'], string> = {
   lobby: 'En attente des joueurs',
@@ -30,6 +31,14 @@ export function App() {
   const seconds = useCountdown(view?.phaseEndsAt ?? null);
   if (!view) return <div className="loading">Connexion au serveur…</div>;
 
+  if (view.phase === 'lobby')
+    return (
+      <>
+        <Lobby view={view} />
+        {hostKey && <HostBar view={view} />}
+      </>
+    );
+
   return (
     <div className="layout">
       <header>
@@ -52,12 +61,7 @@ export function App() {
 function PhasePanel({ view }: { view: ScreenView }) {
   switch (view.phase) {
     case 'lobby':
-      return (
-        <div className="panel">
-          <h2>{view.playerCount} joueurs connectés</h2>
-          <p>Rejoignez sur {location.host}</p>
-        </div>
-      );
+      return null;
     case 'choices':
       return (
         <div className="panel">
