@@ -4,11 +4,16 @@ import { hostKey, socket } from './socket.ts';
 import { HostBar } from './HostBar.tsx';
 import { PhaseHeader } from './PhaseHeader.tsx';
 import { WorldMap } from './WorldMap.tsx';
+import { EarthGlobe } from './EarthGlobe.tsx';
+import { webglAvailable } from './webgl.ts';
 import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
 import { ChoicesPanel, VotePanel } from './PhasePanels.tsx';
 import { Feedback } from './Feedback.tsx';
 import { Ending } from './Ending.tsx';
+
+// The flat map stays as a fallback for machines without WebGL.
+const HAS_WEBGL = webglAvailable();
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
@@ -50,21 +55,27 @@ export function App() {
       </div>
     );
 
+  // Three columns: what players do · the Earth · the state of the planet.
+  // The vote takes over the first two during the conflicts phase.
   return (
-    <div className="layout">
+    <div className="layout game-layout">
       <PhaseHeader view={view} />
-      <section className="stage">
-        {view.phase === 'conflicts' ? (
+      {view.phase === 'conflicts' ? (
+        <section className="vote-stage">
           <VotePanel view={view} />
-        ) : (
-          <>
+        </section>
+      ) : (
+        <>
+          <section className="players">
+            <ChoicesPanel view={view} />
+          </section>
+          <section className="stage">
             <div className="map">
-              <WorldMap world={view.world} />
+              {HAS_WEBGL ? <EarthGlobe world={view.world} /> : <WorldMap world={view.world} />}
             </div>
-            {view.phase === 'choices' && <ChoicesPanel view={view} />}
-          </>
-        )}
-      </section>
+          </section>
+        </>
+      )}
       <aside>
         <Indicators world={view.world} />
       </aside>

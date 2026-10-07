@@ -81,7 +81,10 @@ function Change<T>({
   const tone = delta === 0 ? 'flat' : delta > 0 === (ind.worse === 'up') ? 'worse' : 'better';
   return (
     <div className={`change ${tone}${minor ? ' minor' : ''}`}>
-      <span className="change-label">{ind.label}</span>
+      <span className="change-label">
+        <ind.icon className="change-icon" strokeWidth={2.2} />
+        {ind.label}
+      </span>
       <span className="change-values">
         {before !== undefined && <span className="before">{before.toFixed(ind.digits)} → </span>}
         <strong>

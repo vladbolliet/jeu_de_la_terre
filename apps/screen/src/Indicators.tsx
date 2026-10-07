@@ -1,3 +1,16 @@
+import {
+  Bird,
+  Coins,
+  Factory,
+  Globe2,
+  Megaphone,
+  Smile,
+  Thermometer,
+  Trees,
+  Users,
+  Waves,
+  type LucideIcon,
+} from 'lucide-react';
 import type { Climate, Society, World } from '@jdlt/shared';
 
 type Severity = 'ok' | 'warn' | 'bad';
@@ -5,6 +18,7 @@ type Severity = 'ok' | 'warn' | 'bad';
 export interface Indicator<T> {
   key: keyof T;
   label: string;
+  icon: LucideIcon;
   unit: string;
   digits: number;
   /** Direction in which a change is bad news. */
@@ -24,24 +38,43 @@ export const CLIMATE: Indicator<Climate>[] = [
   {
     key: 'temperature',
     label: 'Température',
+    icon: Thermometer,
     unit: ' °C',
     digits: 2,
     worse: 'up',
     severity: above(1, 2),
   },
-  { key: 'co2', label: 'CO₂', unit: ' ppm', digits: 0, worse: 'up', severity: above(350, 450) },
+  {
+    key: 'co2',
+    label: 'CO₂',
+    icon: Factory,
+    unit: ' ppm',
+    digits: 0,
+    worse: 'up',
+    severity: above(350, 450),
+  },
   {
     key: 'seaLevel',
     label: 'Niveau de la mer',
+    icon: Waves,
     unit: ' cm',
     digits: 0,
     worse: 'up',
     severity: above(20, 50),
   },
-  { key: 'forest', label: 'Forêts', unit: ' %', digits: 0, worse: 'down', severity: below(85, 65) },
+  {
+    key: 'forest',
+    label: 'Forêts',
+    icon: Trees,
+    unit: ' %',
+    digits: 0,
+    worse: 'down',
+    severity: below(85, 65),
+  },
   {
     key: 'biodiversity',
     label: 'Biodiversité',
+    icon: Bird,
     unit: ' %',
     digits: 0,
     worse: 'down',
@@ -50,9 +83,16 @@ export const CLIMATE: Indicator<Climate>[] = [
 ];
 
 export const SOCIETY: Indicator<Society>[] = [
-  { key: 'gdp', label: 'PIB', unit: '', digits: 0, worse: 'down' },
-  { key: 'wellbeing', label: 'Bien-être', unit: '', digits: 0, worse: 'down' },
-  { key: 'awareness', label: 'Sensibilisation', unit: '', digits: 0, worse: 'down' },
+  { key: 'gdp', label: 'PIB', icon: Coins, unit: '', digits: 0, worse: 'down' },
+  { key: 'wellbeing', label: 'Bien-être', icon: Smile, unit: '', digits: 0, worse: 'down' },
+  {
+    key: 'awareness',
+    label: 'Sensibilisation',
+    icon: Megaphone,
+    unit: '',
+    digits: 0,
+    worse: 'down',
+  },
 ];
 
 export function Indicators({ world }: { world: World }) {
@@ -60,6 +100,9 @@ export function Indicators({ world }: { world: World }) {
   const prev = world.history.at(-1);
   return (
     <div className="indicators">
+      <div className="panel-kicker">
+        <Globe2 className="icon" /> État de la planète
+      </div>
       <div className="climate-tiles">
         {CLIMATE.map((ind) => (
           <Tile
@@ -70,6 +113,9 @@ export function Indicators({ world }: { world: World }) {
             className="tile climate"
           />
         ))}
+      </div>
+      <div className="panel-kicker">
+        <Users className="icon" /> Société
       </div>
       <div className="society-tiles">
         {SOCIETY.map((ind) => (
@@ -98,8 +144,12 @@ function Tile<T>({
   className: string;
 }) {
   const severity = ind.severity?.(value);
+  const Icon = ind.icon;
   return (
     <div className={`${className}${severity ? ` sev-${severity}` : ''}`}>
+      <span className="tile-icon">
+        <Icon strokeWidth={2.2} />
+      </span>
       <div className="tile-label">{ind.label}</div>
       <div className="tile-value">
         {value.toFixed(ind.digits)}
@@ -110,17 +160,19 @@ function Tile<T>({
         <Delta
           delta={Number(value.toFixed(ind.digits)) - Number(prev.toFixed(ind.digits))}
           digits={ind.digits}
+          worse={ind.worse}
         />
       )}
     </div>
   );
 }
 
-function Delta({ delta, digits }: { delta: number; digits: number }) {
+function Delta({ delta, digits, worse }: { delta: number; digits: number; worse: 'up' | 'down' }) {
   const shown = Number(delta.toFixed(digits)) || 0;
   if (shown === 0) return <div className="tile-delta">=</div>;
+  const bad = worse === 'up' ? shown > 0 : shown < 0;
   return (
-    <div className="tile-delta">
+    <div className={`tile-delta ${bad ? 'worse' : 'better'}`}>
       {shown > 0 ? '▲ +' : '▼ '}
       {shown.toFixed(digits)}
     </div>
