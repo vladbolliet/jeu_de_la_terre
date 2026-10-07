@@ -1,0 +1,21 @@
+# Rôles. `share` = proportion de joueurs, `voteWeight` = poids du bulletin dans les votes collectifs.
+- id: elite
+  name: Élite industrielle
+  objective: Maximiser ton capital et la puissance de ton industrie.
+  share: 15
+  voteWeight: 1
+- id: citoyen
+  name: Citoyen·ne
+  objective: Maximiser tes revenus, ta sécurité d'emploi et ton bien-être.
+  share: 60
+  voteWeight: 1
+- id: politique
+  name: Politique
+  objective: Maximiser ton approbation et garder une économie stable.
+  share: 10
+  voteWeight: 3
+- id: militant
+  name: Militant·e
+  objective: Maximiser la sensibilisation du public et peser sur les décisions politiques.
+  share: 15
+  voteWeight: 1

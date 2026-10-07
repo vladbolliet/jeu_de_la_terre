@@ -1,0 +1,38 @@
+# Votes collectifs (phase « conflits »). Le premier vote dont la condition est remplie est joué.
+# Mettre l'option « statu quo » en premier : elle gagne en cas d'égalité.
+- id: loi_taxe_carbone
+  eras: [1980, 2000, 2020, 2040, 2060, 2080]
+  when: { indicator: awareness, gt: 30 }
+  title: Taxe carbone
+  text: Le parlement débat d'une taxe sur les émissions de CO2.
+  options:
+    - id: contre
+      label: Rejeter la taxe
+      effects: { gdp: 1 }
+    - id: pour
+      label: Adopter la taxe
+      effects: { emissions: -5, gdp: -1, approval: -1 }
+
+- id: loi_travail_enfants
+  eras: [1900, 1920]
+  title: Conditions de travail
+  text: Faut-il limiter les heures de travail en usine ?
+  options:
+    - id: non
+      label: Laisser faire le marché
+      effects: { gdp: 1, wellbeing: -1 }
+    - id: oui
+      label: Limiter les heures
+      effects: { gdp: -1, wellbeing: 3 }
+
+- id: loi_autoroutes
+  eras: [1940, 1960]
+  title: Plan autoroutier
+  text: Construire un grand réseau d'autoroutes ?
+  options:
+    - id: oui
+      label: Construire
+      effects: { emissions: 3, deforestation: 2, gdp: 2, employment: 2 }
+    - id: non
+      label: Investir dans le rail
+      effects: { emissions: -1, gdp: 1 }

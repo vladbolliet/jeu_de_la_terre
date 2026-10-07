@@ -1,0 +1,24 @@
+{
+  "name": "jeu-de-la-terre",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter \"./apps/*\" dev",
+    "build": "pnpm -r --filter \"./apps/*\" build",
+    "start": "pnpm --filter @jdlt/server start",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r --if-present test",
+    "content:check": "pnpm --filter @jdlt/engine content:check",
+    "simulate": "pnpm --filter @jdlt/engine simulate",
+    "loadtest": "pnpm --filter @jdlt/server loadtest",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,106 @@
+:root {
+  --bg: #0b1120;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --panel: #111827;
+  --alert: #f97316;
+  color-scheme: dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+}
+.loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  font-size: 2rem;
+}
+/* Projected 16:9 in an amphitheatre: big type, high contrast. */
+.layout {
+  display: grid;
+  grid-template: 'header header' auto 'map aside' 1fr / 2fr 1fr;
+  height: 100vh;
+  gap: 16px;
+  padding: 16px;
+}
+header {
+  grid-area: header;
+  display: flex;
+  align-items: baseline;
+  gap: 32px;
+}
+.year {
+  font-size: 4rem;
+  font-weight: 800;
+}
+.phase {
+  font-size: 2rem;
+  color: var(--muted);
+  flex: 1;
+}
+.timer {
+  font-size: 3rem;
+  font-variant-numeric: tabular-nums;
+}
+.map {
+  grid-area: map;
+  display: grid;
+  place-items: center;
+}
+aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 1.3rem;
+}
+.indicators {
+  width: 100%;
+  border-collapse: collapse;
+}
+.indicators td {
+  padding: 4px 6px;
+}
+.indicators .value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.panel {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 16px;
+}
+.alert {
+  color: var(--alert);
+  font-weight: 700;
+}
+.hostbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  background: #1f2937;
+  font-size: 0.9rem;
+}
+.hostbar span {
+  flex: 1;
+}
+.hostbar button {
+  padding: 8px 14px;
+  font-size: 1rem;
+}

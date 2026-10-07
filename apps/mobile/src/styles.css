@@ -1,0 +1,98 @@
+:root {
+  --bg: #0f172a;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --card: #1e293b;
+  --accent: #22c55e;
+  --danger: #f87171;
+  color-scheme: dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.center {
+  text-align: center;
+  padding-top: 24px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.objective,
+.muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.right {
+  text-align: right;
+}
+.year {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card h2 {
+  margin-top: 0;
+}
+.from {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+button,
+input {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 14px;
+  border-radius: 10px;
+  border: 0;
+  margin-top: 10px;
+}
+button {
+  background: #334155;
+  color: var(--fg);
+}
+button:active,
+button.selected {
+  background: var(--accent);
+  color: #052e16;
+}
+button:disabled {
+  opacity: 0.5;
+}
+.banner {
+  background: var(--danger);
+  color: #000;
+  text-align: center;
+  padding: 6px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.error {
+  color: var(--danger);
+}
+.outcome {
+  font-style: italic;
+}

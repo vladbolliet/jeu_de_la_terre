@@ -1,0 +1,165 @@
+# EXEMPLES — à remplacer par le vrai contenu. Voir docs/CONTENU.md.
+
+# --- Élite industrielle ---
+- id: elite_usine_charbon
+  roles: [elite]
+  eras: [1900, 1920, 1940, 1960]
+  title: Nouvelle usine
+  text: Tu peux ouvrir une usine au charbon, bon marché, ou investir dans une technologie plus propre mais coûteuse.
+  options:
+    - id: charbon
+      label: Usine au charbon
+      outcome: Production record. La fumée noircit la ville.
+      effects: { emissions: 6, gdp: 4, employment: 3 }
+      score: 5
+    - id: propre
+      label: Technologie plus propre
+      outcome: Tes marges baissent, tes actionnaires grognent.
+      effects: { emissions: -1, gdp: 1 }
+      score: 1
+
+- id: elite_dechets
+  roles: [elite]
+  title: Déchets toxiques
+  text: Ton usine produit des déchets. Les traiter coûte cher.
+  options:
+    - id: traiter
+      label: Les traiter correctement
+      effects: { gdp: -1, wellbeing: 2 }
+      score: 1
+    - id: soudoyer
+      label: Payer un·e élu·e pour fermer les yeux
+      outcome: Une enveloppe est partie vers la mairie…
+      effects: { wellbeing: -3 }
+      score: 4
+      sends: { card: politique_pot_de_vin, toRole: politique }
+
+- id: elite_expansion
+  roles: [elite]
+  eras: [1980, 2000, 2020, 2040, 2060, 2080]
+  title: Expansion internationale
+  text: Tu peux délocaliser ta production là où les normes environnementales sont faibles.
+  options:
+    - id: delocaliser
+      label: Délocaliser
+      effects: { emissions: 4, deforestation: 3, employment: -3, gdp: 3 }
+      score: 5
+    - id: rester
+      label: Moderniser sur place
+      effects: { emissions: -2, employment: 1 }
+      score: 2
+
+# --- Citoyens ---
+- id: citoyen_transport
+  roles: [citoyen]
+  title: Aller au travail
+  text: Ton travail est loin. La voiture est rapide ; le vélo/transport en commun est lent et tu risques d'arriver en retard.
+  options:
+    - id: voiture
+      label: Voiture
+      effects: { emissions: 3, wellbeing: 1 }
+      score: 3
+    - id: velo
+      label: Vélo / transports en commun
+      outcome: Ton patron a remarqué ton retard.
+      effects: { emissions: -2, wellbeing: 1 }
+      score: 1
+
+- id: citoyen_emploi
+  roles: [citoyen]
+  title: Offre d'emploi
+  text: Une usine polluante embauche avec un bon salaire. Un emploi dans une coopérative locale paie moins.
+  options:
+    - id: usine
+      label: L'usine
+      effects: { emissions: 2, employment: 2 }
+      score: 4
+    - id: coop
+      label: La coopérative
+      effects: { emissions: -1, wellbeing: 2 }
+      score: 2
+
+- id: citoyen_consommation
+  roles: [citoyen]
+  eras: [1960, 1980, 2000, 2020, 2040, 2060, 2080]
+  title: Pouvoir d'achat
+  text: Ta prime vient de tomber.
+  options:
+    - id: acheter
+      label: Nouvel électroménager et un voyage en avion
+      effects: { emissions: 3, gdp: 2, wellbeing: 2 }
+      score: 4
+    - id: epargner
+      label: Épargner et réparer l'ancien
+      effects: { emissions: -1 }
+      score: 1
+
+# --- Politiques ---
+- id: politique_budget
+  roles: [politique]
+  title: Budget
+  text: Tu dois choisir la priorité du budget de l'année.
+  options:
+    - id: routes
+      label: Routes et industrie
+      effects: { emissions: 3, gdp: 3, approval: 2 }
+      score: 4
+    - id: social
+      label: Santé et éducation
+      effects: { wellbeing: 3, approval: 1 }
+      score: 3
+    - id: nature
+      label: Parcs naturels
+      effects: { deforestation: -4, approval: -1 }
+      score: 1
+
+- id: politique_pot_de_vin
+  roles: [politique]
+  interactionOnly: true
+  title: Une enveloppe
+  text: Une entreprise te propose de l'argent pour ignorer un dépôt de déchets toxiques.
+  options:
+    - id: accepter
+      label: Accepter discrètement
+      effects: { wellbeing: -2 }
+      score: 4
+    - id: denoncer
+      label: Dénoncer publiquement
+      outcome: Scandale ! Le public t'applaudit.
+      effects: { approval: 3, awareness: 2 }
+      score: 3
+
+# --- Militants ---
+- id: militant_action
+  roles: [militant]
+  title: Mode d'action
+  text: Comment veux-tu faire passer ton message ?
+  options:
+    - id: manif
+      label: Organiser une manifestation
+      effects: { awareness: 4, approval: -1 }
+      score: 3
+    - id: lobby
+      label: Faire du lobbying auprès des élu·es
+      effects: { awareness: 1 }
+      score: 2
+      sends: { card: politique_rencontre_militant, toRole: politique }
+    - id: rien
+      label: Abandonner et rentrer chez toi
+      effects: {}
+      score: 0
+
+- id: politique_rencontre_militant
+  roles: [politique]
+  interactionOnly: true
+  title: Rendez-vous militant
+  text: Un·e militant·e demande à te rencontrer pour parler de pollution.
+  options:
+    - id: recevoir
+      label: Le/la recevoir et promettre une loi
+      effects: { awareness: 2, approval: 1 }
+      score: 2
+    - id: ignorer
+      label: Ignorer la demande
+      effects: { approval: -1 }
+      score: 1
