@@ -14,11 +14,12 @@ import { hostCommand } from './socket.ts';
 const COLLAPSED_KEY = 'jdlt.hostbar.collapsed';
 
 // Per-viewer convenience only: storage may be unavailable (private mode…).
+// Folded by default so nothing covers the projected screen.
 function readCollapsed() {
   try {
-    return localStorage.getItem(COLLAPSED_KEY) === '1';
+    return localStorage.getItem(COLLAPSED_KEY) !== '0';
   } catch {
-    return false;
+    return true;
   }
 }
 function saveCollapsed(value: boolean) {
