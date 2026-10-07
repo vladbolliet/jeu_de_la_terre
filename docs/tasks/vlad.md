@@ -7,7 +7,7 @@ Chaque tâche est finie quand : `pnpm typecheck && pnpm test && pnpm content:che
 
 ## J1 — Partie jouable en ligne
 
-- [ ] **V1. Déploiement en ligne.** _(préparé : `render.yaml` + section Déploiement dans ARCHITECTURE.md ; reste à créer le service sur Render et vérifier)_ Déployer le `Dockerfile` sur Render (Web Service, plan gratuit accepté) ou Fly.io. Variables d'env : `HOST_KEY` (secret, ≠ `dev`), `PUBLIC_URL` (l'URL publique). Ajouter dans `docs/ARCHITECTURE.md` une section « Déploiement » avec les étapes exactes et l'URL.
+- [x] **V1. Déploiement en ligne.** Déployer le `Dockerfile` sur Render (Web Service, plan gratuit accepté) ou Fly.io. Variables d'env : `HOST_KEY` (secret, ≠ `dev`), `PUBLIC_URL` (l'URL publique). Ajouter dans `docs/ARCHITECTURE.md` une section « Déploiement » avec les étapes exactes et l'URL.
   Fini quand : l'URL publique sert le mobile sur `/`, l'écran sur `/screen/`, `/health` répond, et `pnpm loadtest --url <URL> --bots 150` tient sans déconnexion ni erreur.
 - [x] **V2. Robustesse reconnexion.** Écrire des tests vitest dans `apps/server/test/` qui couvrent : un joueur se déconnecte pendant `choices` puis revient avec son token → il retrouve sa carte non jouée, son score, son rôle ; un joueur qui rejoint pendant `conflicts` peut voter ; un `reset` invalide les anciens tokens (le client doit alors revenir à l'écran d'inscription — vérifier que `player:join` avec un token inconnu crée bien un nouveau joueur). Corriger ce qui casse.
   Fini quand : tests verts.

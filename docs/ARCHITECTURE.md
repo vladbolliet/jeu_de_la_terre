@@ -63,7 +63,7 @@ Attention : sur Render, le disque est effacé quand le conteneur redémarre (sau
 
 ## Déploiement
 
-URL de production : **à compléter après le premier déploiement**.
+URL de production : **https://jeu-de-la-terre.onrender.com** (écran : `/screen/?key=<HOST_KEY>`, clé visible dans Render → Environment). Testé avec 150 bots sur une ère complète : 0 déconnexion, 0 erreur, réponses < 220 ms (p95).
 
 Render (fichier `render.yaml` à la racine) :
 1. https://dashboard.render.com → **New → Blueprint** → choisir le repo GitHub `jeu_de_la_terre`. Render lit `render.yaml`, construit le `Dockerfile` et déploie la branche `main` à chaque merge.
