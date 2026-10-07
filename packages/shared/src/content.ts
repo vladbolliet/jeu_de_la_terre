@@ -42,6 +42,8 @@ export const OptionSchema = z
     score: z.number().default(0),
     /** Cross-impact: sends a card to a random player of another role. */
     sends: z.object({ card: z.string(), toRole: RoleSchema }).optional(),
+    /** On a card received through `sends`: text added to the sender's outcomes when this option is picked. */
+    reply: z.string().optional(),
   })
   .strict();
 export type Option = z.infer<typeof OptionSchema>;
@@ -75,25 +77,38 @@ export const IndicatorKeySchema = z.enum([
 ]);
 export type IndicatorKey = z.infer<typeof IndicatorKeySchema>;
 
+export const ConditionSchema = z
+  .object({ indicator: IndicatorKeySchema, gt: z.number().optional(), lt: z.number().optional() })
+  .strict();
+export type Condition = z.infer<typeof ConditionSchema>;
+
 export const VoteSchema = z
   .object({
     id: z.string(),
     eras: z.array(EraSchema).optional(),
     /** The vote is only triggered if this condition holds at the start of the conflicts phase. */
-    when: z
-      .object({
-        indicator: IndicatorKeySchema,
-        gt: z.number().optional(),
-        lt: z.number().optional(),
-      })
-      .strict()
-      .optional(),
+    when: ConditionSchema.optional(),
     title: z.string(),
     text: z.string(),
     options: z.array(OptionSchema).min(2).max(4),
   })
   .strict();
 export type Vote = z.infer<typeof VoteSchema>;
+
+/** Global event (crisis, disaster, discovery) applied automatically at the end of an era. */
+export const EventSchema = z
+  .object({
+    id: z.string(),
+    eras: z.array(EraSchema).optional(),
+    /** Checked on the world at the end of the era, before resolving it. */
+    when: ConditionSchema.optional(),
+    title: z.string(),
+    text: z.string(),
+    /** Applied at full strength, like a vote result. */
+    effects: EffectsSchema.default({}),
+  })
+  .strict();
+export type GameEvent = z.infer<typeof EventSchema>;
 
 export const RoleDefSchema = z
   .object({
@@ -112,4 +127,6 @@ export interface Content {
   roles: RoleDef[];
   cards: Card[];
   votes: Vote[];
+  /** Each event fires at most once per game. */
+  events: GameEvent[];
 }
