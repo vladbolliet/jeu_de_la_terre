@@ -24,4 +24,5 @@ Chaque tâche est finie quand : `pnpm typecheck` passe + le critère « Fini qua
 ## J3
 
 - [ ] **S8. Test au projecteur.** Tester dans une vraie salle (avec Rémi/Mo) : lisibilité depuis le fond, couleurs sur projecteur délavé. Corriger.
-- [ ] **S9. Barre hôte.** La masquer automatiquement après 5 s sans mouvement de souris ; raccourcis clavier : Espace = phase suivante, P = pause/reprise.
+- [x] **S9. Barre hôte.** La masquer automatiquement après 5 s sans mouvement de souris ; raccourcis clavier : Espace = phase suivante, P = pause/reprise.
+  Fait : masquage auto (barre repliée, bouton rond et curseur cachés). Pas de raccourcis clavier : décision de garder les boutons « Pause » et « Phase suivante » de la barre.

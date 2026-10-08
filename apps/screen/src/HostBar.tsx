@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ChevronDown,
   Pause,
@@ -20,6 +20,8 @@ import {
 } from './fontScale.ts';
 
 const COLLAPSED_KEY = 'jdlt.hostbar.collapsed';
+/** Mouse idle time after which the controls (and cursor) hide. */
+const IDLE_MS = 5000;
 
 // Per-viewer convenience only: storage may be unavailable (private mode…).
 // Folded by default so nothing covers the projected screen.
@@ -43,15 +45,50 @@ export function HostBar({ view }: { view: ScreenView }) {
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [fontScale, setFontScale] = useState(readFontScale);
   const changeFontScale = (delta: number) => setFontScale(applyFontScale(fontScale + delta));
+  const hovering = useRef(false);
   const toggle = (value: boolean) => {
+    hovering.current = false;
     setCollapsed(value);
     saveCollapsed(value);
   };
 
+  // After IDLE_MS without mouse movement: fold the bar, hide the round
+  // button and the cursor. Any movement brings the round button back.
+  // Not while the pointer rests on the bar.
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    let timer = 0;
+    const arm = () => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (hovering.current) return arm();
+        setIdle(true);
+        setCollapsed(true);
+        saveCollapsed(true);
+      }, IDLE_MS);
+    };
+    const wake = () => {
+      setIdle(false);
+      arm();
+    };
+    arm();
+    window.addEventListener('mousemove', wake);
+    window.addEventListener('mousedown', wake);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('mousemove', wake);
+      window.removeEventListener('mousedown', wake);
+    };
+  }, []);
+  useEffect(() => {
+    document.body.classList.toggle('pointer-idle', idle);
+    return () => document.body.classList.remove('pointer-idle');
+  }, [idle]);
+
   if (collapsed)
     return (
       <button
-        className="hostbar-fab"
+        className={`hostbar-fab${idle ? ' idle' : ''}`}
         onClick={() => toggle(false)}
         aria-label="Afficher les commandes de l'hôte"
         title="Commandes de l'hôte"
@@ -64,7 +101,13 @@ export function HostBar({ view }: { view: ScreenView }) {
   const timed = view.phase !== 'lobby' && view.phase !== 'ended';
 
   return (
-    <div className="hostbar" role="toolbar" aria-label="Commandes de l'hôte">
+    <div
+      className="hostbar"
+      role="toolbar"
+      aria-label="Commandes de l'hôte"
+      onMouseEnter={() => (hovering.current = true)}
+      onMouseLeave={() => (hovering.current = false)}
+    >
       <div className="hostbar-status">
         <span className={`hostbar-dot${timed && !running ? ' paused' : ''}`} />
         <span className="hostbar-title">Hôte</span>
