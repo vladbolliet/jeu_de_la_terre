@@ -7,11 +7,11 @@ import {
   Smile,
   Thermometer,
   Trees,
-  Users,
   Waves,
   type LucideIcon,
 } from 'lucide-react';
 import type { Climate, Society, World } from '@jdlt/shared';
+import { Sparkline } from './Sparkline.tsx';
 
 type Severity = 'ok' | 'warn' | 'bad';
 
@@ -95,84 +95,150 @@ export const SOCIETY: Indicator<Society>[] = [
   },
 ];
 
+/** Thermometer scale (°C) and the Paris Agreement band. */
+const THERMO_MAX = 4;
+const PARIS = [1.5, 2];
+
 export function Indicators({ world }: { world: World }) {
   // history[last] is the world at the start of the previous era.
   const prev = world.history.at(-1);
+  const [temperature, ...others] = CLIMATE;
   return (
     <div className="indicators">
       <div className="panel-kicker">
         <Globe2 className="icon" /> État de la planète
       </div>
-      <div className="climate-tiles">
-        {CLIMATE.map((ind) => (
-          <Tile
-            key={ind.key}
-            ind={ind}
-            value={world.climate[ind.key]}
-            prev={prev?.climate[ind.key]}
-            className="tile climate"
-          />
+      <TemperatureCard ind={temperature!} world={world} prev={prev?.climate.temperature} />
+      <div className="climate-grid">
+        {others.map((ind) => (
+          <ClimateTile key={ind.key} ind={ind} world={world} prev={prev?.climate[ind.key]} />
         ))}
       </div>
-      <div className="panel-kicker">
-        <Users className="icon" /> Société
-      </div>
-      <div className="society-tiles">
-        {SOCIETY.map((ind) => (
-          <Tile
-            key={ind.key}
-            ind={ind}
-            value={world.society[ind.key]}
-            prev={prev?.society[ind.key]}
-            className="tile society"
-          />
-        ))}
+      <div className="society-strip">
+        {SOCIETY.map((ind) => {
+          const value = world.society[ind.key];
+          return (
+            <div key={ind.key} className="society-chip">
+              <span className="society-label">{ind.label}</span>
+              <span className="society-value">{value.toFixed(ind.digits)}</span>
+              {prev && <Delta {...deltaOf(ind, value, prev.society[ind.key])} compact />}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function Tile<T>({
+function TemperatureCard({
   ind,
-  value,
+  world,
   prev,
-  className,
 }: {
-  ind: Indicator<T>;
-  value: number;
+  ind: Indicator<Climate>;
+  world: World;
   prev: number | undefined;
-  className: string;
 }) {
-  const severity = ind.severity?.(value);
-  const Icon = ind.icon;
+  const value = world.climate.temperature;
+  const pos = (t: number) => `${(Math.min(THERMO_MAX, Math.max(0, t)) / THERMO_MAX) * 100}%`;
   return (
-    <div className={`${className}${severity ? ` sev-${severity}` : ''}`}>
-      <span className="tile-icon">
-        <Icon strokeWidth={2.2} />
-      </span>
-      <div className="tile-label">{ind.label}</div>
-      <div className="tile-value">
-        {value.toFixed(ind.digits)}
-        <span className="tile-unit">{ind.unit}</span>
+    <div className={`tile temperature-card sev-${ind.severity!(value)}`}>
+      <div className="temp-head">
+        <span className="tile-icon">
+          <Thermometer strokeWidth={2.2} />
+        </span>
+        <span className="tile-label">Réchauffement</span>
+        {prev !== undefined && <Delta {...deltaOf(ind, value, prev)} />}
       </div>
-      {prev !== undefined && (
-        // Delta of the displayed (rounded) values.
-        <Delta
-          delta={Number(value.toFixed(ind.digits)) - Number(prev.toFixed(ind.digits))}
-          digits={ind.digits}
-          worse={ind.worse}
-        />
-      )}
+      <div className="temp-value">
+        {value >= 0 ? '+' : ''}
+        {value.toFixed(ind.digits)}
+        <span className="tile-unit">°C</span>
+      </div>
+      <div className="thermo">
+        <div className="thermo-bar">
+          <div
+            className="thermo-paris"
+            style={{ left: pos(PARIS[0]!), right: `calc(100% - ${pos(PARIS[1]!)})` }}
+          />
+          <span className="thermo-paris-label" style={{ left: pos(1.75) }}>
+            Accord de Paris
+          </span>
+          <div className="thermo-cursor" style={{ left: pos(value) }} />
+        </div>
+        <div className="thermo-ticks">
+          {[0, 1, 2, 3, 4].map((t) => (
+            <span key={t} style={{ left: pos(t) }}>
+              {t === 0 ? '0' : `+${t}`}°
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function Delta({ delta, digits, worse }: { delta: number; digits: number; worse: 'up' | 'down' }) {
+function ClimateTile({
+  ind,
+  world,
+  prev,
+}: {
+  ind: Indicator<Climate>;
+  world: World;
+  prev: number | undefined;
+}) {
+  const value = world.climate[ind.key];
+  const Icon = ind.icon;
+  const points = [
+    ...world.history.map((h) => ({ year: h.year, value: h.climate[ind.key] })),
+    { year: world.year, value },
+  ];
+  return (
+    <div className={`tile climate-tile sev-${ind.severity!(value)}`}>
+      <div className="climate-tile-head">
+        <span className="tile-icon">
+          <Icon strokeWidth={2.2} />
+        </span>
+        <span className="tile-label">{ind.label}</span>
+      </div>
+      <div className="climate-tile-value">
+        <span className="tile-value">
+          {value.toFixed(ind.digits)}
+          <span className="tile-unit">{ind.unit}</span>
+        </span>
+        {prev !== undefined && <Delta {...deltaOf(ind, value, prev)} />}
+      </div>
+      <Sparkline points={points} />
+    </div>
+  );
+}
+
+/** Delta of the displayed (rounded) values. */
+function deltaOf<T>(ind: Indicator<T>, value: number, prev: number) {
+  return {
+    delta: Number(value.toFixed(ind.digits)) - Number(prev.toFixed(ind.digits)),
+    digits: ind.digits,
+    worse: ind.worse,
+  };
+}
+
+function Delta({
+  delta,
+  digits,
+  worse,
+  compact,
+}: {
+  delta: number;
+  digits: number;
+  worse: 'up' | 'down';
+  compact?: boolean;
+}) {
   const shown = Number(delta.toFixed(digits)) || 0;
-  if (shown === 0) return <div className="tile-delta">=</div>;
+  const cls = `tile-delta${compact ? ' compact' : ''}`;
+  if (shown === 0) return <div className={cls}>=</div>;
   const bad = worse === 'up' ? shown > 0 : shown < 0;
   return (
-    <div className={`tile-delta ${bad ? 'worse' : 'better'}`}>
+    <div className={`${cls} ${bad ? 'worse' : 'better'}`}>
       {shown > 0 ? '▲ +' : '▼ '}
       {shown.toFixed(digits)}
     </div>

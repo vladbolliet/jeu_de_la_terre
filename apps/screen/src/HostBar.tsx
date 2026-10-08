@@ -6,10 +6,18 @@ import {
   RotateCcw,
   SkipForward,
   SlidersHorizontal,
+  Type,
   Users,
 } from 'lucide-react';
 import type { ScreenView } from '@jdlt/shared';
 import { hostCommand } from './socket.ts';
+import {
+  applyFontScale,
+  FONT_SCALE_MAX,
+  FONT_SCALE_MIN,
+  FONT_SCALE_STEP,
+  readFontScale,
+} from './fontScale.ts';
 
 const COLLAPSED_KEY = 'jdlt.hostbar.collapsed';
 
@@ -33,6 +41,8 @@ function saveCollapsed(value: boolean) {
 /** Floating host controls; can be folded into a small round button. */
 export function HostBar({ view }: { view: ScreenView }) {
   const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [fontScale, setFontScale] = useState(readFontScale);
+  const changeFontScale = (delta: number) => setFontScale(applyFontScale(fontScale + delta));
   const toggle = (value: boolean) => {
     setCollapsed(value);
     saveCollapsed(value);
@@ -63,6 +73,33 @@ export function HostBar({ view }: { view: ScreenView }) {
           {view.connectedCount}
           <span className="hostbar-muted">/{view.playerCount}</span>
         </span>
+      </div>
+      <div className="hostbar-font" role="group" aria-label="Taille du texte">
+        <button
+          className="hb-font-btn"
+          onClick={() => changeFontScale(-FONT_SCALE_STEP)}
+          disabled={fontScale <= FONT_SCALE_MIN}
+          aria-label="Réduire le texte"
+          title="Réduire le texte"
+        >
+          <Type className="icon small" />
+        </button>
+        <button
+          className="hb-font-value"
+          onClick={() => setFontScale(applyFontScale(1))}
+          title="Taille du texte (cliquer pour revenir à 100 %)"
+        >
+          {Math.round(fontScale * 100)} %
+        </button>
+        <button
+          className="hb-font-btn"
+          onClick={() => changeFontScale(FONT_SCALE_STEP)}
+          disabled={fontScale >= FONT_SCALE_MAX}
+          aria-label="Agrandir le texte"
+          title="Agrandir le texte"
+        >
+          <Type className="icon" />
+        </button>
       </div>
       <div className="hostbar-actions">
         {view.phase === 'lobby' ? (

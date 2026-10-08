@@ -1,19 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Factory, House, Landmark, Megaphone, type LucideIcon } from 'lucide-react';
 import { geoEquirectangular, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
-import type { Role, ScreenView } from '@jdlt/shared';
+import type { ScreenView } from '@jdlt/shared';
 import land110m from 'world-atlas/land-110m.json';
-import { ROLES, ROLE_LABEL } from './roles.ts';
-
-const ROLE_ICON: Record<Role, LucideIcon> = {
-  elite: Factory,
-  citoyen: House,
-  politique: Landmark,
-  militant: Megaphone,
-};
+import { ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
+import { STRIPE_COLORS } from './stripes.ts';
 
 export function Lobby({ view }: { view: ScreenView }) {
   const joinUrl = view.joinUrl ?? location.origin;
@@ -233,23 +226,6 @@ function Globe() {
 
 // ---------- warming stripes ----------
 
-/** Ed Hawkins' "warming stripes" palette (ColorBrewer RdBu), cold → hot. */
-const STRIPE_COLORS = [
-  '#08306b',
-  '#08519c',
-  '#2171b5',
-  '#4292c6',
-  '#6baed6',
-  '#9ecae1',
-  '#c6dbef',
-  '#fee0d2',
-  '#fcbba1',
-  '#fc9272',
-  '#fb6a4a',
-  '#ef3b2c',
-  '#cb181d',
-  '#99000d',
-];
 const PAST_STRIPES = 25; // 1900 → 2025, one stripe per 5 years
 const FUTURE_STRIPES = 15; // 2025 → 2100: not written yet
 

@@ -31,145 +31,10 @@ body {
   height: 100vh;
   font-size: 2rem;
 }
-/* Projected 16:9 in an amphitheatre: big type, high contrast.
-   In-game screens use a brighter ocean blue (projectors crush near-black)
-   with sand cards in dark ink for the data. */
-.layout {
-  --bg: #0f3a56;
-  --panel: #1a4d6d;
-  --muted: #b9d1dd;
-  --card: #f6efe2;
-  --card-track: #e2d5bf;
-  --ink: #0f2a3c;
-  --ink-muted: #4f6878;
-  --ok-ink: #12804a;
-  --warn-ink: #b45f00;
-  --bad-ink: #cc3216;
-  --fill: #1b7aa6;
-  display: grid;
-  grid-template: 'header header' auto 'stage aside' 1fr / 2fr 1fr;
-  height: 100vh;
-  gap: 20px 28px;
-  padding: 20px 28px 24px;
-  background:
-    radial-gradient(ellipse 50% 70% at 49% 60%, rgb(80 180 230 / 0.45), transparent 70%),
-    linear-gradient(180deg, #134a6c 0%, #0f3a56 100%);
-}
-.game-layout {
-  grid-template:
-    'header header header' auto
-    'players stage aside' 1fr / 500px 1fr 540px;
-}
-/* Data cards: sand background, dark ink. */
-.panel,
-.vote-panel,
-.tile,
-.society-tiles {
-  background: var(--card);
-  color: var(--ink);
-  box-shadow: 0 18px 40px -18px rgb(3 20 32 / 0.6);
-}
-.panel-kicker {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
-.panel .panel-kicker {
-  color: var(--ink-muted);
-}
-.phase-header {
-  grid-area: header;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.phase-row {
-  display: flex;
-  align-items: baseline;
-  gap: 40px;
-}
-.year {
-  font-family: var(--font-display);
-  letter-spacing: -0.03em;
-  font-size: 5.5rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.phase {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: var(--muted);
-  flex: 1;
-}
-.layout .phase-row {
-  align-items: center;
-}
-.layout .phase {
-  flex: 0 1 auto;
-  margin-right: auto;
-  padding: 8px 26px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
-  color: var(--fg);
-}
-.paused {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--alert);
-}
-.timer {
-  font-family: var(--font-display);
-  font-size: 4rem;
-  font-weight: 800;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  transition: color 0.3s;
-}
-.progress {
-  height: 14px;
-  border-radius: 7px;
-  background: rgb(255 255 255 / 0.14);
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--fg);
-  transform-origin: left;
-  transition:
-    transform 0.1s linear,
-    background-color 0.3s;
-}
-.phase-header.urgent .timer {
-  color: var(--urgent);
-  animation: pulse 1s ease-in-out infinite;
-}
-.phase-header.urgent .progress-fill {
-  background: var(--urgent);
-}
 @keyframes pulse {
   50% {
     opacity: 0.55;
   }
-}
-.players {
-  grid-area: players;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
-.stage {
-  grid-area: stage;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 0;
 }
 .map {
   flex: 1;
@@ -257,152 +122,6 @@ body {
     transform: scale(2.2);
     opacity: 0;
   }
-}
-aside {
-  grid-area: aside;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-/* State of the planet: fills the whole column, one row per indicator. */
-.indicators {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.climate-tiles {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-auto-rows: 1fr;
-  gap: 12px;
-}
-.tile {
-  display: grid;
-  grid-template:
-    'icon label value' auto
-    'icon delta value' auto / auto 1fr auto;
-  align-content: center;
-  align-items: center;
-  column-gap: 18px;
-  border-radius: 16px;
-  padding: 8px 24px 8px 18px;
-  font-variant-numeric: tabular-nums;
-}
-/* Icon badge, tinted with the indicator's severity. */
-.tile-icon {
-  grid-area: icon;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: var(--card-track);
-  color: var(--ink);
-  transition:
-    background-color 0.6s,
-    color 0.6s;
-}
-.tile-icon svg {
-  width: 36px;
-  height: 36px;
-}
-.tile-label {
-  grid-area: label;
-  font-size: 1.9rem;
-  font-weight: 700;
-  line-height: 1.15;
-}
-.tile-value {
-  grid-area: value;
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-weight: 700;
-  line-height: 1;
-  text-align: right;
-  white-space: nowrap;
-  transition: color 0.6s;
-}
-.tile.climate .tile-value {
-  font-size: 3.4rem;
-}
-/* Temperature is the headline indicator. */
-.climate-tiles .tile:first-child .tile-value {
-  font-size: 4rem;
-}
-.tile-unit {
-  font-size: 0.5em;
-  font-weight: 600;
-  margin-left: 4px;
-}
-.tile-delta {
-  grid-area: delta;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--ink-muted);
-}
-.tile-delta.worse {
-  color: var(--bad-ink);
-}
-.tile-delta.better {
-  color: var(--ok-ink);
-}
-/* Society: one compact card, one line per indicator. */
-.society-tiles {
-  display: flex;
-  flex-direction: column;
-  border-radius: 16px;
-  padding: 6px 24px;
-}
-.tile.society {
-  grid-template: 'icon label delta value' auto / auto 1fr auto 110px;
-  background: none;
-  box-shadow: none;
-  border: 0;
-  border-radius: 0;
-  padding: 6px 0;
-}
-.tile.society .tile-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-}
-.tile.society .tile-icon svg {
-  width: 26px;
-  height: 26px;
-}
-.tile.society .tile-label {
-  font-weight: 600;
-}
-.tile.society .tile-value {
-  font-size: 2.2rem;
-}
-.sev-ok .tile-value,
-.sev-ok .tile-icon {
-  color: var(--ok-ink);
-}
-.sev-ok .tile-icon {
-  background: rgb(18 128 74 / 0.14);
-}
-.sev-warn .tile-value,
-.sev-warn .tile-icon {
-  color: var(--warn-ink);
-}
-.sev-warn .tile-icon {
-  background: rgb(180 95 0 / 0.15);
-}
-.sev-bad .tile-value,
-.sev-bad .tile-icon {
-  color: var(--bad-ink);
-}
-.sev-bad .tile-icon {
-  background: rgb(204 50 22 / 0.14);
-}
-.panel {
-  border-radius: 20px;
-  padding: 28px;
 }
 .alert {
   color: var(--alert);
@@ -676,164 +395,8 @@ aside {
   font-family: var(--font-display);
   color: var(--sand);
 }
-/* Shared gauge (choices made, ballots cast). */
-.gauge-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 12px 24px;
-}
-.gauge-label {
-  font-size: 2rem;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.gauge-label strong {
-  font-family: var(--font-display);
-  font-size: 3.4rem;
-  letter-spacing: -0.02em;
-}
-.gauge {
-  flex: 1 1 100%;
-  height: 28px;
-  border-radius: 14px;
-  background: var(--card-track);
-  overflow: hidden;
-}
-.gauge-fill {
-  height: 100%;
-  background: var(--fill);
-  border-radius: 14px;
-  transform-origin: left;
-  transition: transform 0.5s ease-out;
-}
-/* Choices phase: per-role "more/less polluting" bars, no numbers. */
-.choices-panel {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 48px;
-}
-.emissions-legend {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: -28px;
-  font-size: 1.75rem;
-  font-weight: 800;
-}
-.emissions-legend .less {
-  color: var(--ok-ink);
-}
-.emissions-legend .more {
-  color: var(--bad-ink);
-}
-.role-bars {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-.role-bars li {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 1.9rem;
-  font-weight: 700;
-  transition: opacity 0.4s;
-}
-.role-bars li.waiting {
-  opacity: 0.35;
-}
-.diverging {
-  position: relative;
-  height: 36px;
-  background: var(--card-track);
-  border-radius: 10px;
-}
-.diverging .axis {
-  position: absolute;
-  left: 50%;
-  top: -5px;
-  bottom: -5px;
-  width: 4px;
-  margin-left: -2px;
-  border-radius: 2px;
-  background: var(--ink);
-}
-.diverging .bar {
-  position: absolute;
-  top: 5px;
-  bottom: 5px;
-  transition: width 0.6s ease-out;
-}
-.diverging .bar.less {
-  background: var(--ok-ink);
-  border-radius: 8px 0 0 8px;
-}
-.diverging .bar.more {
-  background: var(--bad-ink);
-  border-radius: 0 8px 8px 0;
-}
-/* Conflicts phase: the vote takes over the players and Earth columns. */
-.vote-stage {
-  grid-row: 2;
-  grid-column: 1 / 3;
-  display: flex;
-  min-height: 0;
-}
-.vote-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 32px;
-  border-radius: 24px;
-  padding: 48px 64px;
-}
-.vote-kicker {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--ink-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.vote-title {
-  margin: 0;
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-size: 4.25rem;
-  line-height: 1.1;
-}
-.vote-text {
-  margin: 0;
-  font-size: 2.75rem;
-  line-height: 1.3;
-}
-.vote-options {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-}
-.vote-options li {
-  font-size: 2.25rem;
-  font-weight: 700;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 0 var(--card-track);
-  padding: 18px 26px;
-}
 /* Feedback phase (S6): full-screen era summary. */
-.full-layout {
+.layout.full-layout {
   grid-template: 'header' auto 'full' 1fr / 1fr;
 }
 .feedback {
@@ -1170,11 +733,6 @@ aside {
 .winner-icon {
   color: var(--ok);
 }
-.paused {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 /* ---------- Host bar (only with ?key=…) ---------- */
 .hostbar {
   position: fixed;
@@ -1191,7 +749,8 @@ aside {
   border: 1px solid rgb(147 169 181 / 0.25);
   box-shadow: 0 18px 50px -12px rgb(0 0 0 / 0.75);
   backdrop-filter: blur(14px) saturate(1.3);
-  font-size: 1.05rem;
+  /* px, not rem: the host bar must not grow with the text size setting. */
+  font-size: 17px;
   animation: hostbar-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes hostbar-in {
@@ -1237,6 +796,57 @@ aside {
 .hostbar-actions {
   display: flex;
   gap: 8px;
+}
+.hostbar-font {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgb(147 169 181 / 0.14);
+}
+.hb-font-btn,
+.hb-font-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.hb-font-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.hb-font-btn .icon {
+  width: 20px;
+  height: 20px;
+}
+.hb-font-btn .icon.small {
+  width: 14px;
+  height: 14px;
+}
+.hb-font-btn:hover,
+.hb-font-value:hover {
+  background: rgb(147 169 181 / 0.26);
+}
+.hb-font-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: transparent;
+}
+.hb-font-value {
+  min-width: 64px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 .hb-btn,
 .hb-collapse,
@@ -1374,5 +984,1250 @@ aside {
   }
   100% {
     box-shadow: 0 0 0 0 rgb(240 83 58 / 0);
+  }
+}
+/* ---------- Game screen ---------- */
+/* Projected 16:9 in an amphitheatre: big type, high contrast.
+   In-game screens use a bright ocean blue (projectors crush near-black) with
+   sand cards in dark ink for the data. The background warms up with the planet:
+   --heat goes from 0 (pre-industrial) to 1 (+3 °C), set from App.tsx. */
+@property --heat {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+.layout {
+  --bg: #0f3a56;
+  --panel: #1a4d6d;
+  --muted: #c3d8e3;
+  --card: #f6efe2;
+  --card-track: #e2d5bf;
+  --ink: #0f2a3c;
+  --ink-muted: #4f6878;
+  --ok-ink: #12804a;
+  --warn-ink: #b45f00;
+  --bad-ink: #cc3216;
+  --fill: #1b7aa6;
+  position: relative;
+  display: grid;
+  grid-template: 'header header' auto 'stage aside' 1fr / 2fr 1fr;
+  height: 100vh;
+  gap: 20px 28px;
+  padding: 22px 32px 18px;
+  /* Ocean blue on top; as it warms, a glow rises from the bottom and the
+     halo turns from blue to orange (two layers cross-fading on --heat). */
+  background:
+    radial-gradient(
+      ellipse 50% 70% at 50% 58%,
+      rgb(80 180 230 / calc(0.45 * (1 - var(--heat)))),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 70% at 50% 58%,
+      rgb(255 140 70 / calc(0.4 * var(--heat))),
+      transparent 70%
+    ),
+    linear-gradient(
+      0deg,
+      rgb(214 74 34 / calc(0.85 * var(--heat))) 0%,
+      rgb(190 70 40 / calc(0.4 * var(--heat))) 40%,
+      transparent 80%
+    ),
+    linear-gradient(180deg, #134a6c 0%, #0f3a56 100%);
+  transition: --heat 3s ease-in-out;
+}
+/* Same film grain as the lobby. */
+.layout::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.game-layout {
+  grid-template:
+    'header header header' auto
+    'players stage aside' 1fr
+    'timeline timeline timeline' auto / 460px 1fr 540px;
+}
+/* Data cards: sand background, dark ink. */
+.panel,
+.vote-panel,
+.tile {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 18px 40px -18px rgb(3 20 32 / 0.6);
+}
+.panel-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* Header: year · the three steps of an era · countdown ring. */
+.phase-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.year-block {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.year {
+  font-family: var(--font-display);
+  font-size: 6rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  animation: year-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes year-in {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
+    filter: blur(6px);
+  }
+}
+.year-range {
+  white-space: nowrap;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.phase,
+.phase-steps {
+  margin: 0 auto 0 0;
+}
+.phase {
+  padding: 8px 26px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+.phase-steps {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+.phase-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 26px 8px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--muted);
+  transition:
+    background-color 0.5s,
+    color 0.5s;
+}
+.step-num {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.14);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+.phase-steps li.done {
+  color: var(--fg);
+}
+.phase-steps li.done .step-num {
+  background: var(--ok);
+  color: var(--ink);
+}
+.phase-steps li.current {
+  background: var(--sand);
+  color: var(--ink);
+  box-shadow: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+}
+.phase-steps li.current .step-num {
+  background: var(--ink);
+  color: var(--sand);
+}
+.ring-timer {
+  position: relative;
+  width: 8.5rem;
+  height: 8.5rem;
+  flex-shrink: 0;
+}
+.ring-timer > svg,
+.ring > svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ring-track,
+.ring-arc {
+  fill: none;
+}
+.ring-timer .ring-track {
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 9;
+}
+.ring-timer .ring-arc {
+  stroke: var(--sand);
+  stroke-width: 9;
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset 0.1s linear,
+    stroke 0.3s;
+}
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+.timer {
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+.phase-header.urgent .ring-arc {
+  stroke: var(--urgent);
+}
+.phase-header.urgent .ring-timer {
+  animation: heartbeat 1s ease-in-out infinite;
+}
+.phase-header.urgent .timer {
+  color: #ffb3a6;
+}
+@keyframes heartbeat {
+  15% {
+    transform: scale(1.07);
+  }
+  30% {
+    transform: scale(1);
+  }
+}
+.ring-timer.is-paused .ring-arc {
+  stroke: var(--warn);
+}
+.ring-pause {
+  width: 3rem;
+  height: 3rem;
+  color: var(--warn);
+}
+.ring-paused-label {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 20px;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--warn);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+/* Players column. */
+.players {
+  grid-area: players;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.panel {
+  border-radius: 24px;
+  padding: 24px 28px;
+}
+.choices-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+.choices-head {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.ring {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  flex-shrink: 0;
+}
+.ring .ring-track {
+  stroke: var(--card-track);
+  stroke-width: 11;
+}
+.ring .ring-arc {
+  stroke: var(--fill);
+  stroke-width: 11;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+.ring-count {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.choices-count {
+  display: flex;
+  flex-direction: column;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.choices-count span:first-child {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.emissions-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+.emissions-legend .less {
+  color: var(--ok-ink);
+}
+.emissions-legend .more {
+  color: var(--bad-ink);
+}
+.role-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.role-bars li {
+  display: grid;
+  grid-template:
+    'badge name' auto
+    'badge bar' auto / auto 1fr;
+  align-items: center;
+  gap: 6px 14px;
+  transition: opacity 0.5s;
+}
+.role-bars li.waiting {
+  opacity: 0.45;
+}
+.role-badge {
+  grid-area: badge;
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 14px;
+  background: var(--role-color);
+  color: var(--ink);
+}
+.role-badge svg {
+  width: 2rem;
+  height: 2rem;
+}
+.role-name {
+  grid-area: name;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.diverging {
+  grid-area: bar;
+  position: relative;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--card-track);
+}
+.diverging .axis {
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--ink);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.diverging .bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: width 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+.diverging .bar.less {
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(270deg, #5fd08a, #12804a);
+}
+.diverging .bar.more {
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(90deg, #f2a93b, #cc3216);
+}
+.era-trend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 2px dashed var(--card-track);
+}
+.era-trend svg {
+  width: 13rem;
+  overflow: visible;
+}
+.trend-arc {
+  fill: none;
+  stroke-width: 18;
+  stroke-linecap: round;
+}
+.trend-needle {
+  transform-box: view-box;
+  transform-origin: 100px 100px;
+  transition: transform 1.2s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.trend-needle line {
+  stroke: var(--ink);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.trend-needle circle {
+  fill: var(--ink);
+}
+.trend-label {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.era-trend.more .trend-label {
+  color: var(--bad-ink);
+}
+.era-trend.less .trend-label {
+  color: var(--ok-ink);
+}
+.era-trend.neutral .trend-label {
+  color: var(--warn-ink);
+}
+.era-trend.waiting .trend-label {
+  color: var(--ink-muted);
+}
+
+/* Earth column: a halo behind the globe that turns orange as it warms. */
+.stage {
+  grid-area: stage;
+  position: relative;
+  display: flex;
+  min-height: 0;
+}
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 2% 4%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(120 210 255 / calc(0.4 * (1 - var(--heat)))) 0, transparent 62%),
+    radial-gradient(circle, rgb(255 120 50 / calc(0.65 * var(--heat))) 0, transparent 62%);
+  filter: blur(24px);
+  animation: breathe 6s ease-in-out infinite;
+}
+@keyframes breathe {
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+.stage .map {
+  z-index: 1;
+}
+
+/* State of the planet. */
+aside {
+  grid-area: aside;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.indicators {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tile {
+  border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.sev-ok {
+  --sev: var(--ok-ink);
+}
+.sev-warn {
+  --sev: var(--warn-ink);
+}
+.sev-bad {
+  --sev: var(--bad-ink);
+}
+.tile-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 14px;
+  color: var(--sev, var(--ink));
+  background: color-mix(in srgb, var(--sev, var(--ink)) 14%, transparent);
+  transition:
+    background-color 0.6s,
+    color 0.6s;
+}
+.tile-icon svg {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.tile-label {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.tile-unit {
+  font-size: 0.45em;
+  font-weight: 600;
+  margin-left: 4px;
+}
+.tile-delta {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ink-muted);
+}
+.tile-delta.worse {
+  color: var(--bad-ink);
+}
+.tile-delta.better {
+  color: var(--ok-ink);
+}
+.temperature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 24px 12px;
+}
+.temp-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.temp-head .tile-delta {
+  margin-left: auto;
+}
+.temp-value {
+  font-family: var(--font-display);
+  font-size: 4.4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--sev);
+  transition: color 0.6s;
+}
+.thermo {
+  position: relative;
+  margin-top: 1.9rem;
+}
+.thermo-bar {
+  position: relative;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #6baed6 0%,
+    #c6dbef 14%,
+    #fcbba1 28%,
+    #fb6a4a 48%,
+    #cb181d 72%,
+    #67000d 100%
+  );
+}
+/* Paris Agreement: keep warming between +1.5 and +2 °C. */
+.thermo-paris {
+  position: absolute;
+  top: -7px;
+  bottom: -7px;
+  border: 3px dashed var(--ink);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.3);
+}
+.thermo-paris-label {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 1.15rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+.thermo-cursor {
+  position: absolute;
+  top: 50%;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #fff;
+  border: 5px solid var(--ink);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -50%);
+  transition: left 2s cubic-bezier(0.3, 1.2, 0.5, 1);
+  z-index: 1;
+}
+.thermo-ticks {
+  position: relative;
+  height: 1.5rem;
+  margin-top: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+.thermo-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.thermo-ticks span:first-child {
+  transform: none;
+}
+.thermo-ticks span:nth-child(5) {
+  transform: translateX(-100%);
+}
+.climate-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 12px;
+}
+.climate-tile {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px;
+}
+.climate-tile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.climate-tile .tile-icon {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 12px;
+}
+.climate-tile .tile-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+.climate-tile .tile-label {
+  font-size: 1.45rem;
+}
+.climate-tile-value {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  margin-top: 8px;
+}
+.climate-tile .tile-value {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--sev);
+  transition: color 0.6s;
+}
+/* Fills the rest of the tile, edge to edge. */
+.sparkline {
+  flex: 1;
+  min-height: 1.5rem;
+  width: calc(100% + 36px);
+  margin: 6px -18px -14px;
+  color: var(--sev, var(--ink));
+}
+.spark-area {
+  fill: currentColor;
+  opacity: 0.12;
+}
+.spark-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+.society-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.society-chip {
+  min-width: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template:
+    'label label' auto
+    'value delta' auto / auto 1fr;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.16);
+}
+.society-label {
+  grid-area: label;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.society-value {
+  grid-area: value;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.tile-delta.compact {
+  grid-area: delta;
+  justify-self: end;
+  white-space: nowrap;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+.tile-delta.compact.worse {
+  color: #ff9b85;
+}
+.tile-delta.compact.better {
+  color: #7ee2a3;
+}
+
+/* Eras timeline: the game itself drawn as warming stripes. */
+.era-timeline {
+  grid-area: timeline;
+  position: relative;
+  padding-bottom: 2rem;
+}
+.era-stripes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  height: 3.8rem;
+}
+.era {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.14) 0 6px,
+    rgb(255 255 255 / 0.05) 6px 12px
+  );
+  transition: background-color 1.5s;
+}
+.era.done {
+  animation: stripe-in 0.8s ease-out both;
+}
+.era-temp {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.era.now {
+  z-index: 1;
+  outline: 4px solid var(--sand);
+  outline-offset: 3px;
+  animation: era-glow 2.4s ease-in-out infinite;
+}
+@keyframes era-glow {
+  50% {
+    box-shadow: 0 0 34px 6px rgb(243 235 221 / 0.45);
+  }
+}
+.era-now {
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.era-year,
+.era-end {
+  position: absolute;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.era-year {
+  top: calc(100% + 6px);
+  left: 0;
+}
+.era.now .era-year {
+  color: var(--fg);
+}
+.era-end {
+  right: 0;
+  bottom: 0;
+  font-family: var(--font-display);
+  color: var(--sand);
+}
+
+/* Conflicts phase: the vote takes over the players and Earth columns. */
+.vote-stage {
+  grid-row: 2;
+  grid-column: 1 / 3;
+  display: flex;
+  min-height: 0;
+}
+.vote-panel {
+  flex: 1;
+  display: grid;
+  /* The hemicycle gets the larger half: it is the live part of the vote. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: center;
+  gap: 48px;
+  border-radius: 28px;
+  padding: 44px 56px;
+  animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.vote-main {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
+}
+.vote-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.vote-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 4rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.vote-text {
+  margin: 0;
+  font-size: 2.4rem;
+  line-height: 1.3;
+}
+.vote-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+}
+.vote-options li {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 3px 0 var(--card-track);
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  animation: reveal 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.option-letter {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--sand);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+}
+.vote-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ---------- Vote: hemicycle of ballots ---------- */
+.hemicycle {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+}
+.hemicycle svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.seat {
+  fill: var(--card-track);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.4s;
+}
+.seat.lit {
+  fill: var(--fill);
+  animation: seat-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes seat-pop {
+  0% {
+    transform: scale(0.3);
+    fill: var(--ok);
+  }
+  60% {
+    transform: scale(1.5);
+    fill: var(--ok);
+  }
+}
+/* Everybody voted: a wave runs across the seats, left to right. */
+.hemicycle.wave .seat.lit {
+  animation: seat-wave 0.9s ease-in-out calc(var(--i) * 0.9s) 2;
+}
+@keyframes seat-wave {
+  40% {
+    transform: scale(1.6);
+    fill: var(--ok);
+  }
+}
+.envelope {
+  position: absolute;
+  z-index: 3;
+  margin: -1.5rem 0 0 -1.5rem;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+  background: var(--sand);
+  color: var(--fill);
+  box-shadow: 0 6px 18px -4px rgb(3 20 32 / 0.5);
+  pointer-events: none;
+}
+.envelope svg {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+.hemicycle-count {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.hemicycle-count strong {
+  font-family: var(--font-display);
+  font-size: 15cqw;
+  animation: pop 0.4s ease-out;
+}
+.hemicycle-count span {
+  margin-top: 4px;
+  white-space: nowrap;
+  font-size: 4.6cqw;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+.milestone {
+  position: absolute;
+  left: 50%;
+  top: -4.5rem;
+  padding: 10px 26px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: var(--ok);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  box-shadow: 0 12px 30px -8px rgb(3 20 32 / 0.6);
+  animation: milestone 2.8s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@keyframes milestone {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px) scale(0.6);
+  }
+  12%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.95);
+  }
+}
+
+/* Last seconds of the vote: options beat, the panel glows red, the room darkens. */
+.vote-panel.final {
+  animation: final-glow 1s ease-in-out infinite;
+}
+.vote-panel.final .vote-options li {
+  animation: option-beat 1s ease-in-out infinite;
+}
+.vote-panel.final .vote-options li:nth-child(2n) {
+  animation-delay: 0.15s;
+}
+@keyframes final-glow {
+  50% {
+    box-shadow:
+      0 0 0 5px var(--urgent),
+      0 0 60px 6px rgb(240 83 58 / 0.55);
+  }
+}
+@keyframes option-beat {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.035);
+  }
+}
+.game-layout:has(.vote-panel.final)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgb(3 10 16 / 0.6) 100%);
+  animation: fade-in-slow 1.5s ease-out both;
+}
+.game-layout:has(.vote-panel.final) .phase-header,
+.vote-stage {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Vote count, played at the start of the feedback phase ---------- */
+.vote-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 4vh 6vw;
+  background: radial-gradient(ellipse at 50% 40%, #134a6c 0%, #06121b 80%);
+  animation: fade-in-slow 0.5s ease-out both;
+}
+.vote-reveal.stage-leave {
+  animation: reveal-out 0.6s ease-in both;
+}
+@keyframes reveal-out {
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+.reveal-panel {
+  width: min(1500px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.stage-stamp .reveal-panel {
+  animation: shake 0.45s 0.25s;
+}
+@keyframes shake {
+  20% {
+    transform: translate(-10px, 6px);
+  }
+  40% {
+    transform: translate(8px, -6px);
+  }
+  60% {
+    transform: translate(-5px, 3px);
+  }
+  80% {
+    transform: translate(3px, -2px);
+  }
+}
+.reveal-kicker {
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.reveal-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 5.5rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--sand);
+}
+.stage-suspense .reveal-title {
+  animation: suspense-breathe 1.2s ease-in-out infinite;
+}
+@keyframes suspense-breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+.reveal-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.reveal-options li {
+  position: relative;
+  display: grid;
+  grid-template:
+    'letter label count' auto
+    'letter bar bar' auto / auto 1fr auto;
+  align-items: center;
+  gap: 10px 22px;
+  padding: 20px 28px;
+  border-radius: 22px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 2.4rem;
+  font-weight: 700;
+  /* backwards, not both: the winner/loser transforms must stay transitionable. */
+  animation: reveal 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  transition:
+    opacity 0.6s,
+    transform 0.6s,
+    filter 0.6s;
+}
+.stage-suspense .reveal-options li {
+  animation:
+    reveal 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards,
+    tremble 0.25s linear 0.8s infinite;
+}
+@keyframes tremble {
+  25% {
+    transform: translate(1.5px, -1px) rotate(-0.3deg);
+  }
+  75% {
+    transform: translate(-1.5px, 1px) rotate(0.3deg);
+  }
+}
+.reveal-options .option-letter {
+  grid-area: letter;
+  width: 4.2rem;
+  height: 4.2rem;
+  font-size: 2rem;
+}
+.reveal-label {
+  grid-area: label;
+  min-width: 0;
+}
+.reveal-count {
+  grid-area: count;
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.reveal-count small {
+  font-size: 0.7em;
+  color: var(--ink-muted);
+}
+.stage-suspense .reveal-count {
+  visibility: hidden;
+}
+.reveal-bar {
+  grid-area: bar;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--card-track);
+  overflow: hidden;
+}
+.reveal-bar div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fill);
+  transform-origin: left;
+}
+.reveal-options li.winner {
+  transform: scale(1.03);
+  box-shadow:
+    0 0 0 5px var(--ok),
+    0 24px 60px -16px rgb(95 208 138 / 0.6);
+}
+.reveal-options li.winner .reveal-bar div {
+  background: var(--ok);
+}
+.reveal-options li.loser {
+  opacity: 0.45;
+  transform: translateY(8px) scale(0.97);
+  filter: saturate(0.4);
+}
+.stamp {
+  position: absolute;
+  right: 18%;
+  top: 50%;
+  padding: 6px 26px;
+  border: 6px solid var(--urgent);
+  border-radius: 14px;
+  color: var(--urgent);
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgb(246 239 226 / 0.85);
+  pointer-events: none;
+  animation: stamp 0.35s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) rotate(-14deg) scale(3);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) rotate(-9deg) scale(1);
   }
 }

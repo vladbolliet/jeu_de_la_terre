@@ -10,7 +10,7 @@ const PHASE_LABEL: Record<ScreenView['phase'], string> = {
   ended: 'Fin de la partie',
 };
 
-const URGENT_S = 10;
+export const URGENT_S = 10;
 
 /**
  * Countdown + progress for the current phase.
@@ -49,28 +49,78 @@ function usePhaseTimer(view: ScreenView) {
   };
 }
 
+const STEPS = [
+  { phase: 'choices', label: 'Microchoix' },
+  { phase: 'conflicts', label: 'Conflits' },
+  { phase: 'feedback', label: 'Bilan' },
+] as const;
+
 export function PhaseHeader({ view }: { view: ScreenView }) {
   const { seconds, progress, paused } = usePhaseTimer(view);
   const urgent = !paused && seconds !== null && seconds <= URGENT_S;
+  const step = STEPS.findIndex((s) => s.phase === view.phase);
 
   return (
     <header className={`phase-header${urgent ? ' urgent' : ''}`}>
-      <div className="phase-row">
-        <div className="year">{view.year}</div>
-        <div className="phase">{PHASE_LABEL[view.phase]}</div>
-        {paused && (
-          <div className="paused">
-            <Pause className="icon" /> Pause
-          </div>
-        )}
-        {seconds !== null && <div className="timer">{formatTime(seconds)}</div>}
-      </div>
-      {progress !== null && (
-        <div className="progress">
-          <div className="progress-fill" style={{ transform: `scaleX(${progress})` }} />
+      <div className="year-block">
+        <div key={view.year} className="year">
+          {view.year}
         </div>
+        {view.phase !== 'ended' && <div className="year-range">→ {view.year + 20}</div>}
+      </div>
+      {step === -1 ? (
+        <div className="phase">{PHASE_LABEL[view.phase]}</div>
+      ) : (
+        <ol className="phase-steps" aria-label={PHASE_LABEL[view.phase]}>
+          {STEPS.map((s, i) => (
+            <li key={s.phase} className={i < step ? 'done' : i === step ? 'current' : ''}>
+              <span className="step-num">{i + 1}</span>
+              <span className="step-label">{s.label}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {(seconds !== null || paused) && (
+        <RingTimer seconds={seconds} progress={progress} paused={paused} />
       )}
     </header>
+  );
+}
+
+/** Countdown ring: the coloured arc empties as the phase runs out. */
+function RingTimer({
+  seconds,
+  progress,
+  paused,
+}: {
+  /** Null when the screen was loaded while the game was paused. */
+  seconds: number | null;
+  progress: number | null;
+  paused: boolean;
+}) {
+  return (
+    <div className={`ring-timer${paused ? ' is-paused' : ''}`}>
+      <svg viewBox="0 0 100 100" aria-hidden>
+        <circle className="ring-track" cx="50" cy="50" r="44" />
+        <circle
+          className="ring-arc"
+          cx="50"
+          cy="50"
+          r="44"
+          pathLength={1}
+          strokeDasharray="1"
+          strokeDashoffset={progress ?? 0}
+        />
+      </svg>
+      <div className="ring-center">
+        {paused || seconds === null ? (
+          <Pause className="ring-pause" />
+        ) : (
+          <span className="timer">{formatTime(seconds)}</span>
+        )}
+      </div>
+      {paused && <div className="ring-paused-label">Pause</div>}
+    </div>
   );
 }
 
