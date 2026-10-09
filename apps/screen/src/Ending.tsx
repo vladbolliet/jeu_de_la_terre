@@ -1,10 +1,11 @@
-import { Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CircleCheck } from 'lucide-react';
 import type { Climate, ScreenView, World } from '@jdlt/shared';
-import { ROLE_LABEL } from './roles.ts';
-
-// Placeholder: the closing message is to be written by the designers.
-const CONCLUSION =
-  "Chaque choix, même petit, a pesé sur le climat de 2100. Le réchauffement n'est pas une fatalité : il dépend des décisions individuelles et collectives que nous prenons aujourd'hui.";
+import { TIPPING } from './tipping.ts';
+import { temperatureColor } from './stripes.ts';
+import { EndingScene } from './EndingScene.tsx';
+import { Leaderboard } from './Leaderboard.tsx';
+import { ENDINGS, endingTier } from './endingTier.ts';
 
 interface Curve {
   key: keyof Climate;
@@ -22,52 +23,109 @@ const CURVES: Curve[] = [
     unit: ' °C',
     digits: 1,
     refs: [
-      { value: 1.5, label: '+1,5 °C' },
-      { value: 2, label: '+2 °C' },
+      { value: 1.5, label: '+1,5' },
+      { value: 2, label: '+2' },
     ],
   },
   { key: 'co2', title: 'CO₂', unit: ' ppm', digits: 0 },
   { key: 'biodiversity', title: 'Biodiversité', unit: ' %', digits: 0 },
 ];
 
+const fr = (v: number, digits: number) =>
+  v.toLocaleString('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+
 export function Ending({ view }: { view: ScreenView }) {
+  const { world } = view;
+  const tier = endingTier(world.climate.temperature);
+  const ending = ENDINGS[tier];
+
   return (
-    <section className="ending">
-      <div className="ending-curves">
-        {CURVES.map((c) => (
-          <LineChart key={c.key} curve={c} world={view.world} />
-        ))}
+    <section className={`ending ending-${tier}`}>
+      <div className="ending-main">
+        <div className="ending-hero">
+          <EndingScene world={world} tier={tier} />
+          <div className="ending-verdict">
+            <div className="ending-kicker">Le monde en 2100</div>
+            <h1>{ending.title}</h1>
+            <div className="ending-temp">
+              <CountUp value={world.climate.temperature} /> °C
+            </div>
+            <p>{ending.verdict}</p>
+            <div className="ending-tipping">
+              {world.tippingPoints.length ? (
+                world.tippingPoints.map((id) => {
+                  const { icon: Icon, label } = TIPPING[id];
+                  return (
+                    <span key={id} className="tipping-chip">
+                      <Icon className="icon" /> {label}
+                    </span>
+                  );
+                })
+              ) : (
+                <span className="tipping-chip safe">
+                  <CircleCheck className="icon" /> Aucun point de bascule franchi
+                </span>
+              )}
+            </div>
+          </div>
+          <Stripes world={world} />
+        </div>
+        <div className="ending-curves">
+          {CURVES.map((c) => (
+            <LineChart key={c.key} curve={c} world={world} />
+          ))}
+        </div>
       </div>
       <div className="ending-side">
-        <div className="card leaderboard">
-          <div className="card-kicker">
-            <Trophy className="icon" /> Classement
-          </div>
-          <ol>
-            {view.leaderboard.map((p, i) => (
-              <li key={i}>
-                <span className="rank">{i + 1}</span>
-                <span className="who">
-                  <strong>{p.name}</strong>
-                  <span className="role">{ROLE_LABEL[p.role]}</span>
-                </span>
-                <span className="score">{p.score}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <Leaderboard entries={view.leaderboard} />
         <div className="card conclusion">
-          <p>{CONCLUSION}</p>
+          <p>{ending.conclusion}</p>
         </div>
       </div>
     </section>
   );
 }
 
+/** Final temperature counting up from 0 when the ending appears. */
+function CountUp({ value }: { value: number }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start) / 2500));
+      setShown(value * (1 - (1 - t) ** 3));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{`${shown >= 0 ? '+' : '−'}${fr(Math.abs(shown), 1)}`}</>;
+}
+
+/** Warming stripes of the game, one per era plus 2100. */
+function Stripes({ world }: { world: World }) {
+  const temps = [...world.history.map((h) => h.climate.temperature), world.climate.temperature];
+  return (
+    <div className="ending-stripes">
+      <span>1900</span>
+      <div className="stripes-band">
+        {temps.map((t, i) => (
+          <i
+            key={i}
+            style={{ background: temperatureColor(t), animationDelay: `${0.5 + i * 0.12}s` }}
+          />
+        ))}
+      </div>
+      <span>2100</span>
+    </div>
+  );
+}
+
 // Chart geometry in SVG units; the SVG scales to its box.
-const W = 900;
-const H = 230;
-const PAD = { left: 16, right: 150, top: 44, bottom: 40 };
+const W = 540;
+const H = 300;
+const PAD = { left: 20, right: 170, top: 64, bottom: 50 };
 const X0 = 1900;
 const X1 = 2100;
 
@@ -84,18 +142,39 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
   const x = (year: number) => PAD.left + ((year - X0) / (X1 - X0)) * (W - PAD.left - PAD.right);
   const y = (v: number) => PAD.top + (1 - (v - lo) / span) * (H - PAD.top - PAD.bottom);
   const d = points.map((p, i) => `${i ? 'L' : 'M'}${x(p.year)},${y(p.value)}`).join(' ');
-  const first = points[0]!;
   const last = points.at(-1)!;
-  const fmt = (v: number) => `${v.toFixed(curve.digits)}${curve.unit}`;
+  const isTemp = curve.key === 'temperature';
+  const gradientId = `curve-${curve.key}`;
 
   return (
     <figure className="chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${curve.title} de 1900 à 2100`}>
-        <text className="chart-title" x={PAD.left} y={28}>
+        {isTemp && (
+          // The temperature line takes the warming-stripes colour of each era.
+          <defs>
+            <linearGradient
+              id={gradientId}
+              gradientUnits="userSpaceOnUse"
+              x1={x(X0)}
+              x2={x(X1)}
+              y1={0}
+              y2={0}
+            >
+              {points.map((p) => (
+                <stop
+                  key={p.year}
+                  offset={(p.year - X0) / (X1 - X0)}
+                  stopColor={temperatureColor(p.value)}
+                />
+              ))}
+            </linearGradient>
+          </defs>
+        )}
+        <text className="chart-title" x={PAD.left} y={40}>
           {curve.title}
         </text>
         <line className="baseline" x1={x(X0)} x2={x(X1)} y1={H - PAD.bottom} y2={H - PAD.bottom} />
-        {[1900, 1950, 2000, 2050, 2100].map((year) => (
+        {[1900, 2000, 2100].map((year) => (
           <text key={year} className="tick" x={x(year)} y={H - 8}>
             {year}
           </text>
@@ -103,24 +182,28 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
         {curve.refs?.map((r, i) => (
           <g key={r.value}>
             <line className="ref" x1={x(X0)} x2={x(X1)} y1={y(r.value)} y2={y(r.value)} />
-            {/* Lowest reference labelled under its line, the others above, away from the start label. */}
-            <text className="ref-label" x={x(1945)} y={i === 0 ? y(r.value) + 22 : y(r.value) - 8}>
+            {/* Lowest reference labelled under its line, the others above; right of the title. */}
+            <text className="ref-label" x={x(2035)} y={i === 0 ? y(r.value) + 24 : y(r.value) - 8}>
               {r.label}
             </text>
           </g>
         ))}
-        <path className="curve" d={d} />
-        <circle className="end-dot" cx={x(last.year)} cy={y(last.value)} r={7} />
-        <text className="end-label" x={x(last.year) + 14} y={y(last.value) + 9}>
-          {fmt(last.value)}
-        </text>
-        <text
-          className="start-label"
-          x={x(first.year)}
-          // Below the line when it starts at the top, so it never hits the title.
-          y={y(first.value) < PAD.top + 24 ? y(first.value) + 32 : y(first.value) - 12}
-        >
-          {fmt(first.value)}
+        <path
+          className="curve"
+          d={d}
+          style={isTemp ? { stroke: `url(#${gradientId})` } : undefined}
+        />
+        <circle
+          className="end-dot"
+          cx={x(last.year)}
+          cy={y(last.value)}
+          r={9}
+          style={isTemp ? { fill: temperatureColor(last.value) } : undefined}
+        />
+        <text className="end-label" x={x(last.year) + 16} y={y(last.value) + 12}>
+          {isTemp && last.value >= 0 ? '+' : ''}
+          {fr(last.value, curve.digits)}
+          <tspan className="end-unit">{curve.unit}</tspan>
         </text>
       </svg>
     </figure>
