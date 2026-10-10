@@ -300,6 +300,21 @@ header {
   font-size: 0.9rem;
   line-height: 1.3;
 }
+/* Stylised "Objectif" label in the role colour */
+.tag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 9px;
+  border: 1.5px solid var(--role);
+  border-radius: 6px;
+  color: var(--role);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transform: skewX(-8deg);
+  vertical-align: 1px;
+}
 .phase-line {
   display: flex;
   align-items: baseline;

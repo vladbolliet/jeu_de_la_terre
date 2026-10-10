@@ -203,7 +203,10 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
           </div>
         )}
       </header>
-      <p className="objective">🎯 {view.me.objective}</p>
+      <p className="objective">
+        <span className="tag">Objectif</span>
+        {view.me.objective}
+      </p>
       {label && (
         <div className={`phase-line${hurry ? ' hurry' : ''}`}>
           <span className="year">{eraYear(view)}</span>
