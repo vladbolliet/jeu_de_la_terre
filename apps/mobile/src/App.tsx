@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import type { CardView, PlayerView } from '@jdlt/shared';
+import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
@@ -12,6 +12,8 @@ export function App() {
   const [view, setView] = useState<PlayerView | null>(null);
   const [connected, setConnected] = useState(false);
   const [roleSeen, setRoleSeen] = useState(storage.roleSeen);
+  // Year of the last era whose full-screen intro was shown.
+  const [introSeen, setIntroSeen] = useState<number | null>(null);
 
   useEffect(() => {
     // Forget the saved identity and go back to the join screen.
@@ -55,6 +57,9 @@ export function App() {
   return (
     <main>
       {!connected && <div className="banner">Reconnexion…</div>}
+      {view.phase === 'choices' && introSeen !== view.year && (
+        <EraIntro key={view.year} year={view.year} onDone={() => setIntroSeen(view.year)} />
+      )}
       <Header view={view} />
       <Timer view={view} />
       <PhaseBody view={view} />
@@ -149,7 +154,8 @@ function Timer({ view }: { view: PlayerView }) {
   const mustPlay =
     (view.phase === 'choices' && view.hand.length > 0) ||
     (view.phase === 'conflicts' && view.vote !== null && view.vote.myChoice === null);
-  const urgent = seconds !== null && seconds > 0 && seconds <= 10;
+  // Nothing to do during feedback: no red alert there.
+  const urgent = view.phase !== 'feedback' && seconds !== null && seconds > 0 && seconds <= 10;
 
   // Vibrate once per phase (no-op on iOS Safari, which has no Vibration API).
   const vibratedFor = useRef<number | null>(null);
@@ -182,7 +188,7 @@ function PhaseBody({ view }: { view: PlayerView }) {
     case 'conflicts':
       return view.vote ? <Vote view={view} /> : <p className="center">Pas de vote cette ère.</p>;
     case 'feedback':
-      return <Outcomes view={view} waiting="Regarde l'écran principal." />;
+      return <Feedback view={view} />;
     case 'ended':
       return <p className="center">Fin de la partie ! Score final : {view.me.score} pts</p>;
   }
@@ -291,6 +297,77 @@ function Vote({ view }: { view: PlayerView }) {
           : 'Touche une option pour voter.'}
       </p>
     </section>
+  );
+}
+
+/** Full-screen year shown for ~2 s when an era starts; a tap skips it. */
+function EraIntro({ year, onDone }: { year: number; onDone: () => void }) {
+  const done = useRef(onDone);
+  done.current = onDone;
+  useEffect(() => {
+    const id = setTimeout(() => done.current(), 2200);
+    return () => clearTimeout(id);
+  }, []);
+  const index = ERAS.indexOf(year as (typeof ERAS)[number]);
+  return (
+    <div className="era-intro" onClick={onDone}>
+      {index >= 0 && (
+        <p>
+          Époque {index + 1} sur {ERAS.length}
+        </p>
+      )}
+      <strong>{year}</strong>
+      <p>{index === 0 ? 'La partie commence !' : 'Une nouvelle époque commence'}</p>
+    </div>
+  );
+}
+
+/** Feedback phase: recap of the era that just ended, then look at the main screen. */
+function Feedback({ view }: { view: PlayerView }) {
+  // The server has already moved `year` to the next era when feedback starts.
+  const eraYear = ERAS.filter((y) => y < view.year).at(-1) ?? view.year;
+  const choices = view.history.filter((h) => h.year === eraYear);
+  const result = view.lastVoteResult;
+  const ballots = result ? Object.values(result.tally).reduce((a, b) => a + b, 0) : 0;
+  return (
+    <>
+      <section className="look">
+        <div className="look-icon">👀</div>
+        Regarde l'écran principal
+      </section>
+      <section className="card recap">
+        <h2>Tes choix en {eraYear}</h2>
+        {choices.length ? (
+          <ul>
+            {choices.map((c, i) => (
+              <li key={i}>
+                <span className="muted">{c.cardTitle}</span>
+                <strong>{c.optionLabel}</strong>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="muted">Tu n'as joué aucune carte cette époque.</p>
+        )}
+        {view.outcomes.map((o, i) => (
+          <p key={i} className="outcome">
+            {o}
+          </p>
+        ))}
+      </section>
+      {result && (
+        <section className="card recap">
+          <h2>🗳️ {result.title}</h2>
+          <p className="muted">Décision collective</p>
+          <p className="winner">{result.winner.label}</p>
+          <p className="muted">
+            {ballots > 0
+              ? `${result.tally[result.winner.id] ?? 0} voix sur ${ballots}`
+              : "Personne n'a voté."}
+          </p>
+        </section>
+      )}
+    </>
   );
 }
 

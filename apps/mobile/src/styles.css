@@ -329,3 +329,98 @@ header .objective {
     animation: none;
   }
 }
+
+/* Era intro */
+.era-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  text-align: center;
+  animation: era-fade 2.2s ease-in-out forwards;
+}
+.era-intro strong {
+  font-size: 6.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  animation: era-zoom 2.2s ease-out;
+}
+.era-intro p {
+  font-size: 1.2rem;
+  margin: 12px 0;
+}
+@keyframes era-fade {
+  0%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes era-zoom {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  40%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Feedback recap */
+.look {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding: 12px 0 20px;
+}
+.look-icon {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.recap h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+.recap ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.recap li {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-top: 1px solid #334155;
+}
+.recap li strong {
+  font-size: 1.1rem;
+}
+.recap p {
+  margin: 6px 0;
+}
+.recap .winner {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .era-intro,
+  .era-intro strong,
+  .look-icon {
+    animation: none;
+  }
+}
