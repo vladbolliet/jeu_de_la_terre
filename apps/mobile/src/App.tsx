@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import type { CardView, PlayerView } from '@jdlt/shared';
-import { join, socket, storage } from './socket.ts';
+import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
 
@@ -14,16 +14,24 @@ export function App() {
   const [roleSeen, setRoleSeen] = useState(storage.roleSeen);
 
   useEffect(() => {
+    // Forget the saved identity and go back to the join screen.
+    const forget = () => {
+      storage.token = undefined;
+      setView(null);
+    };
     socket.on('player:state', setView);
+    // The host reset the game.
+    socket.on('player:kicked', forget);
     socket.on('connect', () => {
       setConnected(true);
       // Auto re-join after reconnect if we already have an identity.
-      if (storage.token) join(storage.name).catch(() => (storage.token = undefined));
+      if (storage.token) join(storage.name).catch(forget);
     });
     socket.on('disconnect', () => setConnected(false));
     socket.connect();
     return () => {
       socket.off('player:state');
+      socket.off('player:kicked');
       socket.off('connect');
       socket.off('disconnect');
       socket.disconnect();
@@ -33,13 +41,16 @@ export function App() {
   if (!view) return <JoinScreen connected={connected} />;
   if (roleSeen !== view.me.id)
     return (
-      <RoleReveal
-        view={view}
-        onDone={() => {
-          storage.roleSeen = view.me.id;
-          setRoleSeen(view.me.id);
-        }}
-      />
+      <>
+        {!connected && <div className="banner">Reconnexion…</div>}
+        <RoleReveal
+          view={view}
+          onDone={() => {
+            storage.roleSeen = view.me.id;
+            setRoleSeen(view.me.id);
+          }}
+        />
+      </>
     );
   return (
     <main>
@@ -163,9 +174,9 @@ function Card({ card }: { card: CardView }) {
           disabled={busy}
           onClick={() => {
             setBusy(true);
-            socket.emit('player:choose', { instanceId: card.instanceId, optionId: o.id }, () =>
-              setBusy(false),
-            );
+            choose(card.instanceId, o.id)
+              .catch(() => {})
+              .finally(() => setBusy(false));
           }}
         >
           {o.label}
@@ -185,7 +196,7 @@ function Vote({ view }: { view: PlayerView }) {
         <button
           key={o.id}
           className={vote.myChoice === o.id ? 'selected' : ''}
-          onClick={() => socket.emit('player:vote', { voteId: vote.id, optionId: o.id }, () => {})}
+          onClick={() => sendVote(vote.id, o.id).catch(() => {})}
         >
           {o.label}
         </button>

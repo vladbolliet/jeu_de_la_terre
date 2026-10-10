@@ -1,9 +1,11 @@
 import { io, type Socket } from 'socket.io-client';
-import type { ClientToServerEvents, ServerToClientEvents } from '@jdlt/shared';
+import type { Ack, ClientToServerEvents, ServerToClientEvents } from '@jdlt/shared';
 
 // Same origin in dev (Vite proxy) and in prod (served by the game server).
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({
   autoConnect: false,
+  // Retry quickly after a network drop: an era only lasts ~2 min.
+  reconnectionDelayMax: 2000,
 });
 
 const TOKEN_KEY = 'jdlt:token';
@@ -68,4 +70,31 @@ export function join(name: string): Promise<void> {
       resolve();
     });
   });
+}
+
+// Error sent by the server when this socket is not bound to a player (e.g. it restarted).
+const NOT_JOINED = 'Pas encore inscrit';
+
+/** Sends a request; if the server no longer knows this socket, re-joins with the token and retries once. */
+function withRejoin<T>(send: (ack: Ack<T>) => void): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const attempt = (canRetry: boolean) =>
+      send((res) => {
+        if (res.ok) return resolve(res.data);
+        if (canRetry && res.error === NOT_JOINED && storage.token)
+          return join(storage.name).then(() => attempt(false), reject);
+        reject(new Error(res.error));
+      });
+    attempt(true);
+  });
+}
+
+export function choose(instanceId: string, optionId: string) {
+  return withRejoin<{ outcome: string | null }>((ack) =>
+    socket.emit('player:choose', { instanceId, optionId }, ack),
+  );
+}
+
+export function vote(voteId: string, optionId: string) {
+  return withRejoin<null>((ack) => socket.emit('player:vote', { voteId, optionId }, ack));
 }

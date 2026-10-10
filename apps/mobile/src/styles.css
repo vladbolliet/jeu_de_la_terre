@@ -83,12 +83,16 @@ button:disabled {
   opacity: 0.5;
 }
 .banner {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-bottom: 8px;
+  border-radius: 8px;
   background: var(--danger);
   color: #000;
+  font-weight: 700;
   text-align: center;
-  padding: 6px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 8px 8px;
 }
 .error {
   color: var(--danger);
