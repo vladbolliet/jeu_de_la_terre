@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
+import { Ended } from './Ended.tsx';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
 
@@ -126,10 +127,16 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
     <main className="reveal" style={roleVars(view)}>
       <div className="reveal-body">
         <p className="reveal-hello">{view.me.name}, tu es</p>
-        <div className="reveal-icon">{ROLE_STYLE[view.me.role].icon}</div>
+        <div className="reveal-medal">
+          <i />
+          <i />
+          <span className="reveal-icon">{ROLE_STYLE[view.me.role].icon}</span>
+        </div>
         <h1>{view.me.roleName}</h1>
-        <p className="reveal-label">Ton objectif</p>
-        <p className="reveal-objective">{view.me.objective}</p>
+        <section className="reveal-card">
+          <span className="reveal-label">Ton objectif</span>
+          <p className="reveal-objective">{view.me.objective}</p>
+        </section>
       </div>
       <button onClick={onDone}>Compris</button>
     </main>
@@ -232,9 +239,7 @@ function PhaseBody({ view }: { view: PlayerView }) {
     case 'feedback':
       return <Feedback view={view} />;
     case 'ended':
-      return (
-        <Message icon="🏁" title="Fin de la partie !" text={`Score final : ${view.me.score} pts`} />
-      );
+      return <Ended view={view} />;
   }
 }
 
