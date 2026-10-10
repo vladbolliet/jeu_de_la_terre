@@ -8,6 +8,12 @@ function roleVars(view: PlayerView): CSSProperties {
   return { '--role': ROLE_STYLE[view.me.role].color } as CSSProperties;
 }
 
+/** Era being played or recapped: the server has already moved `year` forward when feedback starts. */
+function eraYear(view: PlayerView): number {
+  if (view.phase !== 'feedback') return view.year;
+  return ERAS.filter((y) => y < view.year).at(-1) ?? view.year;
+}
+
 export function App() {
   const [view, setView] = useState<PlayerView | null>(null);
   const [connected, setConnected] = useState(false);
@@ -44,7 +50,7 @@ export function App() {
   if (roleSeen !== view.me.id)
     return (
       <>
-        {!connected && <div className="banner">Reconnexion…</div>}
+        {!connected && <div className="banner banner-fixed">Reconnexion…</div>}
         <RoleReveal
           view={view}
           onDone={() => {
@@ -55,14 +61,18 @@ export function App() {
       </>
     );
   return (
-    <main>
-      {!connected && <div className="banner">Reconnexion…</div>}
+    <main className="game" style={roleVars(view)}>
+      <div className="backdrop" aria-hidden="true">
+        {view.phase !== 'lobby' && <span className="watermark">{eraYear(view)}</span>}
+        <i className="planet" />
+      </div>
       {view.phase === 'choices' && introSeen !== view.year && (
         <EraIntro key={view.year} year={view.year} onDone={() => setIntroSeen(view.year)} />
       )}
-      <Header view={view} />
-      <Timer view={view} />
-      <PhaseBody view={view} />
+      <TopBar view={view} connected={connected} />
+      <div className="stage">
+        <PhaseBody view={view} />
+      </div>
     </main>
   );
 }
@@ -73,6 +83,9 @@ function JoinScreen({ connected }: { connected: boolean }) {
   const [error, setError] = useState<string | null>(null);
   return (
     <main className="join">
+      <div className="backdrop" aria-hidden="true">
+        <i className="planet" />
+      </div>
       <div className="join-logo">🌍</div>
       <h1>Jeu de la Terre</h1>
       <p className="muted">1900 → 2100 : à toi de jouer.</p>
@@ -123,35 +136,14 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
   );
 }
 
-function Header({ view }: { view: PlayerView }) {
-  return (
-    <header style={roleVars(view)}>
-      <div>
-        <span className="role-chip">
-          {ROLE_STYLE[view.me.role].icon} {view.me.roleName}
-        </span>{' '}
-        {view.me.name}
-        <div className="objective">{view.me.objective}</div>
-      </div>
-      <div className="right">
-        <div className="year">{view.year}</div>
-        {/* Re-mounted when the score changes so the bump animation replays. */}
-        <div key={view.me.score} className="score">
-          {view.me.score} pts
-        </div>
-      </div>
-    </header>
-  );
-}
-
 const PHASE_LABEL: Partial<Record<PlayerView['phase'], string>> = {
   choices: 'Choisis tes cartes',
   conflicts: 'Vote collectif',
   feedback: 'Résultats',
 };
 
-/** Countdown bar, always visible; turns red and vibrates at 10 s if the player still has to play. */
-function Timer({ view }: { view: PlayerView }) {
+/** Sticky top bar: role, score and a countdown ring that turns red and vibrates at 10 s if the player still has to play. */
+function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
   const seconds = useCountdown(view.phaseEndsAt);
   const label = PHASE_LABEL[view.phase];
   const mustPlay =
@@ -159,32 +151,64 @@ function Timer({ view }: { view: PlayerView }) {
     (view.phase === 'conflicts' && view.vote !== null && view.vote.myChoice === null);
   // Nothing to do during feedback: no red alert there.
   const urgent = view.phase !== 'feedback' && seconds !== null && seconds > 0 && seconds <= 10;
+  const hurry = urgent && mustPlay;
 
   // Vibrate once per phase (no-op on iOS Safari, which has no Vibration API).
   const vibratedFor = useRef<number | null>(null);
   useEffect(() => {
-    if (urgent && mustPlay && vibratedFor.current !== view.phaseEndsAt) {
+    if (hurry && vibratedFor.current !== view.phaseEndsAt) {
       vibratedFor.current = view.phaseEndsAt;
       navigator.vibrate?.([200, 100, 200]);
     }
-  }, [urgent, mustPlay, view.phaseEndsAt]);
+  }, [hurry, view.phaseEndsAt]);
 
-  if (!label) return null;
   return (
-    <div className={`timer${urgent ? ' urgent' : ''}${urgent && mustPlay ? ' hurry' : ''}`}>
-      <span>{urgent && mustPlay ? 'Dépêche-toi !' : label}</span>
-      <strong>
-        {seconds === null
-          ? '⏸ Pause'
-          : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`}
-      </strong>
-      {view.phaseEndsAt !== null && (
-        // Drains over the time left when it mounts (pure CSS, re-mounted for each phase).
-        <i
-          key={view.phaseEndsAt}
-          className="timer-bar"
-          style={{ animationDuration: `${Math.max(0, view.phaseEndsAt - Date.now())}ms` }}
-        />
+    <div className="topbar">
+      {!connected && <div className="banner">Reconnexion…</div>}
+      <header>
+        <div className="avatar">{ROLE_STYLE[view.me.role].icon}</div>
+        <div className="who">
+          <strong>{view.me.roleName}</strong>
+          <span>
+            {view.me.name} ·{' '}
+            {/* Re-mounted when the score changes so the bump animation replays. */}
+            <b key={view.me.score} className="score">
+              {view.me.score} pts
+            </b>
+          </span>
+        </div>
+        {label && (
+          <div className={`ring${urgent ? ' urgent' : ''}${hurry ? ' hurry' : ''}`}>
+            <svg viewBox="0 0 64 64">
+              <circle className="ring-bg" cx="32" cy="32" r="28" />
+              {view.phaseEndsAt !== null && (
+                // Drains over the time left when it mounts (pure CSS, re-mounted for each phase).
+                <circle
+                  key={view.phaseEndsAt}
+                  className="ring-fg"
+                  cx="32"
+                  cy="32"
+                  r="28"
+                  style={{ animationDuration: `${Math.max(0, view.phaseEndsAt - Date.now())}ms` }}
+                />
+              )}
+            </svg>
+            <strong className={seconds !== null && seconds >= 100 ? 'small' : ''}>
+              {seconds === null
+                ? '⏸'
+                : seconds >= 100
+                  ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+                  : seconds}
+            </strong>
+          </div>
+        )}
+      </header>
+      <p className="objective">🎯 {view.me.objective}</p>
+      {label && (
+        <div className={`phase-line${hurry ? ' hurry' : ''}`}>
+          <span className="year">{eraYear(view)}</span>
+          <span>{hurry ? 'Dépêche-toi !' : seconds === null ? 'Partie en pause' : label}</span>
+        </div>
       )}
     </div>
   );
@@ -193,16 +217,53 @@ function Timer({ view }: { view: PlayerView }) {
 function PhaseBody({ view }: { view: PlayerView }) {
   switch (view.phase) {
     case 'lobby':
-      return <p className="center">En attente du lancement de la partie…</p>;
+      return <Lobby view={view} />;
     case 'choices':
       return <Choices key={view.year} view={view} />;
     case 'conflicts':
-      return view.vote ? <Vote view={view} /> : <p className="center">Pas de vote cette ère.</p>;
+      return view.vote ? (
+        <Vote view={view} />
+      ) : (
+        <Message icon="🗳️" title="Pas de vote cette époque" text="Regarde l'écran principal." />
+      );
     case 'feedback':
       return <Feedback view={view} />;
     case 'ended':
-      return <p className="center">Fin de la partie ! Score final : {view.me.score} pts</p>;
+      return (
+        <Message icon="🏁" title="Fin de la partie !" text={`Score final : ${view.me.score} pts`} />
+      );
   }
+}
+
+/** Centered full-height message, used when there is nothing to play. */
+function Message({ icon, title, text }: { icon: string; title: string; text: string }) {
+  return (
+    <section className="message">
+      <div className="message-icon">{icon}</div>
+      <h2>{title}</h2>
+      <p>{text}</p>
+    </section>
+  );
+}
+
+function Lobby({ view }: { view: PlayerView }) {
+  return (
+    <section className="message">
+      <div className="lobby-badge">
+        <i />
+        <i />
+        <span>{ROLE_STYLE[view.me.role].icon}</span>
+      </div>
+      <h2>Tu es dans la partie, {view.me.name} !</h2>
+      <p>Elle va bientôt commencer.</p>
+      <p className="muted">En attendant, regarde l'écran principal.</p>
+      <div className="dots">
+        <i />
+        <i />
+        <i />
+      </div>
+    </section>
+  );
 }
 
 /** Choices phase: one card at a time, then the outcome of the choice, then waiting for the others. */
@@ -218,7 +279,7 @@ function Choices({ view }: { view: PlayerView }) {
 
   if (result)
     return (
-      <section className="result">
+      <section className="message result">
         <div className="result-check">✓</div>
         <p className="result-outcome">{result.outcome ?? 'Choix enregistré.'}</p>
         {hand.length ? (
@@ -233,15 +294,45 @@ function Choices({ view }: { view: PlayerView }) {
 
   // Cards sent by another player come first.
   const card = sending ?? hand.find((c) => c.fromPlayer) ?? hand[0];
-  if (!card) return <Outcomes view={view} waiting="En attente des autres joueurs…" />;
+  if (!card)
+    return (
+      <section className="message">
+        <div className="message-icon">⏳</div>
+        {view.outcomes.map((o, i) => (
+          <p key={i} className="outcome">
+            {o}
+          </p>
+        ))}
+        <p className="muted waiting">En attente des autres joueurs…</p>
+      </section>
+    );
 
   const others = hand.filter((c) => c.instanceId !== card.instanceId).length;
   return (
-    <>
-      <section key={card.instanceId} className={card.fromPlayer ? 'card card-received' : 'card'}>
-        {card.fromPlayer && <div className="from">📨 {card.fromPlayer} t'envoie cette carte</div>}
-        <h2>{card.title}</h2>
-        <p>{card.text}</p>
+    <div className="play" key={card.instanceId}>
+      <section className={card.fromPlayer ? 'card card-received' : 'card'}>
+        <div className="card-band">
+          {card.fromPlayer
+            ? `📨 ${card.fromPlayer} t'envoie cette carte`
+            : `Ta carte · ${view.year}`}
+        </div>
+        <div className="card-body">
+          <h2>{card.title}</h2>
+          <p>{card.text}</p>
+        </div>
+        <span className="card-mark" aria-hidden="true">
+          {ROLE_STYLE[view.me.role].icon}
+        </span>
+      </section>
+      <div className="actions">
+        {others > 0 && (
+          <p className="muted">
+            {others === 1
+              ? 'Encore 1 carte après celle-ci'
+              : `Encore ${others} cartes après celle-ci`}
+          </p>
+        )}
+        {error && <p className="error">{error}</p>}
         {card.options.map((o) => (
           <button
             key={o.id}
@@ -261,16 +352,8 @@ function Choices({ view }: { view: PlayerView }) {
             {o.label}
           </button>
         ))}
-        {error && <p className="error">{error}</p>}
-      </section>
-      {others > 0 && (
-        <p className="muted center-text">
-          {others === 1
-            ? 'Encore 1 carte après celle-ci'
-            : `Encore ${others} cartes après celle-ci`}
-        </p>
-      )}
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -280,34 +363,42 @@ function Vote({ view }: { view: PlayerView }) {
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   return (
-    <section className="card vote">
-      <h2>🗳️ {vote.title}</h2>
-      <p>{vote.text}</p>
-      {vote.options.map((o) => (
-        <button
-          key={o.id}
-          className={vote.myChoice === o.id ? 'selected' : ''}
-          disabled={sending !== null}
-          aria-pressed={vote.myChoice === o.id}
-          onClick={() => {
-            setSending(o.id);
-            setError(null);
-            sendVote(vote.id, o.id)
-              .catch((err: Error) => setError(err.message))
-              .finally(() => setSending(null));
-          }}
-        >
-          {vote.myChoice === o.id && '✓ '}
-          {o.label}
-        </button>
-      ))}
-      {error && <p className="error">{error}</p>}
-      <p className="muted center-text">
-        {vote.myChoice
-          ? "Vote enregistré. Tu peux changer d'avis jusqu'à la fin."
-          : 'Touche une option pour voter.'}
-      </p>
-    </section>
+    <div className="play">
+      <section className="card vote">
+        <div className="card-band">Tout le monde décide</div>
+        <div className="card-body">
+          <div className="vote-icon">🗳️</div>
+          <h2>{vote.title}</h2>
+          <p>{vote.text}</p>
+        </div>
+      </section>
+      <div className="actions">
+        <p className="muted">
+          {vote.myChoice
+            ? "Vote enregistré. Tu peux changer d'avis jusqu'à la fin."
+            : 'Touche une option pour voter.'}
+        </p>
+        {error && <p className="error">{error}</p>}
+        {vote.options.map((o) => (
+          <button
+            key={o.id}
+            className={vote.myChoice === o.id ? 'selected' : ''}
+            disabled={sending !== null}
+            aria-pressed={vote.myChoice === o.id}
+            onClick={() => {
+              setSending(o.id);
+              setError(null);
+              sendVote(vote.id, o.id)
+                .catch((err: Error) => setError(err.message))
+                .finally(() => setSending(null));
+            }}
+          >
+            {vote.myChoice === o.id && '✓ '}
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -363,19 +454,18 @@ function EraIntro({ year, onDone }: { year: number; onDone: () => void }) {
 
 /** Feedback phase: recap of the era that just ended, then look at the main screen. */
 function Feedback({ view }: { view: PlayerView }) {
-  // The server has already moved `year` to the next era when feedback starts.
-  const eraYear = ERAS.filter((y) => y < view.year).at(-1) ?? view.year;
-  const choices = view.history.filter((h) => h.year === eraYear);
+  const year = eraYear(view);
+  const choices = view.history.filter((h) => h.year === year);
   const result = view.lastVoteResult;
   const ballots = result ? Object.values(result.tally).reduce((a, b) => a + b, 0) : 0;
   return (
-    <>
+    <div className="feedback">
       <section className="look">
         <div className="look-icon">👀</div>
         Regarde l'écran principal
       </section>
-      <section className="card recap">
-        <h2>Tes choix en {eraYear}</h2>
+      <section className="panel">
+        <h2>Tes choix en {year}</h2>
         {choices.length ? (
           <ul>
             {choices.map((c, i) => (
@@ -395,7 +485,7 @@ function Feedback({ view }: { view: PlayerView }) {
         ))}
       </section>
       {result && (
-        <section className="card recap">
+        <section className="panel">
           <h2>🗳️ {result.title}</h2>
           <p className="muted">Décision collective</p>
           <p className="winner">{result.winner.label}</p>
@@ -406,24 +496,6 @@ function Feedback({ view }: { view: PlayerView }) {
           </p>
         </section>
       )}
-    </>
-  );
-}
-
-function Outcomes({ view, waiting }: { view: PlayerView; waiting: string }) {
-  return (
-    <section className="center">
-      {view.outcomes.map((o, i) => (
-        <p key={i} className="outcome">
-          {o}
-        </p>
-      ))}
-      {view.lastVoteResult && (
-        <p>
-          Vote « {view.lastVoteResult.title} » : <strong>{view.lastVoteResult.winner.label}</strong>
-        </p>
-      )}
-      <p className="muted">{waiting}</p>
-    </section>
+    </div>
   );
 }
