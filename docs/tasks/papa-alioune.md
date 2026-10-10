@@ -9,7 +9,7 @@ Chaque tâche est finie quand : `pnpm typecheck` passe + le critère « Fini qua
 
 ## J1 — Parcours complet
 
-- [ ] **P1. Inscription et rôle.** Écran d'accueil (titre, champ prénom, bouton). Après inscription, écran « Tu es <rôle> » plein écran avec l'objectif (`me.roleName`, `me.objective`), une couleur et une icône par rôle (elite, citoyen, politique, militant), bouton « Compris ». Le rôle reste visible en haut ensuite.
+- [x] **P1. Inscription et rôle.** Écran d'accueil (titre, champ prénom, bouton). Après inscription, écran « Tu es <rôle> » plein écran avec l'objectif (`me.roleName`, `me.objective`), une couleur et une icône par rôle (elite, citoyen, politique, militant), bouton « Compris ». Le rôle reste visible en haut ensuite.
 - [ ] **P2. Reconnexion.** Si le serveur répond « Joueur inconnu » ou si le token n'est plus valide après un reset, effacer le token et revenir à l'inscription. Bandeau « Reconnexion… » pendant les coupures. Tester : passer le téléphone en mode avion 10 s pendant une phase, puis revenir.
   Fini quand : le joueur retrouve sa carte et son score sans rien faire.
 - [ ] **P3. Cartes.** Une carte à la fois (si plusieurs dans `hand`, la carte reçue d'un autre joueur `fromPlayer` est mise en avant avec un style distinct). Après un choix : afficher le texte `outcome` renvoyé par l'ack de `player:choose` avec une animation, puis « En attente des autres ». Désactiver les boutons pendant l'envoi, afficher l'erreur de l'ack si `ok: false`.

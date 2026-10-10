@@ -8,6 +8,7 @@ export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io({
 
 const TOKEN_KEY = 'jdlt:token';
 const NAME_KEY = 'jdlt:name';
+const ROLE_SEEN_KEY = 'jdlt:roleSeen';
 
 export const storage = {
   get token() {
@@ -35,6 +36,22 @@ export const storage = {
   set name(v: string) {
     try {
       localStorage.setItem(NAME_KEY, v);
+    } catch {
+      /* private mode */
+    }
+  },
+  /** Id of the player who already dismissed the role reveal screen. */
+  get roleSeen() {
+    try {
+      return localStorage.getItem(ROLE_SEEN_KEY) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  },
+  set roleSeen(v: string | undefined) {
+    try {
+      if (v) localStorage.setItem(ROLE_SEEN_KEY, v);
+      else localStorage.removeItem(ROLE_SEEN_KEY);
     } catch {
       /* private mode */
     }

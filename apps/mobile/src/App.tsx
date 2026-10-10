@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { CardView, PlayerView } from '@jdlt/shared';
 import { join, socket, storage } from './socket.ts';
+import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
+
+function roleVars(view: PlayerView): CSSProperties {
+  return { '--role': ROLE_STYLE[view.me.role].color } as CSSProperties;
+}
 
 export function App() {
   const [view, setView] = useState<PlayerView | null>(null);
   const [connected, setConnected] = useState(false);
+  const [roleSeen, setRoleSeen] = useState(storage.roleSeen);
 
   useEffect(() => {
     socket.on('player:state', setView);
@@ -25,6 +31,16 @@ export function App() {
   }, []);
 
   if (!view) return <JoinScreen connected={connected} />;
+  if (roleSeen !== view.me.id)
+    return (
+      <RoleReveal
+        view={view}
+        onDone={() => {
+          storage.roleSeen = view.me.id;
+          setRoleSeen(view.me.id);
+        }}
+      />
+    );
   return (
     <main>
       {!connected && <div className="banner">Reconnexion…</div>}
@@ -36,26 +52,56 @@ export function App() {
 
 function JoinScreen({ connected }: { connected: boolean }) {
   const [name, setName] = useState(storage.name);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   return (
-    <main className="center">
+    <main className="join">
+      <div className="join-logo">🌍</div>
       <h1>Jeu de la Terre</h1>
+      <p className="muted">1900 → 2100 : à toi de jouer.</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          join(name).catch((err: Error) => setError(err.message));
+          setBusy(true);
+          setError(null);
+          join(name.trim())
+            .catch((err: Error) => setError(err.message))
+            .finally(() => setBusy(false));
         }}
       >
+        <label htmlFor="name">Ton prénom</label>
         <input
+          id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ton prénom"
+          placeholder="Ex. Awa"
           maxLength={24}
+          autoComplete="given-name"
+          autoCapitalize="words"
+          enterKeyHint="go"
           autoFocus
         />
-        <button disabled={!connected || !name.trim()}>Rejoindre</button>
+        <button className="primary" disabled={!connected || busy || !name.trim()}>
+          {busy ? 'Inscription…' : 'Rejoindre la partie'}
+        </button>
       </form>
+      {!connected && <p className="muted">Connexion au serveur…</p>}
       {error && <p className="error">{error}</p>}
+    </main>
+  );
+}
+
+function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) {
+  return (
+    <main className="reveal" style={roleVars(view)}>
+      <div className="reveal-body">
+        <p className="reveal-hello">{view.me.name}, tu es</p>
+        <div className="reveal-icon">{ROLE_STYLE[view.me.role].icon}</div>
+        <h1>{view.me.roleName}</h1>
+        <p className="reveal-label">Ton objectif</p>
+        <p className="reveal-objective">{view.me.objective}</p>
+      </div>
+      <button onClick={onDone}>Compris</button>
     </main>
   );
 }
@@ -63,9 +109,12 @@ function JoinScreen({ connected }: { connected: boolean }) {
 function Header({ view }: { view: PlayerView }) {
   const seconds = useCountdown(view.phaseEndsAt);
   return (
-    <header>
+    <header style={roleVars(view)}>
       <div>
-        <strong>{view.me.roleName}</strong> · {view.me.name}
+        <span className="role-chip">
+          {ROLE_STYLE[view.me.role].icon} {view.me.roleName}
+        </span>{' '}
+        {view.me.name}
         <div className="objective">{view.me.objective}</div>
       </div>
       <div className="right">
