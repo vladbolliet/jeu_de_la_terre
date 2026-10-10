@@ -14,6 +14,12 @@
     -apple-system,
     sans-serif;
 }
+html {
+  /* No double-tap zoom, no font boosting when the phone is rotated */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 * {
   box-sizing: border-box;
 }
@@ -23,6 +29,14 @@ body {
   color: var(--fg);
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  /* A long press must not select text or open the iOS callout */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input {
+  -webkit-user-select: text;
+  user-select: text;
 }
 main {
   position: relative;

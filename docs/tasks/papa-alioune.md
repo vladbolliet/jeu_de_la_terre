@@ -19,7 +19,7 @@ Chaque tâche est finie quand : `pnpm typecheck` passe + le critère « Fini qua
 
 - [x] **P5. Transitions d'ère.** Animation « 1920 » plein écran au début de chaque ère ; en phase `feedback`, rappeler ses choix de l'ère (`outcomes`) et le résultat du vote (`lastVoteResult`), et inviter à regarder l'écran.
 - [x] **P6. Fin de partie.** Phase `ended` : score final, puis « Ton impact » : la liste `history` (année, carte, option choisie) avec, pour chaque choix, les effets (`effects`, révélés seulement à la fin) traduits en mots et pictos (ex. emissions +6 → « 🏭 beaucoup plus de CO₂ »). Résumé : « Tes choix ont plutôt augmenté / réduit les émissions ».
-- [ ] **P7. Finitions.** Empêcher le zoom accidentel et la mise en veille si possible (Wake Lock API), icône et nom pour « Ajouter à l'écran d'accueil » (manifest), état vide propre pour chaque phase.
+- [x] **P7. Finitions.** Empêcher le zoom accidentel et la mise en veille si possible (Wake Lock API), icône et nom pour « Ajouter à l'écran d'accueil » (manifest), état vide propre pour chaque phase.
 
 ## J3
 

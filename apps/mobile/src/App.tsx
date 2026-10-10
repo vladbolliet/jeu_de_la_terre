@@ -4,6 +4,7 @@ import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { Ended } from './Ended.tsx';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
+import { useWakeLock } from './useWakeLock.ts';
 
 function roleVars(view: PlayerView): CSSProperties {
   return { '--role': ROLE_STYLE[view.me.role].color } as CSSProperties;
@@ -46,6 +47,9 @@ export function App() {
       socket.disconnect();
     };
   }, []);
+
+  // Keep the screen on from the moment the player has joined until the end of the game.
+  useWakeLock(view !== null && view.phase !== 'ended');
 
   if (!view) return <JoinScreen connected={connected} />;
   if (roleSeen !== view.me.id)
@@ -302,10 +306,20 @@ function Choices({ view }: { view: PlayerView }) {
 
   // Cards sent by another player come first.
   const card = sending ?? hand.find((c) => c.fromPlayer) ?? hand[0];
-  if (!card)
+  if (!card) {
+    // No card dealt this era (e.g. the player joined after the deal).
+    if (!view.outcomes.length && !view.history.some((h) => h.year === view.year))
+      return (
+        <Message
+          icon="🃏"
+          title="Pas de carte pour toi cette époque"
+          text="Regarde l'écran principal en attendant la suite."
+        />
+      );
     return (
       <section className="message">
         <div className="message-icon">⏳</div>
+        <h2>Tes choix sont faits</h2>
         {view.outcomes.map((o, i) => (
           <p key={i} className="outcome">
             {o}
@@ -314,6 +328,7 @@ function Choices({ view }: { view: PlayerView }) {
         <p className="muted waiting">En attente des autres joueurs…</p>
       </section>
     );
+  }
 
   const others = hand.filter((c) => c.instanceId !== card.instanceId).length;
   return (
