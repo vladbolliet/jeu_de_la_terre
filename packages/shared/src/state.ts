@@ -1,4 +1,4 @@
-import type { IndicatorKey, Role } from './content.ts';
+import type { Condition, IndicatorKey, Role } from './content.ts';
 
 export interface Climate {
   /** CO2 concentration, ppm */
@@ -49,6 +49,13 @@ export function indicatorValue(world: World, key: IndicatorKey): number {
   return key in world.climate
     ? world.climate[key as keyof Climate]
     : world.society[key as keyof Society];
+}
+
+/** True if the world satisfies a content `when` condition (no condition = true). */
+export function conditionHolds(world: World, when: Condition | undefined): boolean {
+  if (!when) return true;
+  const value = indicatorValue(world, when.indicator);
+  return (when.gt === undefined || value > when.gt) && (when.lt === undefined || value < when.lt);
 }
 
 export type RoleCounts = Record<Role, number>;

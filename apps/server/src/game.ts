@@ -3,12 +3,13 @@ import { randomUUID } from 'node:crypto';
 import {
   END_YEAR,
   ROLES,
-  indicatorValue,
+  conditionHolds,
   type Card,
   type CardView,
   type ChoiceRecord,
   type Content,
   type Effects,
+  type GameEvent,
   type Phase,
   type PlayerView,
   type Role,
@@ -25,7 +26,9 @@ import { initialWorld, pick, resolveEra } from '@jdlt/engine';
 interface DealtCard {
   instanceId: string;
   card: Card;
+  /** Sender name and id, for cards received through another player's `sends`. */
   fromPlayer?: string;
+  fromPlayerId?: string;
 }
 
 interface Player {
@@ -33,7 +36,8 @@ interface Player {
   token: string;
   name: string;
   role: Role;
-  connected: boolean;
+  /** Number of open sockets bound to this player (a phone can briefly have two while reconnecting). */
+  connections: number;
   score: number;
   hand: DealtCard[];
   outcomes: string[];
@@ -41,6 +45,41 @@ interface Player {
 }
 
 type Durations = { choices: number; conflicts: number; feedback: number };
+
+export interface GameOptions {
+  durations: Durations;
+  /** Called whenever state changed; the server throttles broadcasts. */
+  onChange?: () => void;
+  rng?: () => number;
+  publicUrl?: string | null;
+  maxPlayers?: number;
+}
+
+/** Serializable game state, written to disk so a server crash does not lose the game. */
+export interface GameSnapshot {
+  version: 1;
+  savedAt: number;
+  phase: Phase;
+  world: World;
+  /** Remaining time of the current phase; null if the phase has no timer. */
+  remainingMs: number | null;
+  paused: boolean;
+  players: (Omit<Player, 'hand' | 'connections'> & {
+    hand: { instanceId: string; cardId: string; fromPlayer?: string; fromPlayerId?: string }[];
+  })[];
+  decisions: { role: Role; effects: Effects }[];
+  cardsDealt: number;
+  voteId: string | null;
+  ballots: [string, string][];
+  lastVoteResult: VoteResult | null;
+  collective: Effects[];
+  newTippingPoints: TippingPointId[];
+  firedEvents: string[];
+  eraEvents: string[];
+}
+
+/** Minimum time left to a restored phase, so players have time to reconnect. */
+const RESTORE_MIN_MS = 10_000;
 
 export class GameError extends Error {}
 
@@ -59,31 +98,44 @@ export class Game {
   private lastVoteResult: VoteResult | null = null;
   private collective: Effects[] = [];
   private newTippingPoints: TippingPointId[] = [];
+  /** Ids of events already fired this game (each fires once). */
+  private firedEvents = new Set<string>();
+  /** Events fired at the end of the last resolved era. */
+  private eraEvents: GameEvent[] = [];
+
+  private durations: Durations;
+  private onChange: () => void;
+  private rng: () => number;
+  private publicUrl: string | null;
+  private maxPlayers: number;
 
   constructor(
     private content: Content,
-    private durations: Durations,
-    /** Called whenever state changed; the server throttles broadcasts. */
-    private onChange: () => void,
-    private rng: () => number = Math.random,
-    private publicUrl: string | null = null,
-  ) {}
+    opts: GameOptions,
+  ) {
+    this.durations = opts.durations;
+    this.onChange = opts.onChange ?? (() => {});
+    this.rng = opts.rng ?? Math.random;
+    this.publicUrl = opts.publicUrl ?? null;
+    this.maxPlayers = opts.maxPlayers ?? 200;
+  }
 
   // ---------- players ----------
 
   join(name: string, token?: string): Player {
     const existing = token ? this.byToken.get(token) : undefined;
     if (existing) {
-      existing.connected = true;
+      existing.connections++;
       this.onChange();
       return existing;
     }
+    if (this.players.size >= this.maxPlayers) throw new GameError('La partie est complète');
     const player: Player = {
       id: randomUUID(),
       token: randomUUID(),
       name: name.trim().slice(0, 24) || 'Anonyme',
       role: this.nextRole(),
-      connected: true,
+      connections: 1,
       score: 0,
       hand: [],
       outcomes: [],
@@ -96,9 +148,10 @@ export class Game {
     return player;
   }
 
+  /** Called when one socket bound to this player closes. */
   disconnect(playerId: string) {
     const p = this.players.get(playerId);
-    if (p) p.connected = false;
+    if (p) p.connections = Math.max(0, p.connections - 1);
     this.onChange();
   }
 
@@ -140,17 +193,24 @@ export class Game {
       effects: option.effects,
     });
     if (option.outcome) p.outcomes.push(option.outcome);
+    if (option.reply && dealt.fromPlayerId)
+      this.players.get(dealt.fromPlayerId)?.outcomes.push(option.reply);
 
     if (option.sends) {
       const target = pick(
         [...this.players.values()].filter(
-          (o) => o.connected && o.role === option.sends!.toRole && o.id !== p.id,
+          (o) => o.connections > 0 && o.role === option.sends!.toRole && o.id !== p.id,
         ),
         this.rng,
       );
       const card = this.content.cards.find((c) => c.id === option.sends!.card);
       if (target && card) {
-        target.hand.push({ instanceId: randomUUID(), card, fromPlayer: p.name });
+        target.hand.push({
+          instanceId: randomUUID(),
+          card,
+          fromPlayer: p.name,
+          fromPlayerId: p.id,
+        });
         this.cardsDealt++;
       }
     }
@@ -222,6 +282,8 @@ export class Game {
     this.pausedRemainingMs = null;
     this.lastVoteResult = null;
     this.newTippingPoints = [];
+    this.firedEvents.clear();
+    this.eraEvents = [];
     this.onChange();
   }
 
@@ -245,6 +307,11 @@ export class Game {
     this.onChange();
   }
 
+  /** Stops the phase timer (server shutdown, tests). */
+  stop() {
+    this.clearTimer();
+  }
+
   private schedule(ms: number) {
     this.clearTimer();
     this.phaseEndsAt = Date.now() + ms;
@@ -262,6 +329,7 @@ export class Game {
     this.cardsDealt = 0;
     this.lastVoteResult = null;
     this.newTippingPoints = [];
+    this.eraEvents = [];
     for (const p of this.players.values()) {
       p.hand = [];
       p.outcomes = [];
@@ -271,10 +339,7 @@ export class Game {
 
   private deal(p: Player) {
     const pool = this.content.cards.filter(
-      (c) =>
-        !c.interactionOnly &&
-        c.roles.includes(p.role) &&
-        (!c.eras || (c.eras as readonly number[]).includes(this.world.year)),
+      (c) => !c.interactionOnly && c.roles.includes(p.role) && this.inEra(c.eras),
     );
     const card = pick(pool, this.rng);
     if (!card) return;
@@ -286,15 +351,8 @@ export class Game {
     for (const p of this.players.values()) p.hand = [];
     this.ballots.clear();
     this.vote =
-      this.content.votes.find((v) => {
-        if (v.eras && !(v.eras as readonly number[]).includes(this.world.year)) return false;
-        if (!v.when) return true;
-        const value = indicatorValue(this.world, v.when.indicator);
-        return (
-          (v.when.gt === undefined || value > v.when.gt) &&
-          (v.when.lt === undefined || value < v.when.lt)
-        );
-      }) ?? null;
+      this.content.votes.find((v) => this.inEra(v.eras) && conditionHolds(this.world, v.when)) ??
+      null;
   }
 
   private closeVote() {
@@ -318,7 +376,19 @@ export class Game {
     };
   }
 
+  private inEra(eras: readonly number[] | undefined) {
+    return !eras || eras.includes(this.world.year);
+  }
+
   private endEra() {
+    this.eraEvents = this.content.events.filter(
+      (e) =>
+        !this.firedEvents.has(e.id) && this.inEra(e.eras) && conditionHolds(this.world, e.when),
+    );
+    for (const e of this.eraEvents) {
+      this.firedEvents.add(e.id);
+      this.collective.push(e.effects);
+    }
     const res = resolveEra(this.world, {
       decisions: this.decisions.map((d) => d.effects),
       playerCount: Math.max(1, this.players.size),
@@ -369,7 +439,7 @@ export class Game {
       year: this.world.year,
       phaseEndsAt: this.phaseEndsAt,
       playerCount: players.length,
-      connectedCount: players.filter((p) => p.connected).length,
+      connectedCount: players.filter((p) => p.connections > 0).length,
       roleCounts: this.roleCounts(),
       choicesMade: this.decisions.length,
       cardsDealt: this.cardsDealt,
@@ -390,6 +460,7 @@ export class Game {
         .slice(0, 10)
         .map((p) => ({ role: p.role, name: p.name, score: p.score })),
       roleStats: this.roleStats(),
+      events: this.eraEvents.map((e) => ({ id: e.id, title: e.title, text: e.text })),
       joinUrl: this.publicUrl,
     };
   }
@@ -409,6 +480,72 @@ export class Game {
 
   playerIds() {
     return [...this.players.keys()];
+  }
+
+  // ---------- persistence ----------
+
+  snapshot(): GameSnapshot {
+    const remainingMs =
+      this.pausedRemainingMs ??
+      (this.phaseEndsAt ? Math.max(0, this.phaseEndsAt - Date.now()) : null);
+    return {
+      version: 1,
+      savedAt: Date.now(),
+      phase: this.phase,
+      world: this.world,
+      remainingMs,
+      paused: this.pausedRemainingMs !== null,
+      players: [...this.players.values()].map(({ hand, connections: _, ...p }) => ({
+        ...p,
+        hand: hand.map((d) => ({
+          instanceId: d.instanceId,
+          cardId: d.card.id,
+          fromPlayer: d.fromPlayer,
+          fromPlayerId: d.fromPlayerId,
+        })),
+      })),
+      decisions: this.decisions,
+      cardsDealt: this.cardsDealt,
+      voteId: this.vote?.id ?? null,
+      ballots: [...this.ballots],
+      lastVoteResult: this.lastVoteResult,
+      collective: this.collective,
+      newTippingPoints: this.newTippingPoints,
+      firedEvents: [...this.firedEvents],
+      eraEvents: this.eraEvents.map((e) => e.id),
+    };
+  }
+
+  /** Rebuilds a game from a snapshot. Cards/votes removed from the content since are dropped. */
+  static restore(snap: GameSnapshot, content: Content, opts: GameOptions): Game {
+    const g = new Game(content, opts);
+    const cards = new Map(content.cards.map((c) => [c.id, c]));
+    for (const sp of snap.players) {
+      const hand: DealtCard[] = sp.hand.flatMap((h) => {
+        const card = cards.get(h.cardId);
+        return card ? [{ ...h, card }] : [];
+      });
+      const p: Player = { ...sp, hand, connections: 0 };
+      g.players.set(p.id, p);
+      g.byToken.set(p.token, p);
+    }
+    g.phase = snap.phase;
+    g.world = snap.world;
+    g.decisions = snap.decisions;
+    g.cardsDealt = snap.cardsDealt;
+    g.vote = content.votes.find((v) => v.id === snap.voteId) ?? null;
+    g.ballots = new Map(snap.ballots);
+    g.lastVoteResult = snap.lastVoteResult;
+    g.collective = snap.collective;
+    g.newTippingPoints = snap.newTippingPoints;
+    g.firedEvents = new Set(snap.firedEvents);
+    g.eraEvents = content.events.filter((e) => snap.eraEvents.includes(e.id));
+    if (snap.remainingMs !== null) {
+      const ms = Math.max(RESTORE_MIN_MS, snap.remainingMs);
+      if (snap.paused) g.pausedRemainingMs = ms;
+      else g.schedule(ms);
+    }
+    return g;
   }
 }
 

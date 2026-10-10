@@ -4,7 +4,15 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { z } from 'zod';
-import { CardSchema, ERAS, RoleDefSchema, ROLES, VoteSchema, type Content } from '@jdlt/shared';
+import {
+  CardSchema,
+  ERAS,
+  EventSchema,
+  RoleDefSchema,
+  ROLES,
+  VoteSchema,
+  type Content,
+} from '@jdlt/shared';
 
 export const DEFAULT_CONTENT_DIR = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -29,12 +37,14 @@ export function loadContent(dir = DEFAULT_CONTENT_DIR): { content: Content; warn
   const roles = z.array(RoleDefSchema).parse(parse(readFileSync(rolesFile, 'utf8')));
   const cards = readYamlList(join(dir, 'cards'), CardSchema);
   const votes = readYamlList(join(dir, 'votes'), VoteSchema);
+  const events = readYamlList(join(dir, 'events'), EventSchema);
 
   const errors: string[] = [];
   const warnings: string[] = [];
   const dup = (ids: string[]) => ids.filter((id, i) => ids.indexOf(id) !== i);
   for (const id of dup(cards.map((c) => c.id))) errors.push(`card id en double: ${id}`);
   for (const id of dup(votes.map((v) => v.id))) errors.push(`vote id en double: ${id}`);
+  for (const id of dup(events.map((e) => e.id))) errors.push(`event id en double: ${id}`);
   for (const r of ROLES)
     if (!roles.some((d) => d.id === r)) errors.push(`rôle manquant dans roles.yaml: ${r}`);
 
@@ -45,6 +55,19 @@ export function loadContent(dir = DEFAULT_CONTENT_DIR): { content: Content; warn
         errors.push(`${card.id}/${o.id}: sends.card inconnue "${o.sends.card}"`);
     }
   }
+  const sentCards = new Set(
+    cards.flatMap((c) => c.options.flatMap((o) => (o.sends ? [o.sends.card] : []))),
+  );
+  for (const card of cards) {
+    if (card.options.some((o) => o.reply) && !sentCards.has(card.id))
+      warnings.push(
+        `${card.id}: a des « reply » mais aucune option ne l'envoie (sends) — les reply ne serviront jamais`,
+      );
+  }
+  for (const vote of votes) {
+    if (vote.options.some((o) => o.reply || o.sends))
+      errors.push(`${vote.id}: reply/sends interdits dans un vote`);
+  }
   for (const era of ERAS) {
     for (const role of ROLES) {
       const n = cards.filter(
@@ -54,5 +77,5 @@ export function loadContent(dir = DEFAULT_CONTENT_DIR): { content: Content; warn
     }
   }
   if (errors.length) throw new Error(errors.join('\n'));
-  return { content: { roles, cards, votes }, warnings };
+  return { content: { roles, cards, votes, events }, warnings };
 }

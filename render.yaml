@@ -1,0 +1,16 @@
+# Render Blueprint: Dashboard → New → Blueprint → select this repo.
+services:
+  - type: web
+    name: jeu-de-la-terre
+    runtime: docker
+    plan: free # passer en "starter" pour le jour J (pas de mise en veille)
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: HOST_KEY
+        generateValue: true
+      - key: PUBLIC_URL
+        sync: false # à remplir avec l'URL donnée par Render, ex. https://jeu-de-la-terre.onrender.com
+      - key: STATE_FILE
+        value: /tmp/game-state.json

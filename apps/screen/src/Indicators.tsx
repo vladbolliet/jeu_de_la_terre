@@ -1,49 +1,246 @@
-import type { World } from '@jdlt/shared';
+import {
+  Bird,
+  Coins,
+  Factory,
+  Globe2,
+  Megaphone,
+  Smile,
+  Thermometer,
+  Trees,
+  Waves,
+  type LucideIcon,
+} from 'lucide-react';
+import type { Climate, Society, World } from '@jdlt/shared';
+import { Sparkline } from './Sparkline.tsx';
 
-const ROWS: { label: string; get: (w: World) => number; unit: string; digits: number }[] = [
-  { label: 'CO₂', get: (w) => w.climate.co2, unit: ' ppm', digits: 0 },
-  { label: 'Température', get: (w) => w.climate.temperature, unit: ' °C', digits: 2 },
-  { label: 'Niveau de la mer', get: (w) => w.climate.seaLevel, unit: ' cm', digits: 0 },
-  { label: 'Biodiversité', get: (w) => w.climate.biodiversity, unit: ' %', digits: 0 },
-  { label: 'Forêts', get: (w) => w.climate.forest, unit: ' %', digits: 0 },
-  { label: 'PIB', get: (w) => w.society.gdp, unit: '', digits: 0 },
-  { label: 'Bien-être', get: (w) => w.society.wellbeing, unit: '', digits: 0 },
-  { label: 'Sensibilisation', get: (w) => w.society.awareness, unit: '', digits: 0 },
+type Severity = 'ok' | 'warn' | 'bad';
+
+export interface Indicator<T> {
+  key: keyof T;
+  label: string;
+  icon: LucideIcon;
+  unit: string;
+  digits: number;
+  /** Direction in which a change is bad news. */
+  worse: 'up' | 'down';
+  /** Severity of the current value; omitted for neutral indicators. */
+  severity?: (v: number) => Severity;
+}
+
+/** Higher is worse. */
+const above = (warn: number, bad: number) => (v: number) =>
+  v >= bad ? 'bad' : v >= warn ? 'warn' : 'ok';
+/** Lower is worse. */
+const below = (warn: number, bad: number) => (v: number) =>
+  v <= bad ? 'bad' : v <= warn ? 'warn' : 'ok';
+
+export const CLIMATE: Indicator<Climate>[] = [
+  {
+    key: 'temperature',
+    label: 'Température',
+    icon: Thermometer,
+    unit: ' °C',
+    digits: 2,
+    worse: 'up',
+    severity: above(1, 2),
+  },
+  {
+    key: 'co2',
+    label: 'CO₂',
+    icon: Factory,
+    unit: ' ppm',
+    digits: 0,
+    worse: 'up',
+    severity: above(350, 450),
+  },
+  {
+    key: 'seaLevel',
+    label: 'Niveau de la mer',
+    icon: Waves,
+    unit: ' cm',
+    digits: 0,
+    worse: 'up',
+    severity: above(20, 50),
+  },
+  {
+    key: 'forest',
+    label: 'Forêts',
+    icon: Trees,
+    unit: ' %',
+    digits: 0,
+    worse: 'down',
+    severity: below(85, 65),
+  },
+  {
+    key: 'biodiversity',
+    label: 'Biodiversité',
+    icon: Bird,
+    unit: ' %',
+    digits: 0,
+    worse: 'down',
+    severity: below(85, 65),
+  },
 ];
 
+export const SOCIETY: Indicator<Society>[] = [
+  { key: 'gdp', label: 'PIB', icon: Coins, unit: '', digits: 0, worse: 'down' },
+  { key: 'wellbeing', label: 'Bien-être', icon: Smile, unit: '', digits: 0, worse: 'down' },
+  {
+    key: 'awareness',
+    label: 'Sensibilisation',
+    icon: Megaphone,
+    unit: '',
+    digits: 0,
+    worse: 'down',
+  },
+];
+
+/** Thermometer scale (°C) and the Paris Agreement band. */
+const THERMO_MAX = 4;
+const PARIS = [1.5, 2];
+
 export function Indicators({ world }: { world: World }) {
+  // history[last] is the world at the start of the previous era.
+  const prev = world.history.at(-1);
+  const [temperature, ...others] = CLIMATE;
   return (
-    <table className="indicators">
-      <tbody>
-        {ROWS.map((r) => (
-          <tr key={r.label}>
-            <td>{r.label}</td>
-            <td className="value">
-              {r.get(world).toFixed(r.digits)}
-              {r.unit}
-            </td>
-            <td>
-              <Sparkline
-                values={[...world.history.map((h) => r.get({ ...world, ...h })), r.get(world)]}
-              />
-            </td>
-          </tr>
+    <div className="indicators">
+      <div className="panel-kicker">
+        <Globe2 className="icon" /> État de la planète
+      </div>
+      <TemperatureCard ind={temperature!} world={world} prev={prev?.climate.temperature} />
+      <div className="climate-grid">
+        {others.map((ind) => (
+          <ClimateTile key={ind.key} ind={ind} world={world} prev={prev?.climate[ind.key]} />
         ))}
-      </tbody>
-    </table>
+      </div>
+      <div className="society-strip">
+        {SOCIETY.map((ind) => {
+          const value = world.society[ind.key];
+          return (
+            <div key={ind.key} className="society-chip">
+              <span className="society-label">{ind.label}</span>
+              <span className="society-value">{value.toFixed(ind.digits)}</span>
+              {prev && <Delta {...deltaOf(ind, value, prev.society[ind.key])} compact />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
-function Sparkline({ values }: { values: number[] }) {
-  if (values.length < 2) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const pts = values
-    .map((v, i) => `${(i / (values.length - 1)) * 100},${20 - ((v - min) / (max - min || 1)) * 20}`)
-    .join(' ');
+function TemperatureCard({
+  ind,
+  world,
+  prev,
+}: {
+  ind: Indicator<Climate>;
+  world: World;
+  prev: number | undefined;
+}) {
+  const value = world.climate.temperature;
+  const pos = (t: number) => `${(Math.min(THERMO_MAX, Math.max(0, t)) / THERMO_MAX) * 100}%`;
   return (
-    <svg viewBox="0 0 100 20" width="100" height="20">
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
+    <div className={`tile temperature-card sev-${ind.severity!(value)}`}>
+      <div className="temp-head">
+        <span className="tile-icon">
+          <Thermometer strokeWidth={2.2} />
+        </span>
+        <span className="tile-label">Réchauffement</span>
+        {prev !== undefined && <Delta {...deltaOf(ind, value, prev)} />}
+      </div>
+      <div className="temp-value">
+        {value >= 0 ? '+' : ''}
+        {value.toFixed(ind.digits)}
+        <span className="tile-unit">°C</span>
+      </div>
+      <div className="thermo">
+        <div className="thermo-bar">
+          <div
+            className="thermo-paris"
+            style={{ left: pos(PARIS[0]!), right: `calc(100% - ${pos(PARIS[1]!)})` }}
+          />
+          <span className="thermo-paris-label" style={{ left: pos(1.75) }}>
+            Accord de Paris
+          </span>
+          <div className="thermo-cursor" style={{ left: pos(value) }} />
+        </div>
+        <div className="thermo-ticks">
+          {[0, 1, 2, 3, 4].map((t) => (
+            <span key={t} style={{ left: pos(t) }}>
+              {t === 0 ? '0' : `+${t}`}°
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClimateTile({
+  ind,
+  world,
+  prev,
+}: {
+  ind: Indicator<Climate>;
+  world: World;
+  prev: number | undefined;
+}) {
+  const value = world.climate[ind.key];
+  const Icon = ind.icon;
+  const points = [
+    ...world.history.map((h) => ({ year: h.year, value: h.climate[ind.key] })),
+    { year: world.year, value },
+  ];
+  return (
+    <div className={`tile climate-tile sev-${ind.severity!(value)}`}>
+      <div className="climate-tile-head">
+        <span className="tile-icon">
+          <Icon strokeWidth={2.2} />
+        </span>
+        <span className="tile-label">{ind.label}</span>
+      </div>
+      <div className="climate-tile-value">
+        <span className="tile-value">
+          {value.toFixed(ind.digits)}
+          <span className="tile-unit">{ind.unit}</span>
+        </span>
+        {prev !== undefined && <Delta {...deltaOf(ind, value, prev)} />}
+      </div>
+      <Sparkline points={points} />
+    </div>
+  );
+}
+
+/** Delta of the displayed (rounded) values. */
+function deltaOf<T>(ind: Indicator<T>, value: number, prev: number) {
+  return {
+    delta: Number(value.toFixed(ind.digits)) - Number(prev.toFixed(ind.digits)),
+    digits: ind.digits,
+    worse: ind.worse,
+  };
+}
+
+function Delta({
+  delta,
+  digits,
+  worse,
+  compact,
+}: {
+  delta: number;
+  digits: number;
+  worse: 'up' | 'down';
+  compact?: boolean;
+}) {
+  const shown = Number(delta.toFixed(digits)) || 0;
+  const cls = `tile-delta${compact ? ' compact' : ''}`;
+  if (shown === 0) return <div className={cls}>=</div>;
+  const bad = worse === 'up' ? shown > 0 : shown < 0;
+  return (
+    <div className={`${cls} ${bad ? 'worse' : 'better'}`}>
+      {shown > 0 ? '▲ +' : '▼ '}
+      {shown.toFixed(digits)}
+    </div>
   );
 }

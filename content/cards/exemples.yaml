@@ -123,11 +123,13 @@
       label: Accepter discrètement
       effects: { wellbeing: -2 }
       score: 4
+      reply: L'élu·e a accepté ton enveloppe. Les déchets restent cachés.
     - id: denoncer
       label: Dénoncer publiquement
       outcome: Scandale ! Le public t'applaudit.
       effects: { approval: 3, awareness: 2 }
       score: 3
+      reply: L'élu·e a dénoncé ta tentative de corruption. Ton entreprise est dans tous les journaux.
 
 # --- Militants ---
 - id: militant_action

@@ -1,7 +1,14 @@
 // Plays a full game with bots to balance content and the climate model.
 // Usage: pnpm simulate [--players 100] [--strategy random|greedy|green] [--seed 1]
 import { parseArgs } from 'node:util';
-import { ERAS, type Card, type Effects, type Option, type Role } from '@jdlt/shared';
+import {
+  ERAS,
+  conditionHolds,
+  type Card,
+  type Effects,
+  type Option,
+  type Role,
+} from '@jdlt/shared';
 import { loadContent } from '../load.ts';
 import { initialWorld, resolveEra } from '../climate.ts';
 import { createRng, pick } from '../rng.ts';
@@ -31,6 +38,7 @@ const chooseOption = (card: Card): Option => {
 };
 
 let world = initialWorld();
+const fired = new Set<string>();
 const rows = [];
 for (const era of ERAS) {
   const decisions: Effects[] = [];
@@ -41,7 +49,15 @@ for (const era of ERAS) {
     const card = pick(pool, rng);
     if (card) decisions.push(chooseOption(card).effects);
   }
-  const res = resolveEra(world, { decisions, playerCount: roster.length, collective: [] });
+  const events = content.events.filter(
+    (e) => !fired.has(e.id) && (!e.eras || e.eras.includes(era)) && conditionHolds(world, e.when),
+  );
+  for (const e of events) fired.add(e.id);
+  const res = resolveEra(world, {
+    decisions,
+    playerCount: roster.length,
+    collective: events.map((e) => e.effects),
+  });
   world = res.world;
   const c = world.climate;
   rows.push({
@@ -54,6 +70,7 @@ for (const era of ERAS) {
     PIB: world.society.gdp.toFixed(0),
     'Gt/an': res.emissions.toFixed(1),
     bascules: res.newTippingPoints.join(' '),
+    événements: events.map((e) => e.id).join(' '),
   });
 }
 console.log(`stratégie=${values.strategy} joueurs=${roster.length}`);

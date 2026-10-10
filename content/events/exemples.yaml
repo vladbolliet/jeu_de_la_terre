@@ -1,0 +1,19 @@
+# Événements globaux : appliqués automatiquement à la fin d'une ère si `eras` et `when` correspondent.
+# Chaque événement ne se produit qu'une fois par partie. Voir docs/CONTENU.md.
+- id: crise_petroliere
+  eras: [1960]
+  title: Choc pétrolier
+  text: Les pays producteurs réduisent leur production. Le prix du pétrole quadruple.
+  effects: { emissions: -2, gdp: -3, employment: -2 }
+
+- id: canicule
+  when: { indicator: temperature, gt: 1.4 }
+  title: Canicule historique
+  text: Une vague de chaleur record fait des milliers de morts. Le public commence à s'inquiéter.
+  effects: { wellbeing: -4, awareness: 5 }
+
+- id: rapport_giec
+  eras: [1980]
+  title: Premier rapport du GIEC
+  text: Les scientifiques alertent officiellement sur le réchauffement d'origine humaine.
+  effects: { awareness: 4 }
