@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { CardView, PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { ROLE_STYLE } from './roles.ts';
@@ -56,6 +56,7 @@ export function App() {
     <main>
       {!connected && <div className="banner">Reconnexion…</div>}
       <Header view={view} />
+      <Timer view={view} />
       <PhaseBody view={view} />
     </main>
   );
@@ -118,7 +119,6 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
 }
 
 function Header({ view }: { view: PlayerView }) {
-  const seconds = useCountdown(view.phaseEndsAt);
   return (
     <header style={roleVars(view)}>
       <div>
@@ -130,11 +130,46 @@ function Header({ view }: { view: PlayerView }) {
       </div>
       <div className="right">
         <div className="year">{view.year}</div>
-        <div>
-          {view.me.score} pts{seconds !== null && ` · ${seconds}s`}
-        </div>
+        <div>{view.me.score} pts</div>
       </div>
     </header>
+  );
+}
+
+const PHASE_LABEL: Partial<Record<PlayerView['phase'], string>> = {
+  choices: 'Choisis tes cartes',
+  conflicts: 'Vote collectif',
+  feedback: 'Résultats',
+};
+
+/** Countdown bar, always visible; turns red and vibrates at 10 s if the player still has to play. */
+function Timer({ view }: { view: PlayerView }) {
+  const seconds = useCountdown(view.phaseEndsAt);
+  const label = PHASE_LABEL[view.phase];
+  const mustPlay =
+    (view.phase === 'choices' && view.hand.length > 0) ||
+    (view.phase === 'conflicts' && view.vote !== null && view.vote.myChoice === null);
+  const urgent = seconds !== null && seconds > 0 && seconds <= 10;
+
+  // Vibrate once per phase (no-op on iOS Safari, which has no Vibration API).
+  const vibratedFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (urgent && mustPlay && vibratedFor.current !== view.phaseEndsAt) {
+      vibratedFor.current = view.phaseEndsAt;
+      navigator.vibrate?.([200, 100, 200]);
+    }
+  }, [urgent, mustPlay, view.phaseEndsAt]);
+
+  if (!label) return null;
+  return (
+    <div className={`timer${urgent ? ' urgent' : ''}${urgent && mustPlay ? ' hurry' : ''}`}>
+      <span>{urgent && mustPlay ? 'Dépêche-toi !' : label}</span>
+      <strong>
+        {seconds === null
+          ? '⏸ Pause'
+          : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`}
+      </strong>
+    </div>
   );
 }
 
@@ -224,19 +259,37 @@ function Choices({ view }: { view: PlayerView }) {
 
 function Vote({ view }: { view: PlayerView }) {
   const vote = view.vote!;
+  // Option being sent; the highlighted choice always comes from the server (`myChoice`).
+  const [sending, setSending] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   return (
-    <section className="card">
+    <section className="card vote">
       <h2>🗳️ {vote.title}</h2>
       <p>{vote.text}</p>
       {vote.options.map((o) => (
         <button
           key={o.id}
           className={vote.myChoice === o.id ? 'selected' : ''}
-          onClick={() => sendVote(vote.id, o.id).catch(() => {})}
+          disabled={sending !== null}
+          aria-pressed={vote.myChoice === o.id}
+          onClick={() => {
+            setSending(o.id);
+            setError(null);
+            sendVote(vote.id, o.id)
+              .catch((err: Error) => setError(err.message))
+              .finally(() => setSending(null));
+          }}
         >
+          {vote.myChoice === o.id && '✓ '}
           {o.label}
         </button>
       ))}
+      {error && <p className="error">{error}</p>}
+      <p className="muted center-text">
+        {vote.myChoice
+          ? "Vote enregistré. Tu peux changer d'avis jusqu'à la fin."
+          : 'Touche une option pour voter.'}
+      </p>
     </section>
   );
 }
