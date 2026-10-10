@@ -339,43 +339,117 @@ header .objective {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, #14342a 0%, var(--bg) 65%);
   text-align: center;
-  animation: era-fade 2.2s ease-in-out forwards;
+  animation: era-out 2.8s ease-in forwards;
 }
 .era-intro strong {
+  position: relative;
   font-size: 6.5rem;
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-  animation: era-zoom 2.2s ease-out;
+  text-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+  animation: era-zoom 0.7s cubic-bezier(0.3, 1.5, 0.6, 1) backwards;
 }
 .era-intro p {
+  position: relative;
   font-size: 1.2rem;
   margin: 12px 0;
 }
-@keyframes era-fade {
+.era-count {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  animation: slide-down 0.5s ease-out 0.1s backwards;
+}
+.era-text {
+  animation: slide-up 0.5s ease-out 1.1s backwards;
+}
+/* Rings expanding behind the year */
+.era-rings i {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 240px;
+  height: 240px;
+  margin: -120px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: ring 2.2s ease-out infinite;
+}
+.era-rings i:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.era-rings i:nth-child(3) {
+  animation-delay: 1s;
+}
+/* Timeline of the 10 eras */
+.era-dots {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  margin-top: 28px;
+  animation: slide-up 0.5s ease-out 1.3s backwards;
+}
+.era-dots i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #334155;
+}
+.era-dots .past {
+  background: var(--muted);
+}
+.era-dots .now {
+  background: var(--accent);
+  animation: dot-now 0.8s ease-in-out 1.6s 2 backwards;
+}
+@keyframes era-out {
   0%,
-  85% {
+  86% {
     opacity: 1;
+    transform: scale(1);
   }
   100% {
     opacity: 0;
+    transform: scale(1.6);
   }
 }
 @keyframes era-zoom {
-  0% {
-    transform: scale(0.4);
+  from {
+    transform: scale(0.2) rotate(-8deg);
     opacity: 0;
   }
-  25% {
-    transform: scale(1.1);
-    opacity: 1;
+}
+@keyframes ring {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.7;
   }
-  40%,
   100% {
-    transform: scale(1);
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+@keyframes dot-now {
+  50% {
+    transform: scale(1.9);
+  }
+}
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-24px);
   }
 }
 
@@ -417,10 +491,245 @@ header .objective {
   font-weight: 700;
   color: var(--accent);
 }
+
+/* ---- Motion polish ---- */
+
+/* Every button reacts to the thumb */
+button {
+  transition:
+    transform 0.12s ease-out,
+    background-color 0.2s;
+}
+button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Join: floating planet */
+.join-logo {
+  animation: float 3.5s ease-in-out infinite;
+}
+.join h1,
+.join > p,
+.join form {
+  animation: slide-up 0.5s ease-out backwards;
+}
+.join > p {
+  animation-delay: 0.1s;
+}
+.join form {
+  animation-delay: 0.2s;
+}
+@keyframes float {
+  50% {
+    transform: translateY(-10px) rotate(8deg);
+  }
+}
+
+/* Role reveal: elements arrive one after the other */
+.reveal-body {
+  animation: none;
+}
+.reveal-body > *,
+.reveal > button {
+  animation: slide-up 0.5s ease-out backwards;
+}
+.reveal-body .reveal-icon {
+  animation: drop-in 0.8s cubic-bezier(0.3, 1.6, 0.6, 1) 0.3s backwards;
+}
+.reveal-body h1 {
+  animation-delay: 0.7s;
+}
+.reveal-body .reveal-label {
+  animation-delay: 1.1s;
+}
+.reveal-body .reveal-objective {
+  animation-delay: 1.25s;
+}
+.reveal > button {
+  animation-delay: 1.7s;
+}
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.3) rotate(-25deg);
+  }
+}
+
+/* Score bumps when it changes */
+.score {
+  animation: bump 0.5s ease-out;
+}
+@keyframes bump {
+  30% {
+    transform: scale(1.5);
+    color: var(--accent);
+  }
+}
+
+/* Countdown: draining bar */
+.timer {
+  overflow: hidden;
+}
+.timer > span,
+.timer > strong {
+  position: relative;
+  z-index: 1;
+}
+.timer-bar {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: rgba(34, 197, 94, 0.22);
+  animation: drain linear forwards;
+}
+.timer.urgent .timer-bar {
+  background: rgba(248, 113, 113, 0.25);
+}
+.timer.hurry .timer-bar {
+  background: rgba(0, 0, 0, 0.15);
+}
+.timer.hurry strong {
+  animation: tick 1s ease-in-out infinite;
+}
+@keyframes drain {
+  to {
+    transform: scaleX(0);
+  }
+}
+@keyframes tick {
+  10% {
+    transform: scale(1.25);
+  }
+  30% {
+    transform: scale(1);
+  }
+}
+
+/* Cards: dealt onto the table, options follow */
+.card {
+  animation: deal 0.45s cubic-bezier(0.2, 1.2, 0.5, 1) backwards;
+}
+.card > button {
+  animation: slide-up 0.35s ease-out backwards;
+}
+.card > button:nth-of-type(1) {
+  animation-delay: 0.25s;
+}
+.card > button:nth-of-type(2) {
+  animation-delay: 0.35s;
+}
+.card > button:nth-of-type(3) {
+  animation-delay: 0.45s;
+}
+.card > button:nth-of-type(n + 4) {
+  animation-delay: 0.55s;
+}
+.card-received {
+  animation:
+    deal 0.45s cubic-bezier(0.2, 1.2, 0.5, 1) backwards,
+    glow 1.8s ease-in-out 0.5s infinite;
+}
+.card-received .from {
+  animation: slide-down 0.4s ease-out 0.2s backwards;
+}
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translateY(60px) rotate(4deg) scale(0.92);
+  }
+}
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 22px rgba(34, 197, 94, 0.55);
+  }
+}
+
+/* Vote: the chosen option pops */
+.vote button.selected {
+  animation: select-pop 0.35s cubic-bezier(0.3, 1.8, 0.6, 1);
+}
+@keyframes select-pop {
+  from {
+    transform: scale(0.93);
+  }
+}
+
+/* Outcome: a ring bursts out of the check mark */
+.result-check {
+  position: relative;
+}
+.result-check::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  animation: ring 0.9s ease-out 0.2s backwards;
+  opacity: 0;
+}
+.result button {
+  animation: slide-up 0.4s ease-out 0.5s backwards;
+}
+
+/* Feedback: blocks arrive one after the other */
+.look {
+  animation: slide-down 0.5s ease-out backwards;
+}
+.look-icon {
+  animation: look 2.4s ease-in-out infinite;
+}
+.recap {
+  animation: slide-up 0.5s ease-out 0.3s backwards;
+}
+.recap + .recap {
+  animation-delay: 0.6s;
+}
+.recap li {
+  animation: slide-up 0.4s ease-out 0.6s backwards;
+}
+.recap li:nth-child(2) {
+  animation-delay: 0.75s;
+}
+.recap li:nth-child(n + 3) {
+  animation-delay: 0.9s;
+}
+.recap .winner {
+  animation: select-pop 0.5s cubic-bezier(0.3, 1.8, 0.6, 1) 1.1s backwards;
+}
+@keyframes look {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  20% {
+    transform: translateY(-12px) scale(1.15);
+  }
+  40% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Reconnection banner slides in */
+.banner {
+  animation: slide-down 0.3s ease-out;
+}
+
+/* Players who asked their phone for less motion get none of it */
 @media (prefers-reduced-motion: reduce) {
-  .era-intro,
-  .era-intro strong,
-  .look-icon {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* The hurry bar must stay readable while it blinks */
+.timer.hurry {
+  animation-name: blink;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.75;
   }
 }

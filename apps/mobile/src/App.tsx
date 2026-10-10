@@ -135,7 +135,10 @@ function Header({ view }: { view: PlayerView }) {
       </div>
       <div className="right">
         <div className="year">{view.year}</div>
-        <div>{view.me.score} pts</div>
+        {/* Re-mounted when the score changes so the bump animation replays. */}
+        <div key={view.me.score} className="score">
+          {view.me.score} pts
+        </div>
       </div>
     </header>
   );
@@ -175,6 +178,14 @@ function Timer({ view }: { view: PlayerView }) {
           ? '⏸ Pause'
           : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`}
       </strong>
+      {view.phaseEndsAt !== null && (
+        // Drains over the time left when it mounts (pure CSS, re-mounted for each phase).
+        <i
+          key={view.phaseEndsAt}
+          className="timer-bar"
+          style={{ animationDuration: `${Math.max(0, view.phaseEndsAt - Date.now())}ms` }}
+        />
+      )}
     </div>
   );
 }
@@ -300,24 +311,52 @@ function Vote({ view }: { view: PlayerView }) {
   );
 }
 
-/** Full-screen year shown for ~2 s when an era starts; a tap skips it. */
+const INTRO_MS = 2800;
+
+/** Full-screen year shown for ~3 s when an era starts; a tap skips it. */
 function EraIntro({ year, onDone }: { year: number; onDone: () => void }) {
   const done = useRef(onDone);
   done.current = onDone;
   useEffect(() => {
-    const id = setTimeout(() => done.current(), 2200);
+    const id = setTimeout(() => done.current(), INTRO_MS);
     return () => clearTimeout(id);
   }, []);
+
+  // The year rolls from the previous era up to the new one.
+  const [shown, setShown] = useState(year - 20);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return setShown(year);
+    const start = performance.now();
+    let frame = requestAnimationFrame(function tick(now) {
+      const t = Math.min(1, (now - start - 300) / 900);
+      if (t > 0) setShown(Math.round(year - 20 + 20 * (1 - (1 - t) ** 3)));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [year]);
+
   const index = ERAS.indexOf(year as (typeof ERAS)[number]);
   return (
     <div className="era-intro" onClick={onDone}>
+      <div className="era-rings">
+        <i />
+        <i />
+        <i />
+      </div>
       {index >= 0 && (
-        <p>
+        <p className="era-count">
           Époque {index + 1} sur {ERAS.length}
         </p>
       )}
-      <strong>{year}</strong>
-      <p>{index === 0 ? 'La partie commence !' : 'Une nouvelle époque commence'}</p>
+      <strong>{shown}</strong>
+      <p className="era-text">
+        {index === 0 ? 'La partie commence !' : 'Une nouvelle époque commence'}
+      </p>
+      <div className="era-dots">
+        {ERAS.map((y, i) => (
+          <i key={y} className={i < index ? 'past' : i === index ? 'now' : ''} />
+        ))}
+      </div>
     </div>
   );
 }
