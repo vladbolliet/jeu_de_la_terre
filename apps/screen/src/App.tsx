@@ -13,6 +13,8 @@ import { Feedback } from './Feedback.tsx';
 import { Ending } from './Ending.tsx';
 import { EraTimeline } from './EraTimeline.tsx';
 import { VoteReveal } from './VoteReveal.tsx';
+import { ClipPlayer } from './ClipPlayer.tsx';
+import { clipsForEra, type Clip } from './clips.ts';
 import { heat } from './stripes.ts';
 
 // The flat map stays as a fallback for machines without WebGL.
@@ -26,14 +28,24 @@ export function App() {
 
   // The vote count is played only when we see conflicts turn into feedback live,
   // not when the screen is (re)loaded in the middle of the feedback phase.
+  // Same for the era's clips, which play once the vote count is done. Clips that
+  // don't fit in the feedback phase wait for the next one (or the ending).
   const [reveal, setReveal] = useState<string | null>(null);
+  const [clips, setClips] = useState<Clip[]>([]);
+  // Feedback/ended screen whose clip session is over, so it doesn't restart.
+  const [clipsDoneFor, setClipsDoneFor] = useState<string | null>(null);
   const lastPhase = useRef(view?.phase);
   useLayoutEffect(() => {
     const before = lastPhase.current;
     lastPhase.current = view?.phase;
-    if (view?.phase !== 'feedback') setReveal(null);
-    else if (before === 'conflicts' && view.lastVoteResult && voteOptions.current.length)
+    if (view?.phase === 'lobby') setClips([]);
+    if (view?.phase !== 'feedback') {
+      setReveal(null);
+      return;
+    }
+    if (before === 'conflicts' && view.lastVoteResult && voteOptions.current.length)
       setReveal(view.lastVoteResult.voteId);
+    if (before && before !== 'feedback') setClips((queue) => [...queue, ...clipsForEra(view)]);
   }, [view?.phase]);
 
   useEffect(() => {
@@ -60,6 +72,7 @@ export function App() {
   // The whole screen warms up with the planet (see .layout in styles.css).
   const heatStyle = { '--heat': heat(view.world.climate.temperature) } as CSSProperties;
 
+  const clipSession = `${view.phase}-${view.world.year}`;
   if (view.phase === 'feedback' || view.phase === 'ended')
     return (
       <div className="layout full-layout" style={heatStyle}>
@@ -75,6 +88,17 @@ export function App() {
             result={view.lastVoteResult}
             options={voteOptions.current}
             onDone={() => setReveal(null)}
+          />
+        )}
+        {!reveal && clips.length > 0 && clipsDoneFor !== clipSession && (
+          <ClipPlayer
+            key={clipSession}
+            clips={clips}
+            endsAt={view.phase === 'feedback' ? view.phaseEndsAt : null}
+            onDone={(played) => {
+              setClips((queue) => queue.filter((c) => !played.includes(c.key)));
+              setClipsDoneFor(clipSession);
+            }}
           />
         )}
         {hostKey && <HostBar view={view} />}
