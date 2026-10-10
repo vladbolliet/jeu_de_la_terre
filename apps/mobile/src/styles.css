@@ -209,3 +209,76 @@ button.primary {
 header .objective {
   margin-top: 4px;
 }
+
+/* Cards */
+.card {
+  animation: card-in 0.25s ease-out;
+}
+.card p {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.card-received {
+  border: 3px solid var(--accent);
+  background: #14342a;
+}
+.card-received .from {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.center-text {
+  text-align: center;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* Outcome of a choice */
+.result {
+  text-align: center;
+  padding-top: 32px;
+}
+.result-check {
+  width: 72px;
+  height: 72px;
+  line-height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #052e16;
+  font-size: 2.4rem;
+  font-weight: 700;
+  animation: pop 0.4s cubic-bezier(0.3, 1.6, 0.6, 1);
+}
+.result-outcome {
+  font-size: 1.3rem;
+  line-height: 1.4;
+  animation: card-in 0.5s ease-out 0.15s backwards;
+}
+.waiting {
+  margin-top: 28px;
+  font-size: 1rem;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pop {
+  from {
+    transform: scale(0);
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .result-check,
+  .result-outcome,
+  .waiting {
+    animation: none;
+  }
+}

@@ -143,15 +143,7 @@ function PhaseBody({ view }: { view: PlayerView }) {
     case 'lobby':
       return <p className="center">En attente du lancement de la partie…</p>;
     case 'choices':
-      return view.hand.length ? (
-        <>
-          {view.hand.map((c) => (
-            <Card key={c.instanceId} card={c} />
-          ))}
-        </>
-      ) : (
-        <Outcomes view={view} waiting="Choix enregistré. Regarde l'écran !" />
-      );
+      return <Choices key={view.year} view={view} />;
     case 'conflicts':
       return view.vote ? <Vote view={view} /> : <p className="center">Pas de vote cette ère.</p>;
     case 'feedback':
@@ -161,28 +153,72 @@ function PhaseBody({ view }: { view: PlayerView }) {
   }
 }
 
-function Card({ card }: { card: CardView }) {
-  const [busy, setBusy] = useState(false);
+/** Choices phase: one card at a time, then the outcome of the choice, then waiting for the others. */
+function Choices({ view }: { view: PlayerView }) {
+  // Card being sent: kept on screen even if a state push removes it from the hand before the ack.
+  const [sending, setSending] = useState<CardView | null>(null);
+  // Cards already answered: state pushes are throttled, so the hand can lag behind the ack.
+  const [played, setPlayed] = useState<string[]>([]);
+  const [result, setResult] = useState<{ outcome: string | null } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const hand = view.hand.filter((c) => !played.includes(c.instanceId));
+
+  if (result)
+    return (
+      <section className="result">
+        <div className="result-check">✓</div>
+        <p className="result-outcome">{result.outcome ?? 'Choix enregistré.'}</p>
+        {hand.length ? (
+          <button className="primary" onClick={() => setResult(null)}>
+            {hand.length > 1 ? `Cartes suivantes (${hand.length})` : 'Carte suivante'}
+          </button>
+        ) : (
+          <p className="muted waiting">En attente des autres joueurs…</p>
+        )}
+      </section>
+    );
+
+  // Cards sent by another player come first.
+  const card = sending ?? hand.find((c) => c.fromPlayer) ?? hand[0];
+  if (!card) return <Outcomes view={view} waiting="En attente des autres joueurs…" />;
+
+  const others = hand.filter((c) => c.instanceId !== card.instanceId).length;
   return (
-    <section className="card">
-      {card.fromPlayer && <div className="from">De la part de {card.fromPlayer}</div>}
-      <h2>{card.title}</h2>
-      <p>{card.text}</p>
-      {card.options.map((o) => (
-        <button
-          key={o.id}
-          disabled={busy}
-          onClick={() => {
-            setBusy(true);
-            choose(card.instanceId, o.id)
-              .catch(() => {})
-              .finally(() => setBusy(false));
-          }}
-        >
-          {o.label}
-        </button>
-      ))}
-    </section>
+    <>
+      <section key={card.instanceId} className={card.fromPlayer ? 'card card-received' : 'card'}>
+        {card.fromPlayer && <div className="from">📨 {card.fromPlayer} t'envoie cette carte</div>}
+        <h2>{card.title}</h2>
+        <p>{card.text}</p>
+        {card.options.map((o) => (
+          <button
+            key={o.id}
+            disabled={sending !== null}
+            onClick={() => {
+              setSending(card);
+              setError(null);
+              choose(card.instanceId, o.id)
+                .then((res) => {
+                  setPlayed((ids) => [...ids, card.instanceId]);
+                  setResult(res);
+                })
+                .catch((err: Error) => setError(err.message))
+                .finally(() => setSending(null));
+            }}
+          >
+            {o.label}
+          </button>
+        ))}
+        {error && <p className="error">{error}</p>}
+      </section>
+      {others > 0 && (
+        <p className="muted center-text">
+          {others === 1
+            ? 'Encore 1 carte après celle-ci'
+            : `Encore ${others} cartes après celle-ci`}
+        </p>
+      )}
+    </>
   );
 }
 
