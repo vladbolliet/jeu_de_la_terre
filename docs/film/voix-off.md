@@ -8,9 +8,44 @@ Film final : `apps/screen/public/film/intro.mp4` (1920×1080, H.264 + AAC, sous-
 
 ## Pour ElevenLabs
 
-- **Un fichier audio par segment**, nommés `01.mp3` … `15.mp3`, à déposer dans `docs/film/audio/`. Les durées exactes de chaque fichier servent à caler les sous-titres et les plans au montage, sans alignement manuel.
-- Même voix, mêmes réglages pour tous les segments (voix grave et posée, style documentaire, stabilité élevée).
-- Coller le texte tel quel : les chiffres sont écrits pour être bien prononcés (« CO₂ » → écrire « C O 2 » dans ElevenLabs si la voix bute dessus, le sous-titre gardera « CO₂ »).
+- **Un seul fichier** : coller le bloc « Texte à coller » ci-dessous d'un coup, exporter en MP3 et le déposer dans `docs/film/audio/voix-off.mp3`.
+- Les `<break time="1.5s" />` mettent un silence entre les segments : au montage, le fichier est découpé sur ces silences. Ils marchent avec les modèles Multilingual v2 / Flash / Turbo. Avec Eleven v3 (qui ne les comprend pas), les remplacer par une ligne vide et « … ».
+- Voix grave et posée, style documentaire, stabilité élevée.
+- Si la voix bute sur « CO2 », écrire « C O 2 » dans ElevenLabs ; le sous-titre gardera « CO₂ ».
+
+### Texte à coller
+
+```
+1900. Le monde se met à brûler du charbon. Les usines tournent jour et nuit, les trains traversent les continents. On appelle ça le progrès.
+<break time="1.5s" />
+En 1908, la Ford T sort des usines. Le pétrole devient le sang de l'économie. Et dans l'air, sans bruit, le CO2 s'accumule.
+<break time="1.5s" />
+En 1938, un ingénieur britannique, Guy Callendar, fait le lien : en brûlant charbon et pétrole, l'humanité réchauffe la planète. Personne ne l'écoute.
+<break time="1.5s" />
+Après la guerre, tout s'accélère. Voitures, avions, plastique, consommation de masse. En quelques décennies, nous brûlons plus d'énergie que dans toute l'histoire humaine.
+<break time="1.5s" />
+En 1958, au sommet d'un volcan à Hawaï, un scientifique commence à mesurer le CO2 de l'air : 315 parties par million. Depuis, la courbe n'a jamais cessé de monter.
+<break time="1.5s" />
+En 1972, le rapport Meadows prévient : une croissance infinie est impossible dans un monde fini. Le monde lit le rapport… et continue.
+<break time="1.5s" />
+À la fin des années 1970, les scientifiques des compagnies pétrolières prévoient eux-mêmes le réchauffement, avec précision. Leurs dirigeants choisissent de semer le doute.
+<break time="1.5s" />
+1988. Les Nations unies créent le GIEC. Devant le Congrès américain, le climatologue James Hansen l'affirme : le réchauffement a commencé.
+<break time="1.5s" />
+Rio, 1992. Kyoto, 1997. Les sommets se succèdent, les promesses aussi. Les émissions, elles, continuent d'augmenter.
+<break time="1.5s" />
+Puis les premières factures arrivent. En 2003, une canicule tue plus de 70 000 personnes en Europe. En 2005, l'ouragan Katrina noie La Nouvelle-Orléans.
+<break time="1.5s" />
+En 2015, à Paris, 195 pays s'engagent à limiter le réchauffement bien en dessous de 2 degrés, et si possible à 1,5. Un espoir.
+<break time="1.5s" />
+Mais les flammes ne négocient pas. En Australie, les mégafeux de 2019 tuent ou déplacent près de trois milliards d'animaux. En 2022, un tiers du Pakistan se retrouve sous les eaux.
+<break time="1.5s" />
+2024 devient la première année où la planète dépasse 1,5 degré de réchauffement. La limite que nous nous étions fixée.
+<break time="1.5s" />
+Rien de tout cela n'était une fatalité. Chaque tonne de CO2 est le résultat d'une décision : construire, investir, voter, consommer, se taire… ou agir.
+<break time="1.5s" />
+Aujourd'hui, c'est à vous de décider. Élites, citoyens, politiques, militants : le monde de 2100 sera celui que vous aurez choisi.
+```
 
 ## Texte
 
