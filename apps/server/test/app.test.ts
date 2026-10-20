@@ -18,7 +18,7 @@ let url: string;
 const clients: Client[] = [];
 
 async function start(overrides: Partial<ServerConfig> = {}) {
-  const config = { ...loadConfig({}), stateFile: null, ...overrides };
+  const config = { ...loadConfig({}), stateFile: null, liveData: false, ...overrides };
   server = createGameServer(config, content);
   await new Promise<void>((r) => server.http.listen(0, r));
   url = `http://localhost:${(server.http.address() as AddressInfo).port}`;
@@ -119,6 +119,7 @@ describe('server', () => {
     const c = await client();
     const joined = await emit(c, 'player:join', { name: 'a' });
     await emit(c, 'host:command', { key: 'dev', action: 'start' });
+    await emit(c, 'host:command', { key: 'dev', action: 'next' }); // skip the intro
     await new Promise((r) => setTimeout(r, 2500)); // save interval
     c.disconnect();
     await server.close();

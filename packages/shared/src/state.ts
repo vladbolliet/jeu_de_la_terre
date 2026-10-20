@@ -43,7 +43,8 @@ export interface World {
   history: EraSnapshot[];
 }
 
-export type Phase = 'lobby' | 'choices' | 'conflicts' | 'feedback' | 'ended';
+/** `intro`: the film (1900 → today) then today's real figures, before the first era. */
+export type Phase = 'lobby' | 'intro' | 'choices' | 'conflicts' | 'feedback' | 'ended';
 
 export function indicatorValue(world: World, key: IndicatorKey): number {
   return key in world.climate

@@ -5,6 +5,7 @@ import { nextEraYear } from './stripes.ts';
 
 const PHASE_LABEL: Record<ScreenView['phase'], string> = {
   lobby: 'En attente des joueurs',
+  intro: 'Introduction',
   choices: 'Phase 1 · Microchoix',
   conflicts: 'Phase 2 · Conflits',
   feedback: 'Phase 3 · Bilan',

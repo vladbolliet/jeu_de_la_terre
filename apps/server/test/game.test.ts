@@ -2,10 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadContent } from '@jdlt/engine/load';
 import { createRng } from '@jdlt/engine';
 import { Game, type GameOptions } from '../src/game.ts';
+import { FALLBACK_TODAY } from '../src/today.ts';
 
 const { content } = loadContent();
 const opts = (o: Partial<GameOptions> = {}): GameOptions => ({
-  durations: { choices: 60, conflicts: 40, feedback: 20 },
+  durations: { intro: 180, choices: 60, conflicts: 40, feedback: 20 },
   rng: createRng(1),
   ...o,
 });
@@ -19,6 +20,7 @@ describe('Game', () => {
     const g = new Game(content, opts());
     const ids = Array.from({ length: 20 }, (_, i) => g.join(`p${i}`).id);
     g.start();
+    g.next(); // skip the intro
     const counts = g.screenView().roleCounts;
     expect(Object.values(counts).reduce((a, b) => a + b)).toBe(20);
     for (const id of ids) expect(g.playerView(id)!.hand).toHaveLength(1);
@@ -30,6 +32,9 @@ describe('Game', () => {
     const g = new Game(content, opts({ rng: createRng(2) }));
     const id = g.join('solo').id;
     g.start();
+    expect(g.phase).toBe('intro');
+    vi.advanceTimersByTime(180_000);
+    expect(g.phase).toBe('choices');
     for (let i = 0; i < 10; i++) {
       const card = g.playerView(id)!.hand[0];
       if (card) g.choose(id, card.instanceId, card.options[0]!.id);
@@ -44,6 +49,7 @@ describe('Game', () => {
     const g = new Game(content, opts());
     const id = g.join('a').id;
     g.start();
+    g.next(); // skip the intro
     const card = g.playerView(id)!.hand[0]!;
     g.choose(id, card.instanceId, card.options[0]!.id);
     expect(g.playerView(id)!.history).toHaveLength(1);
@@ -55,6 +61,7 @@ describe('Game', () => {
     const g = new Game(content, opts());
     const id = g.join('a').id;
     g.start();
+    g.next(); // skip the intro
     const card = g.playerView(id)!.hand[0]!;
     g.choose(id, card.instanceId, card.options[0]!.id);
     expect(() => g.choose(id, card.instanceId, card.options[0]!.id)).toThrow('Carte inconnue');
@@ -77,6 +84,7 @@ describe('reconnection', () => {
     const p = g.join('alice');
     g.join('bob');
     g.start();
+    g.next(); // skip the intro
     const before = g.playerView(p.id)!;
     g.disconnect(p.id);
     expect(g.screenView().connectedCount).toBe(1);
@@ -105,6 +113,7 @@ describe('reconnection', () => {
     const g = new Game(content, opts());
     g.join('a');
     g.start(); // 2026: the combustion-cars vote has no condition
+    g.next(); // skip the intro
     g.next();
     expect(g.phase).toBe('conflicts');
     const late = g.join('late');
@@ -112,6 +121,18 @@ describe('reconnection', () => {
     expect(vote).not.toBeNull();
     g.castVote(late.id, vote.id, vote.options[1]!.id);
     expect(g.playerView(late.id)!.vote!.myChoice).toBe(vote.options[1]!.id);
+  });
+
+  it("starts from today's figures, until the game is launched", () => {
+    const g = new Game(content, opts());
+    const today = { ...FALLBACK_TODAY, co2: { ...FALLBACK_TODAY.co2, value: 431, live: true } };
+    g.setToday(today);
+    expect(g.screenView().world.climate.co2).toBe(431);
+    expect(g.screenView().today.co2.live).toBe(true);
+    g.start();
+    g.setToday(FALLBACK_TODAY);
+    expect(g.screenView().world.climate.co2).toBe(431);
+    g.stop();
   });
 
   it('reset invalidates old tokens: joining with one creates a new player', () => {
@@ -130,6 +151,7 @@ describe('persistence', () => {
     const g = new Game(content, opts());
     const ids = Array.from({ length: 12 }, (_, i) => g.join(`p${i}`).id);
     g.start();
+    g.next(); // skip the intro
     // play a full first era, then half of the second
     for (const id of ids) {
       const c = g.playerView(id)!.hand[0];
@@ -158,6 +180,7 @@ describe('persistence', () => {
     const g = new Game(content, opts());
     g.join('a');
     g.start();
+    g.next(); // skip the intro
     g.pause();
     const r = Game.restore(JSON.parse(JSON.stringify(g.snapshot())), content, opts());
     expect(r.screenView().phaseEndsAt).toBeNull();
@@ -178,6 +201,7 @@ describe('content mechanics', () => {
     for (const g of [withEvent, without]) {
       g.join('a');
       g.start();
+      g.next(); // skip the intro
       g.next(); // conflicts
       g.next(); // feedback: era resolved
     }
@@ -237,6 +261,7 @@ describe('content mechanics', () => {
     const b = g.join('b');
     const [elite, pol] = g.playerView(a.id)!.me.role === 'elite' ? [a, b] : [b, a];
     g.start();
+    g.next(); // skip the intro
     const offer = g.playerView(elite.id)!.hand[0]!;
     g.choose(elite.id, offer.instanceId, 'bribe');
     const received = g.playerView(pol.id)!.hand.find((c) => c.cardId === 'answer')!;

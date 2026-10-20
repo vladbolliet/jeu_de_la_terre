@@ -17,11 +17,13 @@ import {
   type RoleEraStats,
   type ScreenView,
   type TippingPointId,
+  type TodayStats,
   type Vote,
   type VoteResult,
   type World,
 } from '@jdlt/shared';
 import { initialWorld, pick, resolveEra } from '@jdlt/engine';
+import { FALLBACK_TODAY } from './today.ts';
 
 interface DealtCard {
   instanceId: string;
@@ -44,7 +46,7 @@ interface Player {
   history: Required<ChoiceRecord>[];
 }
 
-type Durations = { choices: number; conflicts: number; feedback: number };
+type Durations = { intro: number; choices: number; conflicts: number; feedback: number };
 
 export interface GameOptions {
   durations: Durations;
@@ -76,6 +78,8 @@ export interface GameSnapshot {
   newTippingPoints: TippingPointId[];
   firedEvents: string[];
   eraEvents: string[];
+  /** Missing in snapshots saved before the intro existed. */
+  today?: TodayStats;
 }
 
 /** Minimum time left to a restored phase, so players have time to reconnect. */
@@ -87,7 +91,8 @@ export class Game {
   private players = new Map<string, Player>();
   private byToken = new Map<string, Player>();
   phase: Phase = 'lobby';
-  private world: World = initialWorld();
+  private today: TodayStats = FALLBACK_TODAY;
+  private world: World = this.freshWorld();
   private phaseEndsAt: number | null = null;
   private pausedRemainingMs: number | null = null;
   private timer: NodeJS.Timeout | null = null;
@@ -233,11 +238,29 @@ export class Game {
     return p;
   }
 
+  // ---------- today's figures ----------
+
+  /** New real figures. Before the game starts they also become the initial climate. */
+  setToday(today: TodayStats) {
+    this.today = today;
+    if (this.phase === 'lobby') this.world = this.freshWorld();
+    this.onChange();
+  }
+
+  private freshWorld(): World {
+    const t = this.today;
+    return initialWorld({
+      co2: t.co2.value,
+      temperature: t.temperature.value,
+      seaLevel: t.seaLevel.value,
+    });
+  }
+
   // ---------- phases ----------
 
   start() {
     if (this.phase !== 'lobby') throw new GameError('Partie déjà lancée');
-    this.enter('choices');
+    this.enter('intro');
   }
 
   /** Ends the current phase now (host skip or timer). */
@@ -245,6 +268,8 @@ export class Game {
     switch (this.phase) {
       case 'lobby':
         return this.start();
+      case 'intro':
+        return this.enter('choices');
       case 'choices':
         return this.enter('conflicts');
       case 'conflicts':
@@ -276,7 +301,7 @@ export class Game {
     this.clearTimer();
     this.players.clear();
     this.byToken.clear();
-    this.world = initialWorld();
+    this.world = this.freshWorld();
     this.phase = 'lobby';
     this.phaseEndsAt = null;
     this.pausedRemainingMs = null;
@@ -293,10 +318,7 @@ export class Game {
     if (phase === 'choices') this.beginEra();
     if (phase === 'conflicts') this.openVote();
     if (phase === 'feedback') this.endEra();
-    const seconds =
-      phase === 'choices' || phase === 'conflicts' || phase === 'feedback'
-        ? this.durations[phase]
-        : 0;
+    const seconds = phase === 'lobby' || phase === 'ended' ? 0 : this.durations[phase];
     // Skip the conflicts phase quickly when no vote is triggered this era.
     const ms = phase === 'conflicts' && !this.vote ? 3000 : seconds * 1000;
     if (ms > 0) this.schedule(ms);
@@ -462,6 +484,7 @@ export class Game {
       roleStats: this.roleStats(),
       events: this.eraEvents.map((e) => ({ id: e.id, title: e.title, text: e.text })),
       joinUrl: this.publicUrl,
+      today: this.today,
     };
   }
 
@@ -513,6 +536,7 @@ export class Game {
       newTippingPoints: this.newTippingPoints,
       firedEvents: [...this.firedEvents],
       eraEvents: this.eraEvents.map((e) => e.id),
+      today: this.today,
     };
   }
 
@@ -530,6 +554,7 @@ export class Game {
       g.byToken.set(p.token, p);
     }
     g.phase = snap.phase;
+    if (snap.today) g.today = snap.today;
     g.world = snap.world;
     g.decisions = snap.decisions;
     g.cardsDealt = snap.cardsDealt;

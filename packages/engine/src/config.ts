@@ -10,7 +10,9 @@ export const BASELINE_EMISSIONS = [41, 41, 40, 39, 37, 35, 32, 29, 26, 23];
 export const BASELINE_DEFORESTATION = [0.15, 0.15, 0.15, 0.15, 0.14, 0.14, 0.13, 0.12, 0.12, 0.12];
 
 /** Baseline GDP growth (per year). */
-export const BASELINE_GDP_GROWTH = [0.03, 0.03, 0.028, 0.026, 0.024, 0.022, 0.02, 0.018, 0.016, 0.015];
+export const BASELINE_GDP_GROWTH = [
+  0.03, 0.03, 0.028, 0.026, 0.024, 0.022, 0.02, 0.018, 0.016, 0.015,
+];
 
 /** How much the average player emissions effect (-10…+10) changes the persistent emissions factor per era (whatever its length). */
 export const EMISSIONS_SENSITIVITY = 0.07;

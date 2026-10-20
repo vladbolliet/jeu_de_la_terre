@@ -10,6 +10,7 @@ import type { Ack, ClientToServerEvents, Content, ServerToClientEvents } from '@
 import type { ServerConfig } from './config.ts';
 import { Game, GameError } from './game.ts';
 import { deleteSnapshot, loadSnapshot, saveSnapshot } from './persist.ts';
+import { fetchTodayStats } from './today.ts';
 
 interface SocketData {
   playerId?: string;
@@ -17,6 +18,8 @@ interface SocketData {
 
 /** How often the state file is rewritten when the game changed. */
 const SAVE_INTERVAL_MS = 2000;
+/** CO2 and temperature are published daily. */
+const TODAY_REFRESH_MS = 6 * 60 * 60 * 1000;
 
 export function createGameServer(config: ServerConfig, content: Content) {
   const app = express();
@@ -61,6 +64,18 @@ export function createGameServer(config: ServerConfig, content: Content) {
       console.error('state: save failed', e);
     }
   }, SAVE_INTERVAL_MS);
+
+  const refreshToday = () =>
+    fetchTodayStats().then((today) => {
+      game.setToday(today);
+      const live = Object.values(today).filter((m) => m.live).length;
+      console.log(
+        `today: CO2 ${today.co2.value} ppm, +${today.temperature.value.toFixed(2)} °C (${live} live)`,
+      );
+    });
+  // A restored game keeps the figures it started with.
+  if (config.liveData && !saved) void refreshToday();
+  const todayTimer = config.liveData ? setInterval(refreshToday, TODAY_REFRESH_MS) : undefined;
 
   /** Validates the payload, runs the handler, and turns errors into an ack. */
   function handle<S extends z.ZodType, R>(schema: S, fn: (p: z.infer<S>) => R) {
@@ -179,6 +194,7 @@ export function createGameServer(config: ServerConfig, content: Content) {
     async close() {
       clearInterval(broadcastTimer);
       clearInterval(saveTimer);
+      clearInterval(todayTimer);
       game.stop();
       await io.close();
     },

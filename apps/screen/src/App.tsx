@@ -8,6 +8,7 @@ import { EarthGlobe } from './EarthGlobe.tsx';
 import { webglAvailable } from './webgl.ts';
 import { Indicators } from './Indicators.tsx';
 import { Lobby } from './Lobby.tsx';
+import { Intro } from './Intro.tsx';
 import { ChoicesPanel, VotePanel } from './PhasePanels.tsx';
 import { Feedback } from './Feedback.tsx';
 import { Ending } from './Ending.tsx';
@@ -65,6 +66,14 @@ export function App() {
     return (
       <>
         <Lobby view={view} />
+        {hostKey && <HostBar view={view} />}
+      </>
+    );
+
+  if (view.phase === 'intro')
+    return (
+      <>
+        <Intro view={view} />
         {hostKey && <HostBar view={view} />}
       </>
     );

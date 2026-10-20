@@ -232,6 +232,14 @@ function PhaseBody({ view }: { view: PlayerView }) {
   switch (view.phase) {
     case 'lobby':
       return <Lobby view={view} />;
+    case 'intro':
+      return (
+        <Message
+          icon="🎬"
+          title="Regarde l'écran"
+          text="Un court film raconte comment on en est arrivé là. La partie commence juste après."
+        />
+      );
     case 'choices':
       return <Choices key={view.year} view={view} />;
     case 'conflicts':

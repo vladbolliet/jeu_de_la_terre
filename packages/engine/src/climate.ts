@@ -2,6 +2,7 @@
 import {
   ERAS,
   nextEraYear,
+  type Climate,
   type Effects,
   type EffectKey,
   type TippingPointId,
@@ -29,11 +30,18 @@ const AIRBORNE_FRACTION = 0.75;
 /** Share of the CO2 excess over pre-industrial absorbed back by natural sinks each year. */
 const CO2_SINK = 0.012;
 
-export function initialWorld(): World {
+/** Today's world (2026). `climate` overrides it with real measurements (see the server). */
+export function initialWorld(climate: Partial<Climate> = {}): World {
   return {
     year: ERAS[0],
-    // Today's world (2026). The server may replace the climate with live measurements.
-    climate: { co2: 428, temperature: 1.4, seaLevel: 23, biodiversity: 90, forest: 84 },
+    climate: {
+      co2: 427,
+      temperature: 1.45,
+      seaLevel: 23,
+      biodiversity: 90,
+      forest: 84,
+      ...climate,
+    },
     society: { gdp: 100, employment: 60, wellbeing: 55, approval: 50, awareness: 35 },
     emissionsFactor: 1,
     tippingPoints: [],
