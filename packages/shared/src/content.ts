@@ -6,9 +6,17 @@ export const ROLES = ['elite', 'citoyen', 'politique', 'militant'] as const;
 export const RoleSchema = z.enum(ROLES);
 export type Role = z.infer<typeof RoleSchema>;
 
-/** First year of each 20-year era. The game ends in 2100. */
-export const ERAS = [1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080] as const;
+/**
+ * First year of each era. The game starts today (the intro film covers 1900 → today)
+ * and ends in 2100. Eras are shorter early on so 2030 and 2050 are milestones.
+ */
+export const ERAS = [2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090] as const;
 export const END_YEAR = 2100;
+
+/** First year of the era after the one starting at `year` (END_YEAR for the last one). */
+export function nextEraYear(year: number): number {
+  return ERAS.find((y) => y > year) ?? END_YEAR;
+}
 const EraSchema = z.literal(ERAS);
 
 /**

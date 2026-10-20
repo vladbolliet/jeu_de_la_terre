@@ -31,8 +31,8 @@ function targets(world: World) {
     warm: Math.min(1, Math.max(0, temperature / 4)),
     forestLoss: Math.min(1, Math.max(0, (100 - forest) / 50)),
     bioLoss: Math.min(1, Math.max(0, (100 - biodiversity) / 60)),
-    // Big cities only in 1900, today's lights by ~2040.
-    urban: Math.min(1, Math.max(0, (world.year - 1900) / 140)),
+    // Today's city lights from the first era on.
+    urban: 1,
   };
 }
 

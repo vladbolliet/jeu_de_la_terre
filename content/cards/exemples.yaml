@@ -3,17 +3,17 @@
 # --- Élite industrielle ---
 - id: elite_usine_charbon
   roles: [elite]
-  eras: [1900, 1920, 1940, 1960]
-  title: Nouvelle usine
-  text: Tu peux ouvrir une usine au charbon, bon marché, ou investir dans une technologie plus propre mais coûteuse.
+  eras: [2026, 2030, 2035, 2040]
+  title: Nouvelle centrale
+  text: Tu peux construire une centrale au gaz, rentable tout de suite, ou un parc solaire avec batteries, plus cher au départ.
   options:
     - id: charbon
-      label: Usine au charbon
-      outcome: Production record. La fumée noircit la ville.
+      label: Centrale au gaz
+      outcome: Rentable dès la première année. Elle tournera encore dans 40 ans.
       effects: { emissions: 6, gdp: 4, employment: 3 }
       score: 5
     - id: propre
-      label: Technologie plus propre
+      label: Solaire et batteries
       outcome: Tes marges baissent, tes actionnaires grognent.
       effects: { emissions: -1, gdp: 1 }
       score: 1
@@ -36,7 +36,7 @@
 
 - id: elite_expansion
   roles: [elite]
-  eras: [1980, 2000, 2020, 2040, 2060, 2080]
+  eras: [2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090]
   title: Expansion internationale
   text: Tu peux délocaliser ta production là où les normes environnementales sont faibles.
   options:
@@ -81,7 +81,6 @@
 
 - id: citoyen_consommation
   roles: [citoyen]
-  eras: [1960, 1980, 2000, 2020, 2040, 2060, 2080]
   title: Pouvoir d'achat
   text: Ta prime vient de tomber.
   options:

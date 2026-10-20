@@ -1,6 +1,6 @@
 # Jeu de la Terre
 
-Real-time multiplayer classroom game (~100 phones + 1 projected screen), 1900→2100 in 10 eras of ~2 min.
+Real-time multiplayer classroom game (~100 phones + 1 projected screen), an intro film (1900 → today), then 2026→2100 in 10 eras of ~2 min.
 pnpm monorepo, TypeScript everywhere. See docs/ARCHITECTURE.md for the why.
 
 ## Layout

@@ -14,7 +14,7 @@ export interface Climate {
 }
 
 export interface Society {
-  /** 100 = 1900 level */
+  /** 100 = level at the start of the game (2026) */
   gdp: number;
   /** 0–100 */
   employment: number;

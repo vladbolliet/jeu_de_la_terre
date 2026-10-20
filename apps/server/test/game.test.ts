@@ -104,7 +104,7 @@ describe('reconnection', () => {
     vi.useFakeTimers();
     const g = new Game(content, opts());
     g.join('a');
-    g.start(); // 1900: the work-conditions vote has no condition
+    g.start(); // 2026: the combustion-cars vote has no condition
     g.next();
     expect(g.phase).toBe('conflicts');
     const late = g.join('late');

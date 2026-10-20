@@ -29,7 +29,7 @@ téléphones (mobile) ──intentions──▶ server (Game) ──état──�
 2. `conflicts` (40 s) : premier vote de `content/votes` dont l'ère et la condition `when` correspondent ; votes pondérés par rôle. Sautée en 3 s s'il n'y a pas de vote.
 3. `feedback` (20 s) : `resolveEra()` calcule le nouveau monde (moyenne des effets de tous les joueurs + vote), les points de bascule, et l'écran affiche le bilan.
 
-10 ères : 1900 → 2080, fin en 2100. L'hôte peut lancer, sauter, mettre en pause, réinitialiser.
+10 ères : 2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090, fin en 2100. Les ères n'ont pas toutes la même durée (4 à 10 ans) : le moteur raisonne en taux annuels. Le passé (1900 → aujourd'hui) est raconté par le film d'introduction (`docs/film/`). L'hôte peut lancer, sauter, mettre en pause, réinitialiser.
 
 ## Modèle (packages/engine)
 

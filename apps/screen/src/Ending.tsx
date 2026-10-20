@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CircleCheck } from 'lucide-react';
 import type { Climate, ScreenView, World } from '@jdlt/shared';
 import { TIPPING } from './tipping.ts';
-import { temperatureColor } from './stripes.ts';
+import { END_YEAR, ERAS, temperatureColor } from './stripes.ts';
 import { EndingScene } from './EndingScene.tsx';
 import { Leaderboard } from './Leaderboard.tsx';
 import { ENDINGS, endingTier } from './endingTier.ts';
@@ -108,7 +108,7 @@ function Stripes({ world }: { world: World }) {
   const temps = [...world.history.map((h) => h.climate.temperature), world.climate.temperature];
   return (
     <div className="ending-stripes">
-      <span>1900</span>
+      <span>{X0}</span>
       <div className="stripes-band">
         {temps.map((t, i) => (
           <i
@@ -126,8 +126,8 @@ function Stripes({ world }: { world: World }) {
 const W = 540;
 const H = 300;
 const PAD = { left: 20, right: 170, top: 64, bottom: 50 };
-const X0 = 1900;
-const X1 = 2100;
+const X0 = ERAS[0]!;
+const X1 = END_YEAR;
 
 function LineChart({ curve, world }: { curve: Curve; world: World }) {
   // history holds the start of each played era; the current world closes the series (2100).
@@ -148,7 +148,7 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
 
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${curve.title} de 1900 à 2100`}>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${curve.title} de ${X0} à ${X1}`}>
         {isTemp && (
           // The temperature line takes the warming-stripes colour of each era.
           <defs>
@@ -174,7 +174,7 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
           {curve.title}
         </text>
         <line className="baseline" x1={x(X0)} x2={x(X1)} y1={H - PAD.bottom} y2={H - PAD.bottom} />
-        {[1900, 2000, 2100].map((year) => (
+        {[X0, 2050, X1].map((year) => (
           <text key={year} className="tick" x={x(year)} y={H - 8}>
             {year}
           </text>
@@ -183,7 +183,7 @@ function LineChart({ curve, world }: { curve: Curve; world: World }) {
           <g key={r.value}>
             <line className="ref" x1={x(X0)} x2={x(X1)} y1={y(r.value)} y2={y(r.value)} />
             {/* Lowest reference labelled under its line, the others above; right of the title. */}
-            <text className="ref-label" x={x(2035)} y={i === 0 ? y(r.value) + 24 : y(r.value) - 8}>
+            <text className="ref-label" x={x(X0 + 0.675 * (X1 - X0))} y={i === 0 ? y(r.value) + 24 : y(r.value) - 8}>
               {r.label}
             </text>
           </g>

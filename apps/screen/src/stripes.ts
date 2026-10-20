@@ -17,8 +17,13 @@ export const STRIPE_COLORS = [
 ];
 
 /** First year of each era, mirrors ERAS in packages/shared/src/content.ts (zod-free import). */
-export const ERAS = [1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080];
+export const ERAS = [2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090];
 export const END_YEAR = 2100;
+
+/** Mirrors nextEraYear in packages/shared/src/content.ts. */
+export function nextEraYear(year: number): number {
+  return ERAS.find((y) => y > year) ?? END_YEAR;
+}
 
 /**
  * Temperature anomaly (°C) mapped to the stripes palette like the real warming

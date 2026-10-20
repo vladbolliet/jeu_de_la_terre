@@ -1,4 +1,4 @@
-import { Flame, Landmark, Mountain, PawPrint, TriangleAlert, Tornado, Waves, type LucideIcon } from 'lucide-react';
+import { Flame, PawPrint, TriangleAlert, Tornado, Waves, type LucideIcon } from 'lucide-react';
 import type { Climate, ScreenView } from '@jdlt/shared';
 import { TIPPING } from './tipping.ts';
 
@@ -7,7 +7,7 @@ export interface Clip {
   key: string;
   /** Path under public/ (sources: public/videos/CREDITS.md). */
   video: string;
-  kind: 'tipping' | 'extinct' | 'disaster' | 'history';
+  kind: 'tipping' | 'extinct' | 'disaster';
   kicker: string;
   kickerIcon: LucideIcon;
   title: string;
@@ -62,13 +62,13 @@ const DISASTERS: {
 const EXTINCTIONS: { key: string; below: number; title: string; text: string }[] = [
   {
     key: 'orangutan',
-    below: 90,
+    below: 85,
     title: 'Orang-outan',
     text: 'Sa forêt a été rasée pour l’huile de palme et le bois. Dans votre monde, il a disparu.',
   },
   {
     key: 'polar_bear',
-    below: 75,
+    below: 72,
     title: 'Ours polaire',
     text: 'Sans banquise, il ne peut plus chasser le phoque. Dans votre monde, il a disparu.',
   },
@@ -77,27 +77,6 @@ const EXTINCTIONS: { key: string; below: number; title: string; text: string }[]
     below: 60,
     title: 'Manchot empereur',
     text: 'La glace où il élève ses petits fond trop tôt. Dans votre monde, il a disparu.',
-  },
-];
-
-/** Real events shown in the feedback that ends at `year`, whatever the players did. */
-const HISTORY: (Omit<Clip, 'video' | 'kind' | 'kickerIcon'> & { year: number })[] = [
-  {
-    key: 'thylacine',
-    year: 1940,
-    kicker: 'Fait réel · 1936',
-    title: 'Tigre de Tasmanie',
-    icon: PawPrint,
-    text: 'Chassé jusqu’au dernier : le dernier tigre de Tasmanie meurt au zoo de Hobart en 1936.',
-    stamp: 'Espèce éteinte',
-  },
-  {
-    key: 'volcano',
-    year: 2000,
-    kicker: 'Fait réel · 1991',
-    title: 'Éruption du Pinatubo',
-    icon: Mountain,
-    text: 'Ses cendres voilent le soleil : la Terre se refroidit d’environ 0,5 °C pendant deux ans, puis le réchauffement reprend.',
   },
 ];
 
@@ -145,11 +124,5 @@ export function clipsForEra(view: ScreenView): Clip[] {
     icon: d.icon,
     text: d.text,
   }));
-  const history: Clip[] = HISTORY.filter((h) => h.year === view.world.year).map((h) => ({
-    ...h,
-    video: video(h.key),
-    kind: 'history',
-    kickerIcon: Landmark,
-  }));
-  return [...tipping, ...extinct, ...disasters, ...history];
+  return [...tipping, ...extinct, ...disasters];
 }

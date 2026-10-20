@@ -93,7 +93,7 @@ function JoinScreen({ connected }: { connected: boolean }) {
       </div>
       <div className="join-logo">🌍</div>
       <h1>Jeu de la Terre</h1>
-      <p className="muted">1900 → 2100 : à toi de jouer.</p>
+      <p className="muted">2026 → 2100 : à toi de jouer.</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -437,19 +437,20 @@ function EraIntro({ year, onDone }: { year: number; onDone: () => void }) {
   }, []);
 
   // The year rolls from the previous era up to the new one.
-  const [shown, setShown] = useState(year - 20);
+  const index = ERAS.indexOf(year as (typeof ERAS)[number]);
+  const from = ERAS[index - 1] ?? year;
+  const [shown, setShown] = useState(from);
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return setShown(year);
     const start = performance.now();
     let frame = requestAnimationFrame(function tick(now) {
       const t = Math.min(1, (now - start - 300) / 900);
-      if (t > 0) setShown(Math.round(year - 20 + 20 * (1 - (1 - t) ** 3)));
+      if (t > 0) setShown(Math.round(from + (year - from) * (1 - (1 - t) ** 3)));
       if (t < 1) frame = requestAnimationFrame(tick);
     });
     return () => cancelAnimationFrame(frame);
-  }, [year]);
+  }, [year, from]);
 
-  const index = ERAS.indexOf(year as (typeof ERAS)[number]);
   return (
     <div className="era-intro" onClick={onDone}>
       <div className="era-rings">

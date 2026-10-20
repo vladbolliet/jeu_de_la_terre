@@ -1,6 +1,6 @@
-# Jeu de la Terre (1900–2100)
+# Jeu de la Terre (2026–2100)
 
-Simulation web multijoueur pour un amphi de ~100 joueurs : chacun joue un rôle (élite industrielle, citoyen·ne, politique, militant·e) sur son téléphone, et ses microchoix font évoluer le climat de 1900 à 2100 sur l'écran projeté.
+Simulation web multijoueur pour un amphi de ~100 joueurs : chacun joue un rôle (élite industrielle, citoyen·ne, politique, militant·e) sur son téléphone, et ses microchoix font évoluer le climat d'aujourd'hui à 2100 sur l'écran projeté. Un film d'introduction raconte d'abord comment on en est arrivé là depuis 1900.
 
 **Le squelette fonctionne déjà de bout en bout** (inscription, rôles, cartes, votes, climat jusqu'en 2100, 100 bots). Chacun améliore maintenant sa partie.
 

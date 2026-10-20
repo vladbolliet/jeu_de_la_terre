@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pause } from 'lucide-react';
 import type { ScreenView } from '@jdlt/shared';
+import { nextEraYear } from './stripes.ts';
 
 const PHASE_LABEL: Record<ScreenView['phase'], string> = {
   lobby: 'En attente des joueurs',
@@ -66,7 +67,7 @@ export function PhaseHeader({ view }: { view: ScreenView }) {
         <div key={view.year} className="year">
           {view.year}
         </div>
-        {view.phase !== 'ended' && <div className="year-range">→ {view.year + 20}</div>}
+        {view.phase !== 'ended' && <div className="year-range">→ {nextEraYear(view.year)}</div>}
       </div>
       {step === -1 ? (
         <div className="phase">{PHASE_LABEL[view.phase]}</div>

@@ -23,7 +23,7 @@ export function Lobby({ view }: { view: ScreenView }) {
           Jeu de la <em>Terre</em>
         </h1>
         <p className="lobby-lede reveal" style={{ animationDelay: '0.4s' }}>
-          De 1900 à 2100, vos choix écrivent le climat.
+          De 2026 à 2100, vos choix écrivent le climat.
         </p>
 
         <div className="lobby-count reveal" style={{ animationDelay: '0.55s' }}>
