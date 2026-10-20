@@ -44,7 +44,7 @@ Mais les flammes ne négocient pas. En Australie, les mégafeux de 2019 tuent ou
 <break time="1.5s" />
 Rien de tout cela n'était une fatalité. Chaque tonne de CO2 est le résultat d'une décision : construire, investir, voter, consommer, se taire… ou agir.
 <break time="1.5s" />
-Aujourd'hui, c'est à vous de décider. Élites, citoyens, politiques, militants : le monde de 2100 sera celui que vous aurez choisi.
+Aujourd'hui, c'est à vous de décider. Chacun d'entre vous a un rôle à jouer : le monde de 2100 sera celui que vous aurez choisi.
 ```
 
 ## Texte
@@ -65,7 +65,7 @@ Aujourd'hui, c'est à vous de décider. Élites, citoyens, politiques, militants
 | 12  | Mais les flammes ne négocient pas. En Australie, les mégafeux de 2019 tuent ou déplacent près de trois milliards d'animaux. En 2022, un tiers du Pakistan se retrouve sous les eaux. | Feux australiens, Pakistan inondé vu du satellite                   |
 | 13  | 2024 devient la première année où la planète dépasse 1,5 degré de réchauffement. La limite que nous nous étions fixée.                                                               | Carte des anomalies de température (NASA)                           |
 | 14  | Rien de tout cela n'était une fatalité. Chaque tonne de CO₂ est le résultat d'une décision : construire, investir, voter, consommer, se taire… ou agir.                              | Foules, villes, marches pour le climat                              |
-| 15  | Aujourd'hui, c'est à vous de décider. Élites, citoyens, politiques, militants : le monde de 2100 sera celui que vous aurez choisi.                                                   | Terre vue de l'espace → fondu vers l'écran « La Terre aujourd'hui » |
+| 15  | Aujourd'hui, c'est à vous de décider. Chacun d'entre vous a un rôle à jouer : le monde de 2100 sera celui que vous aurez choisi.                                                     | Terre vue de l'espace → fondu vers l'écran « La Terre aujourd'hui » |
 
 ## Sources des faits cités
 
