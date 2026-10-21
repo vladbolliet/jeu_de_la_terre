@@ -57,6 +57,14 @@ Aujourd'hui, c'est à vous de décider. Chacun d'entre vous a un rôle à jouer.
 4. Musique éventuelle sous la voix, ~20 dB plus bas. Quelques secondes de fin sur la Terre vue de l'espace.
 5. Exporter en `apps/screen/public/film/intro.mp4`, puis mettre `INTRO_S` à la durée du film + ~30 s.
 
+### Montage automatique (version actuelle du film)
+
+Le film actuel est généré par `docs/film/montage/build.sh` à partir de `docs/film/audio/voix-off.mp3` et de la colonne « Sous-titre » ci-dessous : la voix est transcrite mot à mot (Whisper), chaque plan et chaque sous-titre démarre sur le mot prononcé. Photos d'archives en lent zoom (Ken Burns), courbes animées à partir des vraies données (CO₂ de Mauna Loa, émissions mondiales), bandes de réchauffement qui avancent avec les années en bas de l'image, fondu final vers la couleur de fond de l'écran « La Terre aujourd'hui ».
+
+- Le découpage (quelle image sur quel mot) est la liste `shots` de `render.py` ; les années et légendes en haut à gauche, la liste `badges`.
+- Les images viennent de Wikimedia Commons (`media.txt`), crédits et licences dans `apps/screen/public/film/CREDITS.md`.
+- Nouvelle voix ou sous-titre corrigé : remplacer le MP3 et/ou le tableau ci-dessous, relancer `build.sh` (~10 min). Si une phrase change, vérifier les ancres `at(paragraphe, 'mots')` de `render.py`.
+
 ## Plans et sous-titres
 
 Le sous-titre dit exactement la même chose que la voix, écrit pour l'œil (chiffres, CO₂).

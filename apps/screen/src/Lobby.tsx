@@ -6,7 +6,7 @@ import type { GeometryCollection, Topology } from 'topojson-specification';
 import type { ScreenView } from '@jdlt/shared';
 import land110m from 'world-atlas/land-110m.json';
 import { ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
-import { STRIPE_COLORS } from './stripes.ts';
+import { END_YEAR, ERAS, temperatureColor } from './stripes.ts';
 
 export function Lobby({ view }: { view: ScreenView }) {
   const joinUrl = view.joinUrl ?? location.origin;
@@ -69,7 +69,7 @@ export function Lobby({ view }: { view: ScreenView }) {
         <p className="join-hint">Scannez, puis entrez votre prénom</p>
       </aside>
 
-      <WarmingStripes />
+      <WarmingStripes warming={view.today.temperature.value} />
     </div>
   );
 }
@@ -226,41 +226,32 @@ function Globe() {
 
 // ---------- warming stripes ----------
 
-const PAST_STRIPES = 25; // 1900 → 2025, one stripe per 5 years
-const FUTURE_STRIPES = 15; // 2025 → 2100: not written yet
-
-/** Deterministic warming trend with a little year-to-year noise. */
-function stripeColor(i: number) {
-  const trend = (i / (PAST_STRIPES - 1)) ** 1.6;
-  const s = Math.sin(i * 12.9898) * 43758.5453;
-  const noise = s - Math.floor(s) - 0.5;
-  const x = Math.min(1, Math.max(0, 0.08 + trend * 0.85 + noise * 0.22));
-  return STRIPE_COLORS[Math.round(x * (STRIPE_COLORS.length - 1))];
-}
-
-function WarmingStripes() {
+/**
+ * The game's span, one stripe per era (width = its years): the first one coloured by
+ * today's real warming, the others still to be written.
+ */
+function WarmingStripes({ warming }: { warming: number }) {
+  const bounds = [...ERAS, END_YEAR];
   return (
     <div className="stripes" aria-hidden>
       <div className="stripes-band">
-        {Array.from({ length: PAST_STRIPES }, (_, i) => (
+        {ERAS.map((year, i) => (
           <span
-            key={i}
-            className="stripe"
-            style={{ background: stripeColor(i), animationDelay: `${0.9 + i * 0.04}s` }}
-          />
-        ))}
-        {Array.from({ length: FUTURE_STRIPES }, (_, i) => (
-          <span
-            key={`f${i}`}
-            className="stripe future"
-            style={{ animationDelay: `${1.9 + i * 0.04}s` }}
+            key={year}
+            className={i === 0 ? 'stripe' : 'stripe future'}
+            style={{
+              flexGrow: bounds[i + 1]! - year,
+              background: i === 0 ? temperatureColor(warming) : undefined,
+              animationDelay: `${0.9 + i * 0.08}s`,
+            }}
           />
         ))}
       </div>
       <div className="stripes-labels">
-        <span>1900</span>
-        <span className="now">Aujourd'hui</span>
-        <span className="future-label">2100 ?</span>
+        <span className="now">
+          Aujourd'hui · +{warming.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} °C
+        </span>
+        <span className="future-label">{END_YEAR} ?</span>
       </div>
     </div>
   );

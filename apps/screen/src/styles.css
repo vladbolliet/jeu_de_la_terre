@@ -359,8 +359,11 @@ body {
   border-radius: 14px;
   overflow: hidden;
 }
+.stripes .stripes-band {
+  gap: 4px;
+}
 .stripe {
-  flex: 1;
+  flex: 1 1 0;
   animation: stripe-in 0.6s ease-out both;
   transform-origin: bottom;
 }
@@ -387,9 +390,7 @@ body {
   color: var(--muted);
 }
 .stripes-labels .now {
-  position: absolute;
-  left: 62.5%;
-  transform: translateX(-50%);
+  color: var(--sand);
 }
 .stripes-labels .future-label {
   font-family: var(--font-display);
