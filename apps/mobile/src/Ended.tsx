@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Factory, Flag, Scale, Sprout } from 'lucide-react';
 import type { PlayerView } from '@jdlt/shared';
 import { describeEffects, emissionsBalance } from './effects.ts';
 
@@ -19,9 +20,9 @@ function useCountUp(target: number, ms = 1400): number {
 }
 
 const VERDICT = {
-  1: { icon: '🏭', tone: 'bad', text: 'Tes choix ont plutôt augmenté les émissions.' },
-  0: { icon: '⚖️', tone: 'neutral', text: "Tes choix n'ont presque pas changé les émissions." },
-  [-1]: { icon: '🌱', tone: 'good', text: 'Tes choix ont plutôt réduit les émissions.' },
+  1: { icon: Factory, tone: 'bad', text: 'Tes choix ont plutôt augmenté les émissions.' },
+  0: { icon: Scale, tone: 'neutral', text: "Tes choix n'ont presque pas changé les émissions." },
+  [-1]: { icon: Sprout, tone: 'good', text: 'Tes choix ont plutôt réduit les émissions.' },
 } as const;
 
 /** End of the game: final score, then the impact of every choice (effects are only sent now). */
@@ -29,10 +30,13 @@ export function Ended({ view }: { view: PlayerView }) {
   const score = useCountUp(view.me.score);
   const { trend, polluting, clean } = emissionsBalance(view.history);
   const verdict = VERDICT[trend];
+  const VerdictIcon = verdict.icon;
   return (
     <div className="ended">
       <section className="final">
-        <div className="final-flag">🏁</div>
+        <div className="final-flag">
+          <Flag aria-hidden />
+        </div>
         <p className="final-label">Fin de la partie · score final</p>
         <p className="final-score">
           {score} <small>pts</small>
@@ -48,7 +52,9 @@ export function Ended({ view }: { view: PlayerView }) {
       ) : (
         <>
           <section className={`panel verdict ${verdict.tone}`}>
-            <div className="verdict-icon">{verdict.icon}</div>
+            <div className="verdict-icon">
+              <VerdictIcon aria-hidden />
+            </div>
             <p className="verdict-text">{verdict.text}</p>
             {polluting + clean > 0 && (
               <>
@@ -58,9 +64,13 @@ export function Ended({ view }: { view: PlayerView }) {
                 </div>
                 <p className="muted balance-legend">
                   <span>
-                    🏭 {polluting === 1 ? '1 choix polluant' : `${polluting} choix polluants`}
+                    <Factory aria-hidden />
+                    {polluting === 1 ? '1 choix polluant' : `${polluting} choix polluants`}
                   </span>
-                  <span>🌱 {clean === 1 ? '1 choix propre' : `${clean} choix propres`}</span>
+                  <span>
+                    <Sprout aria-hidden />
+                    {clean === 1 ? '1 choix propre' : `${clean} choix propres`}
+                  </span>
                 </p>
               </>
             )}
@@ -78,9 +88,10 @@ export function Ended({ view }: { view: PlayerView }) {
                     <strong>{h.optionLabel}</strong>
                     {lines.length ? (
                       <ul className="chips">
-                        {lines.map((l) => (
-                          <li key={l.text} className={l.tone}>
-                            <span>{l.icon}</span> {l.text}
+                        {lines.map(({ icon: Icon, text, tone }) => (
+                          <li key={text} className={tone}>
+                            <Icon aria-hidden />
+                            {text}
                           </li>
                         ))}
                       </ul>

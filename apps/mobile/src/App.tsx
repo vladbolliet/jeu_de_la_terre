@@ -1,4 +1,17 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  Check,
+  Clapperboard,
+  Earth,
+  Hourglass,
+  Layers,
+  Pause,
+  Projector,
+  Send,
+  Vote as BallotIcon,
+  WifiOff,
+  type LucideIcon,
+} from 'lucide-react';
 import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { Ended } from './Ended.tsx';
@@ -8,6 +21,20 @@ import { useWakeLock } from './useWakeLock.ts';
 
 function roleVars(view: PlayerView): CSSProperties {
   return { '--role': ROLE_STYLE[view.me.role].color } as CSSProperties;
+}
+
+function RoleIcon({ view }: { view: PlayerView }) {
+  const Icon = ROLE_STYLE[view.me.role].icon;
+  return <Icon aria-hidden />;
+}
+
+function Reconnecting({ fixed }: { fixed?: boolean }) {
+  return (
+    <div className={fixed ? 'banner banner-fixed' : 'banner'} role="status">
+      <WifiOff aria-hidden />
+      Reconnexion…
+    </div>
+  );
 }
 
 /** Era being played or recapped: the server has already moved `year` forward when feedback starts. */
@@ -55,7 +82,7 @@ export function App() {
   if (roleSeen !== view.me.id)
     return (
       <>
-        {!connected && <div className="banner banner-fixed">Reconnexion…</div>}
+        {!connected && <Reconnecting fixed />}
         <RoleReveal
           view={view}
           onDone={() => {
@@ -91,7 +118,9 @@ function JoinScreen({ connected }: { connected: boolean }) {
       <div className="backdrop" aria-hidden="true">
         <i className="planet" />
       </div>
-      <div className="join-logo">🌍</div>
+      <div className="join-logo">
+        <Earth aria-hidden />
+      </div>
       <h1>Jeu de la Terre</h1>
       <p className="muted">2026 → 2100 : à toi de jouer.</p>
       <form
@@ -134,7 +163,9 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
         <div className="reveal-medal">
           <i />
           <i />
-          <span className="reveal-icon">{ROLE_STYLE[view.me.role].icon}</span>
+          <span className="reveal-icon">
+            <RoleIcon view={view} />
+          </span>
         </div>
         <h1>{view.me.roleName}</h1>
         <section className="reveal-card">
@@ -175,9 +206,11 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
 
   return (
     <div className="topbar">
-      {!connected && <div className="banner">Reconnexion…</div>}
+      {!connected && <Reconnecting />}
       <header>
-        <div className="avatar">{ROLE_STYLE[view.me.role].icon}</div>
+        <div className="avatar">
+          <RoleIcon view={view} />
+        </div>
         <div className="who">
           <strong>{view.me.roleName}</strong>
           <span>
@@ -205,11 +238,13 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
               )}
             </svg>
             <strong className={seconds !== null && seconds >= 100 ? 'small' : ''}>
-              {seconds === null
-                ? '⏸'
-                : seconds >= 100
-                  ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
-                  : seconds}
+              {seconds === null ? (
+                <Pause aria-label="En pause" />
+              ) : seconds >= 100 ? (
+                `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+              ) : (
+                seconds
+              )}
             </strong>
           </div>
         )}
@@ -235,7 +270,7 @@ function PhaseBody({ view }: { view: PlayerView }) {
     case 'intro':
       return (
         <Message
-          icon="🎬"
+          icon={Clapperboard}
           title="Regarde l'écran"
           text="Un court film raconte comment on en est arrivé là. La partie commence juste après."
         />
@@ -246,7 +281,11 @@ function PhaseBody({ view }: { view: PlayerView }) {
       return view.vote ? (
         <Vote view={view} />
       ) : (
-        <Message icon="🗳️" title="Pas de vote cette époque" text="Regarde l'écran principal." />
+        <Message
+          icon={BallotIcon}
+          title="Pas de vote cette époque"
+          text="Regarde l'écran principal."
+        />
       );
     case 'feedback':
       return <Feedback view={view} />;
@@ -256,10 +295,12 @@ function PhaseBody({ view }: { view: PlayerView }) {
 }
 
 /** Centered full-height message, used when there is nothing to play. */
-function Message({ icon, title, text }: { icon: string; title: string; text: string }) {
+function Message({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
   return (
     <section className="message">
-      <div className="message-icon">{icon}</div>
+      <div className="message-icon">
+        <Icon aria-hidden />
+      </div>
       <h2>{title}</h2>
       <p>{text}</p>
     </section>
@@ -272,7 +313,9 @@ function Lobby({ view }: { view: PlayerView }) {
       <div className="lobby-badge">
         <i />
         <i />
-        <span>{ROLE_STYLE[view.me.role].icon}</span>
+        <span>
+          <RoleIcon view={view} />
+        </span>
       </div>
       <h2>Tu es dans la partie, {view.me.name} !</h2>
       <p>Elle va bientôt commencer.</p>
@@ -300,7 +343,9 @@ function Choices({ view }: { view: PlayerView }) {
   if (result)
     return (
       <section className="message result">
-        <div className="result-check">✓</div>
+        <div className="result-check">
+          <Check aria-hidden strokeWidth={3} />
+        </div>
         <p className="result-outcome">{result.outcome ?? 'Choix enregistré.'}</p>
         {hand.length ? (
           <button className="primary" onClick={() => setResult(null)}>
@@ -319,14 +364,16 @@ function Choices({ view }: { view: PlayerView }) {
     if (!view.outcomes.length && !view.history.some((h) => h.year === view.year))
       return (
         <Message
-          icon="🃏"
+          icon={Layers}
           title="Pas de carte pour toi cette époque"
           text="Regarde l'écran principal en attendant la suite."
         />
       );
     return (
       <section className="message">
-        <div className="message-icon">⏳</div>
+        <div className="message-icon">
+          <Hourglass aria-hidden />
+        </div>
         <h2>Tes choix sont faits</h2>
         {view.outcomes.map((o, i) => (
           <p key={i} className="outcome">
@@ -343,16 +390,21 @@ function Choices({ view }: { view: PlayerView }) {
     <div className="play" key={card.instanceId}>
       <section className={card.fromPlayer ? 'card card-received' : 'card'}>
         <div className="card-band">
-          {card.fromPlayer
-            ? `📨 ${card.fromPlayer} t'envoie cette carte`
-            : `Ta carte · ${view.year}`}
+          {card.fromPlayer ? (
+            <>
+              <Send aria-hidden />
+              {card.fromPlayer} t'envoie cette carte
+            </>
+          ) : (
+            `Ta carte · ${view.year}`
+          )}
         </div>
         <div className="card-body">
           <h2>{card.title}</h2>
           <p>{card.text}</p>
         </div>
-        <span className="card-mark" aria-hidden="true">
-          {ROLE_STYLE[view.me.role].icon}
+        <span className="card-mark">
+          <RoleIcon view={view} />
         </span>
       </section>
       <div className="actions">
@@ -398,7 +450,9 @@ function Vote({ view }: { view: PlayerView }) {
       <section className="card vote">
         <div className="card-band">Tout le monde décide</div>
         <div className="card-body">
-          <div className="vote-icon">🗳️</div>
+          <div className="vote-icon">
+            <BallotIcon aria-hidden />
+          </div>
           <h2>{vote.title}</h2>
           <p>{vote.text}</p>
         </div>
@@ -424,8 +478,8 @@ function Vote({ view }: { view: PlayerView }) {
                 .finally(() => setSending(null));
             }}
           >
-            {vote.myChoice === o.id && '✓ '}
-            {o.label}
+            {vote.myChoice === o.id && <Check aria-hidden strokeWidth={3} />}
+            <span>{o.label}</span>
           </button>
         ))}
       </div>
@@ -493,7 +547,9 @@ function Feedback({ view }: { view: PlayerView }) {
   return (
     <div className="feedback">
       <section className="look">
-        <div className="look-icon">👀</div>
+        <div className="look-icon">
+          <Projector aria-hidden />
+        </div>
         Regarde l'écran principal
       </section>
       <section className="panel">
@@ -518,7 +574,10 @@ function Feedback({ view }: { view: PlayerView }) {
       </section>
       {result && (
         <section className="panel">
-          <h2>🗳️ {result.title}</h2>
+          <h2>
+            <BallotIcon aria-hidden />
+            {result.title}
+          </h2>
           <p className="muted">Décision collective</p>
           <p className="winner">{result.winner.label}</p>
           <p className="muted">
