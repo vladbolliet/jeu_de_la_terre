@@ -374,11 +374,14 @@ shots = [
                                      'parties par million (ppm), mesures mensuelles NOAA', ACCENT,
                                      ticks_x=(1960, 1980, 2000, 2020), ticks_y=(320, 360, 400), draw_s=0.85)),
     (P[5], Card(title='Les limites à la croissance', sub='Rapport Meadows · Club de Rome · 1972')),
+    (at(5, 'Une croissance'), Still('06b.jpg', (1.1, 1.22), (0.45, 0.4))),  # Chalmette smokestack 1972
     (at(5, 'Le monde lit'), Still('06a.jpg', (1.03, 1.15), (0.5, 0.55))),  # DC traffic 1970s
     (P[6], Still('07a.jpg', (1.0, 1.12), (0.5, 0.5))),  # refinery at night
+    (at(6, 'prévoient'), Still('07c.jpg', (1.2, 1.08), (0.5, 0.5))),  # Exxon refinery, Linden, 1970s
     (at(6, 'Leurs dirigeants'), Still('07b.jpg', (1.12, 1.0), (0.52, 0.4))),  # flare stack
     (P[7], Card(logo='08a.png')),
     (at(7, 'Aux États-Unis'), Still('08b.jpg', (1.0, 1.12), (0.45, 0.55), (0.4, 0.5))),  # Capitol 1988
+    (at(7, 'Le réchauffement'), Still('08c.jpg', (1.0, 1.14), (0.5, 0.5))),  # cracked earth
     (P[8], Still('09b.jpeg', (1.0, 1.12), (0.45, 0.4))),  # Kohl at Rio-92
     (at(8, 'Kyoto,'), Still('09a.jpeg', (1.1, 1.0), (0.45, 0.4))),  # Bush at Rio-92
     (at(8, 'Les sommets'), Chart(emis, (1900, 2025), (0, 40), 'Émissions mondiales de CO₂',
@@ -386,18 +389,24 @@ shots = [
                                  marks=((1992, 'Rio'), (1997, 'Kyoto')), ticks_x=(1900, 1950, 2000),
                                  ticks_y=(0, 10, 20, 30, 40), draw_s=0.8)),
     (P[9], Still('10a.jpg', (1.3, 1.42), (0.7, 0.58), (0.66, 0.62))),  # 2003 heatwave map
+    (at(9, 'une canicule'), Still('10d.jpg', (1.02, 1.14), (0.5, 0.6), (0.6, 0.6))),  # dry Rhine bed, 2003
     (at(9, 'En 2005,'), Still('10b.jpg', (1.0, 1.16), (0.48, 0.42))),  # Katrina from space
     (at(9, 'noie'), Still('10c.jpg', (1.0, 1.1), (0.5, 0.5))),  # New Orleans flooded
     (P[10], Still('11b.jpg', (1.02, 1.12), (0.5, 0.35))),  # Hollande, Fabius, Ban applaud
+    (at(10, "s'engagent"), Still('11c.jpg', (1.14, 1.02), (0.5, 0.45))),  # COP21 plenary
     (at(10, 'et si possible'), Still('11a.jpg', (1.12, 1.02), (0.5, 0.45))),  # gavel
     (P[11], Clip(os.path.join(VIDEOS, 'wildfire.mp4'), 0, 0.75)),
-    (at(11, 'tuent ou'), Still('12c.jpg', (1.0, 1.14), (0.35, 0.45))),  # smoke over SE Australia
+    (at(11, 'les mégafeux'), Still('12d.jpg', (1.02, 1.16), (0.5, 0.55))),  # Kangaroo Island, flames
+    (at(11, 'près de'), Still('12e.jpg', (1.14, 1.02), (0.5, 0.55))),  # Mallacoota, burnt bikes
     (at(11, 'En 2022,'), Still('12b.jpg', (1.0, 1.1), (0.5, 0.55), (0.72, 0.55))),  # Sindh 2021 → 2022
+    (at(11, 'se retrouve'), Still('12f.jpg', (1.02, 1.14), (0.5, 0.5))),  # Sindh village still flooded
     (P[12], Still('13a.png', (1.14, 1.22), (0.52, 0.42))),  # GISTEMP 2024 map
     (at(12, 'dépasse'), StripesCard(1880, 2024, big='+1,5 °C', draw_s=0.45)),
-    (P[13], Still('14a.jpg', (1.02, 1.14), (0.5, 0.55))),  # Paris climate march
-    (at(13, 'Chaque tonne'), Still('14b.jpg', (1.12, 1.02), (0.5, 0.45))),
-    (at(13, 'Construire,'), Still('14e.jpg', (1.0, 1.1), (0.5, 0.55))),
+    (P[13], Still('14g.jpg', (1.02, 1.14), (0.5, 0.55))),  # Paiporta after the 2024 flood
+    (at(13, 'Chaque tonne'), Still('14h.jpg', (1.0, 1.12), (0.5, 0.5))),  # Canada fire smoke on New York
+    (at(13, 'Construire,'), Still('14a.jpg', (1.02, 1.14), (0.5, 0.55))),  # Paris climate march
+    (at(13, 'voter,'), Still('14b.jpg', (1.12, 1.02), (0.5, 0.45))),
+    (at(13, 'se taire,'), Still('14e.jpg', (1.0, 1.1), (0.5, 0.55))),
     (P[14], Still('15b.jpg', (1.55, 1.0), (0.5, 0.5))),  # Blue Marble, pulling back
 ]
 badges = [
@@ -406,13 +415,15 @@ badges = [
     (P[3], '1945', None), (P[4], '1958', 'Observatoire de Mauna Loa, Hawaï'),
     (at(4, 'un scientifique'), None, None), (P[5], None, None), (at(5, 'Le monde lit'), '1972', None),
     (P[6], 'Fin des années 70', None), (P[7], '1988', None),
-    (at(7, 'Aux États-Unis'), '1988', 'James Hansen devant le Sénat'),
+    (at(7, 'Aux États-Unis'), '1988', 'James Hansen devant le Sénat'), (at(7, 'Le réchauffement'), None, None),
     (P[8], '1992', 'Sommet de la Terre, Rio'), (at(8, 'Kyoto,'), '1997', 'Protocole de Kyoto'),
     (at(8, 'Les sommets'), None, None),
     (P[9], '2003', 'Canicule en Europe'), (at(9, 'En 2005,'), '2005', 'Ouragan Katrina'),
     (P[10], '2015', 'COP21, Paris'), (P[11], '2019', 'Australie'), (at(11, 'En 2022,'), '2022', 'Pakistan'),
     (P[12], '2024', 'Anomalie de température, NASA'), (at(12, 'dépasse'), None, None),
-    (P[13], None, None), (P[14], None, None),
+    (P[13], '2024', 'Inondations à Valence, Espagne'),
+    (at(13, 'Chaque tonne'), '2023', 'Fumée des feux du Canada sur New York'), (at(13, 'Construire,'), None, None),
+    (P[14], None, None),
 ]
 YEAR_AT = [(0, 1900), (P[1], 1908), (P[2], 1938), (P[3], 1945), (P[4], 1958), (P[5], 1972), (P[6], 1979),
            (P[7], 1988), (P[8], 1992), (P[9], 2003), (P[10], 2015), (P[11], 2019), (P[12], 2024),

@@ -8,45 +8,46 @@ Film final : `apps/screen/public/film/intro.mp4` (1920×1080, H.264 + AAC, sous-
 
 ## 1. Générer la voix (ElevenLabs)
 
-- Coller **tout** le bloc « Texte à lire » d'un coup. Aucune balise, aucun silence forcé : les paragraphes sont séparés par une ligne vide, ce qui donne une respiration naturelle.
-- Modèle **Eleven Multilingual v2** (le plus régulier en français pour de la narration). Voix grave et posée, style documentaire. Réglages de départ : stabilité 50 %, similarité 75 %, style 0, vitesse 1,0.
-- Le texte est écrit pour l'oreille : nombres et années en toutes lettres, pas de « CO2 » (dit « dioxyde de carbone »), pas de deux-points ni de points de suspension, phrases courtes. Ne pas le « corriger » vers les chiffres : c'est ce qui faisait buter la voix.
-- Réécouter en entier. Si un paragraphe est mal lu, le régénérer seul (même voix, mêmes réglages) et le remplacer au montage ; le reste ne bouge pas.
+- Coller **tout** le bloc « Texte à lire » d'un coup. Les paragraphes sont séparés par une ligne vide, ce qui donne une respiration naturelle.
+- Modèle **Eleven v3** (ou v4) : ce sont les seuls qui jouent les balises entre crochets. Multilingual v2 les ignore. Réglage de stabilité **Natural** (Creative si les balises sont ignorées, jamais Robust). Voix grave, style documentaire, avec assez d'amplitude pour jouer les émotions.
+- Les balises (`[serious]`, `[somber]`, `[pause]`…) s'écrivent en anglais, même dans un texte français : ce sont des consignes de jeu, pas des mots à lire. Une par paragraphe au maximum, sinon la voix surjoue. Pas de `<break>` : v3 l'ignore, utiliser `[pause]` ou des points de suspension.
+- Le texte est écrit pour l'oreille : nombres et années en toutes lettres, pas de « CO2 » (dit « dioxyde de carbone »), phrases courtes. Les points de suspension marquent une pause appuyée ; n'en mettre que là où il y en a déjà.
+- Réécouter en entier, et vérifier qu'aucune balise n'est lue à voix haute. Si un paragraphe est mal lu, le régénérer seul (même voix, mêmes réglages) et le remplacer au montage ; le reste ne bouge pas.
 - Mots à surveiller à l'écoute : « Callendar », « Meadows », « Giec », « Kyoto ». Si l'un est mal prononcé, l'écrire comme il se prononce (ex. « Jiek ») uniquement dans le texte collé.
 - Exporter en MP3 → `docs/film/audio/voix-off.mp3`.
 
 ### Texte à lire
 
 ```
-En mille neuf cent, le monde se met à brûler du charbon. Les usines tournent jour et nuit, les trains traversent les continents. On appelle ça le progrès.
+[calm, measured] En mille neuf cent, le monde se met à brûler du charbon. Les usines tournent jour et nuit, les trains traversent les continents. On appelle ça... le progrès.
 
-En mille neuf cent huit, Ford lance une voiture que tout le monde peut acheter. Le pétrole devient le sang de l'économie. Et dans l'air, sans bruit, le dioxyde de carbone s'accumule.
+En mille neuf cent huit, Ford lance une voiture que tout le monde peut acheter. Le pétrole devient le sang de l'économie. [quietly] Et dans l'air, sans bruit, le dioxyde de carbone s'accumule.
 
-En mille neuf cent trente-huit, un ingénieur anglais, Guy Callendar, fait le lien. En brûlant du charbon et du pétrole, l'humanité réchauffe la planète. Personne ne l'écoute.
+En mille neuf cent trente-huit, un ingénieur anglais, Guy Callendar, fait le lien. En brûlant du charbon et du pétrole, l'humanité réchauffe la planète. [pause] Personne ne l'écoute.
 
-Après la guerre, tout s'accélère. Les voitures, les avions, le plastique, la consommation de masse. En quelques décennies, nous brûlons plus d'énergie que dans toute l'histoire humaine.
+[building momentum] Après la guerre, tout s'accélère. Les voitures, les avions, le plastique, la consommation de masse. En quelques décennies, nous brûlons plus d'énergie que dans toute l'histoire humaine.
 
 En mille neuf cent cinquante-huit, au sommet d'un volcan à Hawaï, un scientifique commence à mesurer le dioxyde de carbone dans l'air. Depuis ce jour, la courbe n'a jamais cessé de monter.
 
-En mille neuf cent soixante-douze, le rapport Meadows lance un avertissement. Une croissance infinie est impossible dans un monde fini. Le monde lit le rapport, et continue comme avant.
+En mille neuf cent soixante-douze, le rapport Meadows lance un avertissement. Une croissance infinie est impossible dans un monde fini. Le monde lit le rapport... [sighs] et continue comme avant.
 
-À la fin des années soixante-dix, les chercheurs des compagnies pétrolières prévoient eux-mêmes le réchauffement, avec précision. Leurs dirigeants choisissent de semer le doute.
+À la fin des années soixante-dix, les chercheurs des compagnies pétrolières prévoient eux-mêmes le réchauffement, avec précision. [cold, deliberate] Leurs dirigeants choisissent de semer le doute.
 
-En mille neuf cent quatre-vingt-huit, les Nations unies créent un groupe d'experts sur le climat, le Giec. Aux États-Unis, devant le Congrès, le climatologue James Hansen l'affirme. Le réchauffement a commencé.
+[serious] En mille neuf cent quatre-vingt-huit, les Nations unies créent un groupe d'experts sur le climat, le Giec. Aux États-Unis, devant le Congrès, le climatologue James Hansen l'affirme. Le réchauffement a commencé.
 
-Rio, en mille neuf cent quatre-vingt-douze. Kyoto, en mille neuf cent quatre-vingt-dix-sept. Les sommets se succèdent, les promesses aussi. Mais les émissions continuent d'augmenter.
+Rio, en mille neuf cent quatre-vingt-douze. Kyoto, en mille neuf cent quatre-vingt-dix-sept. Les sommets se succèdent, les promesses aussi. [disillusioned] Mais les émissions continuent d'augmenter.
 
-Puis les premières factures arrivent. En deux mille trois, une canicule tue plus de soixante-dix mille personnes en Europe. En deux mille cinq, l'ouragan Katrina noie la Nouvelle-Orléans.
+[somber] Puis les premières factures arrivent. En deux mille trois, une canicule tue plus de soixante-dix mille personnes en Europe. En deux mille cinq, l'ouragan Katrina noie la Nouvelle-Orléans.
 
-En deux mille quinze, à Paris, cent quatre-vingt-quinze pays s'engagent à limiter le réchauffement bien en dessous de deux degrés, et si possible à un degré et demi. C'est un espoir.
+En deux mille quinze, à Paris, cent quatre-vingt-quinze pays s'engagent à limiter le réchauffement bien en dessous de deux degrés, et si possible à un degré et demi. [hopeful] C'est un espoir.
 
-Mais les flammes ne négocient pas. En deux mille dix-neuf, les mégafeux d'Australie tuent ou déplacent près de trois milliards d'animaux. En deux mille vingt-deux, un tiers du Pakistan se retrouve sous les eaux.
+[grave] Mais les flammes ne négocient pas. En deux mille dix-neuf, les mégafeux d'Australie tuent ou déplacent près de trois milliards d'animaux. En deux mille vingt-deux, un tiers du Pakistan se retrouve sous les eaux.
 
-En deux mille vingt-quatre, pour la première fois, la planète dépasse un degré et demi de réchauffement sur une année entière. C'est la limite que nous nous étions fixée.
+[slowly] En deux mille vingt-quatre, pour la première fois, la planète dépasse un degré et demi de réchauffement sur une année entière. [pause] C'est la limite que nous nous étions fixée.
 
-Rien de tout cela n'était une fatalité. Chaque tonne de carbone vient d'une décision. Construire, investir, voter, consommer, se taire, ou agir.
+[firm] Rien de tout cela n'était une fatalité. Chaque tonne de carbone vient d'une décision. Construire, investir, voter, consommer... se taire, ou agir.
 
-Aujourd'hui, c'est à vous de décider. Chacun d'entre vous a un rôle à jouer. Le monde de deux mille cent sera celui que vous aurez choisi.
+[warm, direct] Aujourd'hui, c'est à vous de décider. Chacun d'entre vous a un rôle à jouer. Le monde de deux mille cent sera celui que vous aurez choisi.
 ```
 
 ## 2. Monter la vidéo sur la voix
