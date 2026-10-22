@@ -1,8 +1,25 @@
+import {
+  Axe,
+  DoorOpen,
+  EyeOff,
+  Factory,
+  Frown,
+  HardHat,
+  Megaphone,
+  Smile,
+  ThumbsDown,
+  ThumbsUp,
+  TreeDeciduous,
+  TrendingDown,
+  TrendingUp,
+  Wind,
+  type LucideIcon,
+} from 'lucide-react';
 import type { ChoiceRecord, EffectKey, Effects } from '@jdlt/shared';
 
 /** One effect of a choice, put into words: players never see the numbers. */
 export interface EffectLine {
-  icon: string;
+  icon: LucideIcon;
   text: string;
   /** Whether this is good or bad news for the planet / society. */
   tone: 'good' | 'bad';
@@ -10,38 +27,42 @@ export interface EffectLine {
 
 interface Wording {
   /** Shown when the effect is positive / negative: [icon, text]. */
-  more: [string, string];
-  less: [string, string];
+  more: [LucideIcon, string];
+  less: [LucideIcon, string];
   /** true when a positive value is bad news (pollution drivers). */
   moreIsBad: boolean;
 }
 
 const WORDING: Record<EffectKey, Wording> = {
-  emissions: { more: ['🏭', 'plus de CO₂'], less: ['🌬️', 'moins de CO₂'], moreIsBad: true },
+  emissions: { more: [Factory, 'plus de CO₂'], less: [Wind, 'moins de CO₂'], moreIsBad: true },
   deforestation: {
-    more: ['🪓', 'plus de forêts détruites'],
-    less: ['🌳', 'moins de forêts détruites'],
+    more: [Axe, 'plus de forêts détruites'],
+    less: [TreeDeciduous, 'moins de forêts détruites'],
     moreIsBad: true,
   },
   gdp: {
-    more: ['📈', 'plus de croissance'],
-    less: ['📉', 'moins de croissance'],
+    more: [TrendingUp, 'plus de croissance'],
+    less: [TrendingDown, 'moins de croissance'],
     moreIsBad: false,
   },
-  employment: { more: ['👷', "plus d'emplois"], less: ['🚪', "moins d'emplois"], moreIsBad: false },
+  employment: {
+    more: [HardHat, "plus d'emplois"],
+    less: [DoorOpen, "moins d'emplois"],
+    moreIsBad: false,
+  },
   wellbeing: {
-    more: ['😊', 'plus de bien-être'],
-    less: ['😟', 'moins de bien-être'],
+    more: [Smile, 'plus de bien-être'],
+    less: [Frown, 'moins de bien-être'],
     moreIsBad: false,
   },
   approval: {
-    more: ['👍', 'plus de confiance envers les politiques'],
-    less: ['👎', 'moins de confiance envers les politiques'],
+    more: [ThumbsUp, 'plus de confiance envers les politiques'],
+    less: [ThumbsDown, 'moins de confiance envers les politiques'],
     moreIsBad: false,
   },
   awareness: {
-    more: ['📢', 'un public plus sensibilisé'],
-    less: ['🙈', 'un public moins sensibilisé'],
+    more: [Megaphone, 'un public plus sensibilisé'],
+    less: [EyeOff, 'un public moins sensibilisé'],
     moreIsBad: false,
   },
 };
@@ -54,7 +75,7 @@ function intensity(value: number): string {
   return '';
 }
 
-/** Translates the effects of a choice into pictos and words, strongest first. */
+/** Translates the effects of a choice into icons and words, strongest first. */
 export function describeEffects(effects: Effects): EffectLine[] {
   return (Object.keys(WORDING) as EffectKey[])
     .map((key) => ({ key, value: effects[key] ?? 0 }))

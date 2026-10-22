@@ -17,7 +17,7 @@ Les fichiers `exemples.yaml` de chaque dossier sont des exemples à remplacer.
 ```yaml
 - id: citoyen_transport          # unique, snake_case, ne plus le changer une fois utilisé
   roles: [citoyen]               # qui peut la recevoir : elite, citoyen, politique, militant
-  eras: [1960, 1980, 2000]       # optionnel : ères où elle peut sortir (défaut : toutes)
+  eras: [2026, 2030, 2035]       # optionnel : ères où elle peut sortir (défaut : toutes)
   title: Aller au travail
   text: Ton travail est loin…
   options:                       # 2 à 4 options
@@ -32,7 +32,7 @@ Les fichiers `exemples.yaml` de chaque dossier sont des exemples à remplacer.
       score: 1
 ```
 
-Ères possibles : 1900, 1920, 1940, 1960, 1980, 2000, 2020, 2040, 2060, 2080.
+Ères possibles : 2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090 (la partie finit en 2100). Le jeu commence aujourd'hui : le passé depuis 1900 est raconté par le film d'introduction, pas par les cartes.
 
 ## Les effets (`effects`)
 
@@ -84,7 +84,7 @@ Sur une carte reçue via `sends`, une option peut renvoyer un message au joueur 
 
 ```yaml
 - id: loi_taxe_carbone
-  eras: [2000, 2020]
+  eras: [2040, 2045]
   when: { indicator: awareness, gt: 30 }   # optionnel ; indicateurs : co2, temperature, seaLevel,
                                            # biodiversity, forest, gdp, employment, wellbeing, approval, awareness
   title: Taxe carbone
@@ -107,7 +107,7 @@ Fichiers `content/events/*.yaml`. Un événement (crise, catastrophe, découvert
 ```yaml
 - id: canicule
   when: { indicator: temperature, gt: 1.4 }   # optionnel ; mêmes indicateurs que pour les votes
-  eras: [2000, 2020, 2040]                    # optionnel
+  eras: [2050, 2060, 2070]                    # optionnel
   title: Canicule historique
   text: Une vague de chaleur record…
   effects: { wellbeing: -4, awareness: 5 }

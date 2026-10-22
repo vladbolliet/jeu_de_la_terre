@@ -1,20 +1,26 @@
 :root {
-  --bg: #0b1220;
-  --fg: #f1f5f9;
-  --muted: #a3b1c6;
-  --card: #1e293b;
-  --line: rgba(255, 255, 255, 0.1);
-  --accent: #22c55e;
-  --danger: #f87171;
+  /* Same « Terre » palette and fonts as the projected screen. */
+  --bg: #06121b;
+  --panel: #0e2230;
+  --panel-2: #132c3d;
+  --fg: #f3ebdd;
+  --ink: #06121b;
+  --muted: #93a9b5;
+  --line: rgb(243 235 221 / 0.1);
+  --accent: #5fd08a;
+  --danger: #f0533a;
+  --font-display: 'Unbounded Variable', system-ui, sans-serif;
+  --font-body: 'Onest Variable', system-ui, -apple-system, sans-serif;
+  /* Side gutter, grows a little on large phones. */
+  --gutter: clamp(14px, 4.5vw, 22px);
   /* Overridden with the player's role colour once they have joined. */
   --role: var(--accent);
   color-scheme: dark;
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-body);
 }
 html {
+  /* Fluid type: every rem scales from small (320 px) to large phones, capped on tablets. */
+  font-size: clamp(14px, 3.4vw + 3px, 18px);
   /* No double-tap zoom, no font boosting when the phone is rotated */
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
@@ -40,11 +46,13 @@ input {
 }
 main {
   position: relative;
-  max-width: 480px;
+  max-width: 560px;
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: 16px;
+  padding: 16px var(--gutter);
+  padding-left: calc(var(--gutter) + env(safe-area-inset-left));
+  padding-right: calc(var(--gutter) + env(safe-area-inset-right));
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -53,6 +61,17 @@ h1,
 h2,
 p {
   margin: 0;
+}
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* Lucide icons follow the text colour; containers set their size. */
+svg.lucide {
+  flex: none;
+  display: block;
 }
 .muted {
   color: var(--muted);
@@ -73,12 +92,17 @@ input {
   font: inherit;
   font-size: 1.1rem;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 0;
 }
 button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   font-weight: 700;
-  background: #334155;
+  line-height: 1.25;
+  background: var(--panel-2);
   color: var(--fg);
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
   transition:
@@ -95,7 +119,11 @@ button:disabled {
 }
 button.primary {
   background: var(--accent);
-  color: #052e16;
+  color: var(--ink);
+}
+button svg.lucide {
+  width: 1.3em;
+  height: 1.3em;
 }
 
 /* ---- Backdrop: role-coloured sky, the Earth at the bottom, the year as a watermark ---- */
@@ -114,24 +142,53 @@ button.primary {
   opacity: 0.22;
 }
 .planet {
+  /* Real Earth (day map + clouds, Solar System Scope, CC BY 4.0), rising at the bottom of the
+     screen. The map strip slides under a fixed sphere shading: only a transform is animated. */
+  --d: min(150vw, 760px);
   position: absolute;
   left: 50%;
-  bottom: calc(-1 * min(120vw, 576px));
-  width: min(150vw, 720px);
-  height: min(150vw, 720px);
-  margin-left: calc(-1 * min(75vw, 360px));
+  bottom: calc(-0.78 * var(--d));
+  width: var(--d);
+  height: var(--d);
+  margin-left: calc(-0.5 * var(--d));
+  border-radius: 50%;
+  overflow: hidden;
+  opacity: 0.6;
+  box-shadow:
+    0 0 50px 8px rgb(80 160 255 / 0.35),
+    0 0 140px 30px rgb(60 130 230 / 0.18);
+}
+.planet::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(4 * var(--d));
+  background: url('./assets/earth.jpg') 0 0 / 50% 100% repeat-x;
+  animation: earth-spin 300s linear infinite;
+  will-change: transform;
+}
+.planet::after {
+  /* Sunlit from the top left, night side and limb darkening, thin blue atmosphere at the rim. */
+  content: '';
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
   background:
-    radial-gradient(18% 12% at 30% 12%, #4ade80 0 60%, transparent 62%),
-    radial-gradient(14% 10% at 58% 8%, #22c55e 0 60%, transparent 62%),
-    radial-gradient(12% 16% at 82% 30%, #4ade80 0 60%, transparent 62%),
-    radial-gradient(16% 12% at 12% 40%, #22c55e 0 60%, transparent 62%),
-    radial-gradient(14% 14% at 70% 80%, #4ade80 0 60%, transparent 62%),
-    radial-gradient(18% 10% at 30% 88%, #22c55e 0 60%, transparent 62%),
-    radial-gradient(circle at 50% 30%, #38bdf8, #0369a1 70%);
-  opacity: 0.4;
-  box-shadow: 0 0 70px 14px rgba(56, 189, 248, 0.4);
-  animation: spin 140s linear infinite;
+    radial-gradient(circle at 34% 22%, rgb(255 255 255 / 0.12), transparent 38%),
+    radial-gradient(
+      circle at 38% 30%,
+      transparent 42%,
+      rgb(2 8 20 / 0.55) 62%,
+      rgb(2 8 20 / 0.92) 74%
+    );
+  box-shadow:
+    inset 0 0 18px 4px rgb(120 190 255 / 0.55),
+    inset 0 0 60px 10px rgb(40 110 220 / 0.25);
+}
+@keyframes earth-spin {
+  to {
+    transform: translateX(-50%);
+  }
 }
 .watermark {
   position: absolute;
@@ -139,8 +196,9 @@ button.primary {
   right: 0;
   top: 46%;
   text-align: center;
-  font-size: min(38vw, 180px);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: min(32vw, 170px);
+  font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;
   opacity: 0.06;
@@ -162,13 +220,27 @@ button.primary {
   z-index: 1;
 }
 .join-logo {
-  font-size: 5.5rem;
-  line-height: 1;
+  align-self: center;
+  width: 6.5rem;
+  height: 6.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3cc3d3, #0b5a6b 75%);
+  color: var(--fg);
+  box-shadow: 0 0 50px rgba(60, 195, 211, 0.45);
   animation: float 3.5s ease-in-out infinite;
 }
+.join-logo svg {
+  width: 62%;
+  height: 62%;
+  stroke-width: 1.5;
+}
 .join h1 {
-  font-size: 2.4rem;
-  margin: 12px 0 4px;
+  font-size: clamp(1.9rem, 9vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 20px 0 6px;
 }
 .join form {
   margin-top: 28px;
@@ -181,8 +253,13 @@ button.primary {
   font-weight: 700;
 }
 .join input {
-  background: #fff;
-  color: #0f172a;
+  background: var(--fg);
+  color: var(--ink);
+  font-weight: 600;
+}
+.join input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 .join form + p {
   margin-top: 14px;
@@ -204,9 +281,8 @@ button.primary {
   text-align: center;
   background:
     radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.5), transparent 62%),
-    linear-gradient(to bottom, transparent 55%, rgba(15, 23, 42, 0.22)),
-    var(--role);
-  color: #0f172a;
+    linear-gradient(to bottom, transparent 55%, rgba(15, 23, 42, 0.22)), var(--role);
+  color: var(--ink);
   padding-top: calc(16px + env(safe-area-inset-top));
   overflow: hidden;
   /* Keeps the rays and rings (z-index: -1) above this background */
@@ -227,13 +303,14 @@ button.primary {
 /* Dark medallion holding the role icon, with sun rays and pulsing rings behind it */
 .reveal-medal {
   position: relative;
-  width: 168px;
-  height: 168px;
+  width: clamp(120px, 40vw, 176px);
+  height: clamp(120px, 40vw, 176px);
   margin: 18px 0 14px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #0f172a;
+  background: var(--ink);
+  color: var(--role);
   border: 5px solid rgba(255, 255, 255, 0.7);
   box-shadow:
     0 18px 40px rgba(15, 23, 42, 0.4),
@@ -259,21 +336,24 @@ button.primary {
   z-index: -1;
   inset: -5px;
   border-radius: 50%;
-  border: 3px solid #0f172a;
+  border: 3px solid var(--ink);
   opacity: 0;
   animation: medal-ring 2.6s ease-out 1.2s infinite;
 }
 .reveal-medal i + i {
   animation-delay: 2.5s;
 }
+.reveal-icon svg {
+  width: clamp(56px, 19vw, 84px);
+  height: clamp(56px, 19vw, 84px);
+  stroke-width: 1.75;
+}
 .reveal-icon {
-  font-size: 5.2rem;
-  line-height: 1;
   animation: float 3.5s ease-in-out 1.2s infinite;
 }
 .reveal h1 {
-  font-size: 2.7rem;
-  font-weight: 900;
+  font-size: clamp(1.8rem, 8.5vw, 2.6rem);
+  font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.01em;
   text-wrap: balance;
@@ -285,8 +365,8 @@ button.primary {
   align-self: stretch;
   padding: 26px 18px 20px;
   border-radius: 22px;
-  background: #0f172a;
-  color: #f1f5f9;
+  background: var(--ink);
+  color: var(--fg);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.35);
 }
 .reveal-label {
@@ -294,10 +374,10 @@ button.primary {
   top: 0;
   left: 50%;
   padding: 3px 14px;
-  border: 2px solid #0f172a;
+  border: 2px solid var(--ink);
   border-radius: 8px;
   background: var(--role);
-  color: #0f172a;
+  color: var(--ink);
   font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -310,8 +390,8 @@ button.primary {
 }
 .reveal button {
   position: relative;
-  background: #0f172a;
-  color: #fff;
+  background: var(--ink);
+  color: var(--fg);
   font-size: 1.2rem;
   font-weight: 700;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
@@ -338,9 +418,9 @@ button.primary {
   position: sticky;
   top: 0;
   z-index: 5;
-  margin: -16px -16px 0;
-  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
-  background: rgba(11, 18, 32, 0.86);
+  margin: -16px calc(-1 * var(--gutter)) 0;
+  padding: calc(10px + env(safe-area-inset-top)) var(--gutter) 10px;
+  background: rgb(6 18 27 / 0.86);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
@@ -352,13 +432,13 @@ header {
 }
 .avatar {
   flex: none;
-  width: 54px;
-  height: 54px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--role);
-  font-size: 1.8rem;
+  color: var(--ink);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
 }
 .who {
@@ -367,9 +447,19 @@ header {
   display: flex;
   flex-direction: column;
 }
+.avatar svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.25;
+}
 .who strong {
-  font-size: 1.2rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--role);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .who span {
   color: var(--muted);
@@ -414,8 +504,9 @@ header {
   font-size: 0.9rem;
 }
 .phase-line .year {
-  font-size: 1.5rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -441,7 +532,7 @@ header {
   stroke-width: 6;
 }
 .ring-bg {
-  stroke: #334155;
+  stroke: var(--panel-2);
 }
 .ring-fg {
   stroke: var(--accent);
@@ -453,11 +544,17 @@ header {
 }
 .ring strong {
   position: relative;
-  font-size: 1.45rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
   font-variant-numeric: tabular-nums;
 }
 .ring strong.small {
-  font-size: 1rem;
+  font-size: 0.78rem;
+  letter-spacing: -0.02em;
+}
+.ring strong svg {
+  width: 24px;
+  height: 24px;
 }
 .ring.urgent .ring-fg {
   stroke: var(--danger);
@@ -475,8 +572,12 @@ header {
 }
 
 .banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--danger);
-  color: #000;
+  color: var(--ink);
   font-weight: 700;
   text-align: center;
   padding: 8px;
@@ -484,11 +585,17 @@ header {
   margin-bottom: 8px;
   animation: slide-down 0.3s ease-out;
 }
+.banner svg {
+  width: 20px;
+  height: 20px;
+}
 .banner-fixed {
   position: fixed;
   top: calc(8px + env(safe-area-inset-top));
-  left: 16px;
-  right: 16px;
+  left: var(--gutter);
+  right: var(--gutter);
+  max-width: 528px;
+  margin: 0 auto;
   z-index: 30;
 }
 
@@ -514,7 +621,7 @@ header {
   padding: 0 8px 8vh;
 }
 .message h2 {
-  font-size: 1.7rem;
+  font-size: clamp(1.35rem, 6.2vw, 1.75rem);
   line-height: 1.2;
   text-wrap: balance;
 }
@@ -523,9 +630,20 @@ header {
   line-height: 1.4;
 }
 .message-icon {
-  font-size: 5rem;
-  line-height: 1.1;
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--role) 16%, transparent);
+  color: var(--role);
   animation: float 3.5s ease-in-out infinite;
+}
+.message-icon svg {
+  width: 52%;
+  height: 52%;
+  stroke-width: 1.75;
 }
 .waiting {
   margin-top: 8px;
@@ -535,18 +653,23 @@ header {
 /* Lobby */
 .lobby-badge {
   position: relative;
-  width: 150px;
-  height: 150px;
+  width: clamp(110px, 36vw, 150px);
+  height: clamp(110px, 36vw, 150px);
   margin-bottom: 16px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   background: var(--role);
-  font-size: 5rem;
+  color: var(--ink);
   animation: drop-in 0.8s cubic-bezier(0.3, 1.6, 0.6, 1) backwards;
 }
 .lobby-badge span {
   animation: float 3.5s ease-in-out infinite;
+}
+.lobby-badge svg {
+  width: clamp(52px, 17vw, 72px);
+  height: clamp(52px, 17vw, 72px);
+  stroke-width: 1.75;
 }
 .lobby-badge i {
   position: absolute;
@@ -604,18 +727,21 @@ header {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 24px;
   border: 1px solid var(--line);
-  background: linear-gradient(160deg, #27354d, #162033);
+  background: linear-gradient(160deg, var(--panel-2), var(--panel));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   animation: deal 0.45s cubic-bezier(0.2, 1.2, 0.5, 1) backwards;
 }
 .card-band {
   position: relative;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 18px;
   background: var(--role);
-  color: #0f172a;
+  color: var(--ink);
   font-weight: 800;
   font-size: 0.9rem;
   text-transform: uppercase;
@@ -631,24 +757,33 @@ header {
   gap: 14px;
   padding: 22px 20px;
 }
+.card-band svg {
+  width: 1.2em;
+  height: 1.2em;
+}
 .card-body h2 {
-  font-size: 1.9rem;
-  line-height: 1.15;
+  font-size: clamp(1.35rem, 6.4vw, 1.8rem);
+  line-height: 1.2;
+  text-wrap: balance;
 }
 .card-body p {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   line-height: 1.45;
 }
 /* Big faded role icon in the corner of the card */
 .card-mark {
   position: absolute;
-  right: -18px;
-  bottom: -30px;
-  font-size: 10rem;
-  line-height: 1;
+  right: -24px;
+  bottom: -28px;
+  color: var(--role);
   opacity: 0.1;
   transform: rotate(-14deg);
   pointer-events: none;
+}
+.card-mark svg {
+  width: 10rem;
+  height: 10rem;
+  stroke-width: 1.5;
 }
 .card-received {
   border: 3px solid var(--accent);
@@ -666,9 +801,14 @@ header {
   text-align: center;
 }
 .vote-icon {
-  font-size: 4.5rem;
-  line-height: 1;
+  align-self: center;
+  color: var(--role);
   animation: float 3.5s ease-in-out infinite;
+}
+.vote-icon svg {
+  width: 4rem;
+  height: 4rem;
+  stroke-width: 1.75;
 }
 
 .actions {
@@ -680,10 +820,11 @@ header {
   text-align: center;
 }
 .actions button {
-  min-height: 66px;
-  font-size: 1.2rem;
-  background: #f1f5f9;
-  color: #0f172a;
+  min-height: 64px;
+  font-size: 1.1rem;
+  text-align: center;
+  background: var(--fg);
+  color: var(--ink);
   border: 3px solid transparent;
   animation: slide-up 0.35s ease-out backwards;
 }
@@ -701,23 +842,22 @@ header {
 }
 .actions button.selected {
   background: var(--accent);
-  color: #052e16;
-  border-color: #fff;
+  color: var(--ink);
+  border-color: var(--fg);
   animation: select-pop 0.35s cubic-bezier(0.3, 1.8, 0.6, 1);
 }
 
 /* Outcome of a choice */
 .result-check {
   position: relative;
-  width: 110px;
-  height: 110px;
-  line-height: 110px;
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
   margin-bottom: 12px;
   border-radius: 50%;
   background: var(--accent);
-  color: #052e16;
-  font-size: 3.6rem;
-  font-weight: 700;
+  color: var(--ink);
   animation: pop 0.4s cubic-bezier(0.3, 1.6, 0.6, 1);
 }
 .result-check::after {
@@ -729,8 +869,13 @@ header {
   opacity: 0;
   animation: ring 0.9s ease-out 0.2s backwards;
 }
+.result-check svg {
+  width: 56px;
+  height: 56px;
+}
 .result .result-outcome {
-  font-size: 1.45rem;
+  font-size: 1.3rem;
+  text-wrap: balance;
   animation: slide-up 0.5s ease-out 0.15s backwards;
 }
 .result button {
@@ -748,31 +893,47 @@ header {
   padding-bottom: 4vh;
 }
 .look {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   text-align: center;
-  font-size: 1.7rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 5.6vw, 1.6rem);
+  font-weight: 700;
   padding-bottom: 10px;
   animation: slide-down 0.5s ease-out backwards;
 }
 .look-icon {
-  font-size: 5.5rem;
-  line-height: 1.1;
+  color: var(--role);
   animation: look 2.4s ease-in-out infinite;
+}
+.look-icon svg {
+  width: 4.5rem;
+  height: 4.5rem;
+  stroke-width: 1.5;
 }
 .panel {
   padding: 16px 18px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  border-left: 6px solid var(--role);
-  background: rgba(30, 41, 59, 0.92);
+  background: rgb(14 34 48 / 0.94);
   animation: slide-up 0.5s ease-out 0.3s backwards;
 }
 .panel + .panel {
   animation-delay: 0.6s;
 }
 .panel h2 {
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
   margin-bottom: 8px;
+}
+.panel h2 svg {
+  width: 1.3em;
+  height: 1.3em;
+  color: var(--role);
 }
 .panel ul {
   list-style: none;
@@ -817,8 +978,9 @@ header {
   padding: 3vh 0 1vh;
 }
 .final-flag {
-  font-size: 4.5rem;
-  line-height: 1.1;
+  display: flex;
+  justify-content: center;
+  color: var(--role);
   animation: drop-in 0.8s cubic-bezier(0.3, 1.6, 0.6, 1) backwards;
 }
 .final-label {
@@ -828,9 +990,15 @@ header {
   font-weight: 700;
   color: var(--muted);
 }
+.final-flag svg {
+  width: 4rem;
+  height: 4rem;
+  stroke-width: 1.75;
+}
 .final-score {
-  font-size: 5.5rem;
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 18vw, 5rem);
+  font-weight: 800;
   line-height: 1.05;
   color: var(--role);
   font-variant-numeric: tabular-nums;
@@ -846,18 +1014,31 @@ header {
 }
 .verdict {
   text-align: center;
-  border-left-color: var(--muted);
 }
 .verdict.bad {
-  border-left-color: var(--danger);
+  border-color: rgb(240 83 58 / 0.45);
+  background: linear-gradient(rgb(240 83 58 / 0.12), rgb(240 83 58 / 0.04)), rgb(14 34 48 / 0.94);
 }
 .verdict.good {
-  border-left-color: var(--accent);
+  border-color: rgb(95 208 138 / 0.45);
+  background: linear-gradient(rgb(95 208 138 / 0.12), rgb(95 208 138 / 0.04)), rgb(14 34 48 / 0.94);
 }
 .verdict-icon {
-  font-size: 3.5rem;
-  line-height: 1.1;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
   animation: float 3.5s ease-in-out infinite;
+}
+.verdict-icon svg {
+  width: 3.2rem;
+  height: 3.2rem;
+  stroke-width: 1.75;
+}
+.verdict.bad .verdict-icon {
+  color: var(--danger);
+}
+.verdict.good .verdict-icon {
+  color: var(--accent);
 }
 .panel .verdict-text {
   font-size: 1.3rem;
@@ -871,7 +1052,7 @@ header {
   margin: 12px 0 6px;
   border-radius: 7px;
   overflow: hidden;
-  background: #334155;
+  background: var(--panel-2);
   transform-origin: left;
   animation: grow 0.9s ease-out 0.8s backwards;
 }
@@ -886,6 +1067,15 @@ header {
   justify-content: space-between;
   gap: 8px;
   font-size: 0.9rem;
+}
+.balance-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.balance-legend svg {
+  width: 18px;
+  height: 18px;
 }
 @keyframes grow {
   from {
@@ -907,7 +1097,7 @@ header {
   padding: 14px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: rgba(30, 41, 59, 0.92);
+  background: rgb(14 34 48 / 0.94);
   animation: slide-up 0.45s ease-out backwards;
 }
 .impact-year {
@@ -916,7 +1106,7 @@ header {
   padding: 4px 8px;
   border-radius: 8px;
   background: var(--role);
-  color: #0f172a;
+  color: var(--ink);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -939,22 +1129,30 @@ header {
   gap: 6px;
 }
 .chips li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 5px 10px;
   border-radius: 999px;
   font-size: 0.95rem;
   font-weight: 600;
 }
+.chips svg {
+  width: 16px;
+  height: 16px;
+}
 .chips .bad {
-  background: rgba(248, 113, 113, 0.18);
-  color: #fecaca;
-  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: rgb(240 83 58 / 0.16);
+  color: #ffc9bd;
+  border: 1px solid rgb(240 83 58 / 0.5);
 }
 .chips .good {
-  background: rgba(34, 197, 94, 0.16);
-  color: #bbf7d0;
-  border: 1px solid rgba(34, 197, 94, 0.5);
+  background: rgb(95 208 138 / 0.14);
+  color: #c4f1d4;
+  border: 1px solid rgb(95 208 138 / 0.5);
 }
 .ended-foot {
+  text-shadow: 0 1px 8px var(--bg);
   text-align: center;
   padding: 8px 0 4vh;
 }
@@ -969,18 +1167,20 @@ header {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 45%, #14342a 0%, var(--bg) 65%);
+  background: radial-gradient(circle at 50% 45%, #10342f 0%, var(--bg) 65%);
   text-align: center;
   animation: era-out 2.8s ease-in forwards;
 }
 .era-intro strong {
   position: relative;
-  font-size: 6.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(4rem, 24vw, 6.5rem);
   line-height: 1;
   letter-spacing: -0.02em;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+  text-shadow: 0 0 40px rgb(95 208 138 / 0.5);
   animation: era-zoom 0.7s cubic-bezier(0.3, 1.5, 0.6, 1) backwards;
 }
 .era-intro p {
@@ -1028,7 +1228,7 @@ header {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #334155;
+  background: var(--panel-2);
 }
 .era-dots .past {
   background: var(--muted);
@@ -1143,7 +1343,7 @@ header {
   50% {
     box-shadow:
       0 16px 40px rgba(0, 0, 0, 0.5),
-      0 0 26px rgba(34, 197, 94, 0.6);
+      0 0 26px rgb(95 208 138 / 0.6);
   }
 }
 @keyframes select-pop {
@@ -1172,7 +1372,10 @@ header {
   .avatar {
     width: 44px;
     height: 44px;
-    font-size: 1.4rem;
+  }
+  .avatar svg {
+    width: 22px;
+    height: 22px;
   }
   .ring {
     width: 52px;
@@ -1198,14 +1401,15 @@ header {
     gap: 8px;
   }
   .card-body h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
   .card-body p {
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.35;
   }
-  .vote-icon {
-    font-size: 2.8rem;
+  .vote-icon svg {
+    width: 2.6rem;
+    height: 2.6rem;
   }
   .actions {
     gap: 10px;
@@ -1215,29 +1419,196 @@ header {
     padding: 10px 14px;
     font-size: 1.1rem;
   }
-  .look-icon,
+  .look-icon svg {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
   .message-icon {
-    font-size: 3.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
   }
   .lobby-badge {
-    width: 110px;
-    height: 110px;
-    font-size: 3.5rem;
+    width: 100px;
+    height: 100px;
   }
   .reveal-medal {
-    width: 124px;
-    height: 124px;
+    width: 112px;
+    height: 112px;
     margin: 10px 0 8px;
   }
-  .reveal-icon {
-    font-size: 3.8rem;
+  .reveal-icon svg {
+    width: 52px;
+    height: 52px;
   }
   .reveal h1 {
-    font-size: 2.1rem;
+    font-size: 1.9rem;
     margin-bottom: 26px;
   }
   .reveal-objective {
     font-size: 1.15rem;
+  }
+}
+
+/* ---- Landscape phones: card on the left, options under the right thumb ---- */
+@media (orientation: landscape) and (max-height: 520px) {
+  main {
+    max-width: 920px;
+  }
+  .planet {
+    --d: min(64vw, 560px);
+    bottom: calc(-0.86 * var(--d));
+    opacity: 0.45;
+  }
+  .objective,
+  .watermark {
+    display: none;
+  }
+  .topbar header {
+    gap: 10px;
+  }
+  .avatar,
+  .ring {
+    width: 42px;
+    height: 42px;
+  }
+  .avatar svg {
+    width: 20px;
+    height: 20px;
+  }
+  .ring strong {
+    font-size: 1rem;
+  }
+  .ring strong.small {
+    font-size: 0.62rem;
+  }
+  .topbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 6px;
+  }
+  .topbar .banner {
+    grid-column: 1 / -1;
+  }
+  .phase-line {
+    grid-row: 1;
+    grid-column: 2;
+    margin: 0 0 0 8px;
+  }
+  .play {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: stretch;
+  }
+  .card {
+    min-height: 0;
+  }
+  .card-body {
+    padding: 12px 18px;
+    gap: 8px;
+  }
+  .card-body h2 {
+    font-size: 1.3rem;
+  }
+  .card-body p {
+    font-size: 1rem;
+  }
+  .actions {
+    justify-content: center;
+  }
+  .actions button {
+    min-height: 52px;
+  }
+  .message {
+    padding-bottom: 2vh;
+  }
+  .message-icon,
+  .lobby-badge,
+  .reveal-medal {
+    width: 84px;
+    height: 84px;
+  }
+  .reveal-medal::before {
+    display: none;
+  }
+  /* Role on the left, objective and button on the right. */
+  .reveal {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    grid-template-rows: 1fr auto 1fr;
+    column-gap: 32px;
+    row-gap: 16px;
+    padding-top: calc(20px + env(safe-area-inset-top));
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  .reveal-body {
+    display: contents;
+  }
+  .reveal-hello,
+  .reveal-medal,
+  .reveal h1 {
+    grid-column: 1;
+    justify-self: center;
+    margin: 0;
+  }
+  .reveal-hello {
+    grid-row: 1;
+    align-self: end;
+  }
+  .reveal-medal {
+    grid-row: 2;
+  }
+  .reveal h1 {
+    grid-row: 3;
+    align-self: start;
+    font-size: 1.8rem;
+  }
+  .reveal-card {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: end;
+  }
+  .reveal > button {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: start;
+  }
+  .feedback,
+  .ended {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .feedback .look,
+  .ended .final,
+  .ended .section-title,
+  .ended .verdict,
+  .ended .impact,
+  .ended-foot {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ---- Tablets and desktop browsers: a centred phone-sized column on a framed background ---- */
+@media (min-width: 700px) and (min-height: 700px) {
+  html {
+    font-size: 20px;
+  }
+  main {
+    max-width: 640px;
+  }
+  .avatar,
+  .ring {
+    width: 64px;
+    height: 64px;
+  }
+  .avatar svg {
+    width: 32px;
+    height: 32px;
+  }
+  .card-body h2 {
+    font-size: 2rem;
   }
 }
 

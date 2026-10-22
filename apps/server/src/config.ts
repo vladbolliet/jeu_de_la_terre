@@ -5,8 +5,10 @@ export interface ServerConfig {
   contentDir: string | undefined;
   /** Public URL of the game (shown as QR code on the screen), e.g. https://jeu-terre.onrender.com */
   publicUrl: string | null;
-  /** Phase durations in seconds. Era total ≈ 2 min. */
-  durations: { choices: number; conflicts: number; feedback: number };
+  /** Phase durations in seconds. Era total ≈ 2 min. `intro` = film + today's figures. */
+  durations: { intro: number; choices: number; conflicts: number; feedback: number };
+  /** Fetch today's CO2 and temperature from NOAA / Copernicus (off in tests). */
+  liveData: boolean;
   /** Max state broadcasts per second (batches bursts of 100 simultaneous clicks). */
   broadcastHz: number;
   maxPlayers: number;
@@ -25,10 +27,12 @@ export function loadConfig(env = process.env): ServerConfig {
     contentDir: env.CONTENT_DIR,
     publicUrl: env.PUBLIC_URL ?? null,
     durations: {
+      intro: Number(env.INTRO_S ?? 180),
       choices: Number(env.CHOICES_S ?? 60),
       conflicts: Number(env.CONFLICTS_S ?? 40),
       feedback: Number(env.FEEDBACK_S ?? 20),
     },
+    liveData: env.LIVE_DATA !== '0',
     broadcastHz: 5,
     maxPlayers: Number(env.MAX_PLAYERS ?? 200),
     maxEventsPerSecond: 10,

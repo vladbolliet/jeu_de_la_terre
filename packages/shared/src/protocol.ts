@@ -61,8 +61,36 @@ export interface PlayerView {
   outcomes: string[];
   vote: (VoteView & { myChoice: string | null }) | null;
   lastVoteResult: VoteResult | null;
-  /** All choices made by this player since 1900. */
+  /** All choices made by this player since the start of the game. */
   history: ChoiceRecord[];
+}
+
+/** A real-world figure shown on the screen during the intro ("La Terre aujourd'hui"). */
+export interface Measurement {
+  value: number;
+  /** What the value refers to, e.g. "2026-10-19" or "2025". */
+  date: string;
+  source: string;
+  /** true = fetched from the source by the server, false = built-in value. */
+  live: boolean;
+}
+
+/** Today's real figures. The game's initial climate is taken from them. */
+export interface TodayStats {
+  /** Atmospheric CO2 at Mauna Loa, ppm (latest day). */
+  co2: Measurement;
+  /** Warming vs 1850–1900, °C, mean of the last 12 months. */
+  temperature: Measurement;
+  /** Warming vs 1850–1900, °C, latest day. */
+  temperatureDay: Measurement;
+  /** Sea level rise since 1900, cm. */
+  seaLevel: Measurement;
+  /** World fossil CO2 emissions, Gt/yr. */
+  emissions: Measurement;
+  /** Species classified as threatened on the IUCN Red List. */
+  threatenedSpecies: Measurement;
+  /** Tropical primary forest lost in one year, million hectares. */
+  forestLoss: Measurement;
 }
 
 export interface ScreenView {
@@ -86,6 +114,7 @@ export interface ScreenView {
   events: { id: string; title: string; text: string }[];
   /** URL players should open (for the QR code). Null if PUBLIC_URL is not set on the server. */
   joinUrl: string | null;
+  today: TodayStats;
 }
 
 export type Ack<T> = (res: { ok: true; data: T } | { ok: false; error: string }) => void;

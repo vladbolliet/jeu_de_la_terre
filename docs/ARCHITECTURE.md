@@ -23,13 +23,19 @@ téléphones (mobile) ──intentions──▶ server (Game) ──état──�
 - **Identité** : à l'inscription le serveur renvoie un `token` stocké dans `localStorage`. À la reconnexion le téléphone renvoie le token et retrouve son rôle et son score.
 - **Les joueurs ne voient jamais les effets chiffrés** de leurs options (`OptionView` n'a que `label`).
 
+## Introduction (phase `intro`, 3 min)
+
+« Lancer la partie » ouvre la phase `intro` : l'écran joue le film `apps/screen/public/film/intro.mp4` (1900 → aujourd'hui, sous-titres incrustés, voir `docs/film/`), puis affiche « La Terre aujourd'hui » avec les vrais chiffres du jour. Les téléphones affichent « Regarde l'écran ». Fin de la phase au bout de `INTRO_S` secondes ou avec « Phase suivante ».
+
+Chiffres du jour (`apps/server/src/today.ts`) : le serveur récupère au démarrage, puis toutes les 6 h, le CO₂ du jour à Mauna Loa (NOAA) et la température (Copernicus ERA5, moyenne des 12 derniers mois par rapport à 1850-1900). Ces valeurs deviennent le climat de départ de la partie. Les chiffres annuels (mer, émissions, espèces menacées, forêts) sont écrits dans ce fichier : **à mettre à jour à chaque nouvelle édition**. Sans Internet, chaque chiffre retombe sur sa valeur intégrée.
+
 ## Déroulé d'une ère (≈ 2 min, réglable par variables d'env)
 
 1. `choices` (60 s) : chaque joueur reçoit une carte de son rôle. Une option peut **envoyer** une carte à un joueur d'un autre rôle (impact croisé, ex. pot-de-vin → politique).
 2. `conflicts` (40 s) : premier vote de `content/votes` dont l'ère et la condition `when` correspondent ; votes pondérés par rôle. Sautée en 3 s s'il n'y a pas de vote.
 3. `feedback` (20 s) : `resolveEra()` calcule le nouveau monde (moyenne des effets de tous les joueurs + vote), les points de bascule, et l'écran affiche le bilan.
 
-10 ères : 1900 → 2080, fin en 2100. L'hôte peut lancer, sauter, mettre en pause, réinitialiser.
+10 ères : 2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090, fin en 2100. Les ères n'ont pas toutes la même durée (4 à 10 ans) : le moteur raisonne en taux annuels. Le passé (1900 → aujourd'hui) est raconté par le film d'introduction (`docs/film/`). L'hôte peut lancer, sauter, mettre en pause, réinitialiser.
 
 ## Modèle (packages/engine)
 
@@ -49,7 +55,9 @@ Défini dans `packages/shared/src/protocol.ts`. **Le modifier = PR relue par les
 | `PORT` | 3000 | Port HTTP |
 | `HOST_KEY` | `dev` | Clé des contrôles hôte (`/screen/?key=…`) — **à changer en prod** |
 | `PUBLIC_URL` | — | URL publique, affichée en QR code dans le lobby |
+| `INTRO_S` | 180 | Durée de l'introduction (film + chiffres du jour) |
 | `CHOICES_S` / `CONFLICTS_S` / `FEEDBACK_S` | 60 / 40 / 20 | Durée des phases (s) |
+| `LIVE_DATA` | `1` | `0` = ne pas récupérer les chiffres du jour (NOAA / Copernicus) |
 | `MAX_PLAYERS` | 200 | Au-delà, « La partie est complète » (les joueurs connus peuvent toujours revenir) |
 | `STATE_FILE` | `./game-state.json` | Fichier de sauvegarde ; vide = désactivé |
 | `CONTENT_DIR` | `content/` | Dossier du contenu YAML |

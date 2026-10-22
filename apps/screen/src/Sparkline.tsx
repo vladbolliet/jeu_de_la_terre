@@ -3,7 +3,7 @@ import { END_YEAR, ERAS } from './stripes.ts';
 const X0 = ERAS[0]!;
 
 /**
- * Tiny trend line over the whole game (1900 → 2100): it grows to the right era
+ * Tiny trend line over the whole game (2026 → 2100): it grows to the right era
  * after era, so the empty part on the right is the future still to be written.
  */
 export function Sparkline({ points }: { points: { year: number; value: number }[] }) {

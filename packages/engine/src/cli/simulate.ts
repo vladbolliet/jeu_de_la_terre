@@ -4,6 +4,7 @@ import { parseArgs } from 'node:util';
 import {
   ERAS,
   conditionHolds,
+  nextEraYear,
   type Card,
   type Effects,
   type Option,
@@ -61,7 +62,7 @@ for (const era of ERAS) {
   world = res.world;
   const c = world.climate;
   rows.push({
-    'fin d’ère': era + 20,
+    'fin d’ère': nextEraYear(era),
     'CO2 ppm': c.co2.toFixed(0),
     '°C': c.temperature.toFixed(2),
     'mer cm': c.seaLevel.toFixed(0),
