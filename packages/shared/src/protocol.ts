@@ -1,7 +1,7 @@
 // Socket.IO contract between server, mobile and screen.
 // Changing this file = breaking change for the 3 devs: open a PR and ping everyone.
 import type { Phase, RoleCounts, TippingPointId, World } from './state.ts';
-import type { Effects, Role } from './content.ts';
+import type { Effects, Region, Role } from './content.ts';
 
 /** Option as seen by a player: no numeric effects (players must not see the eco impact). */
 export interface OptionView {
@@ -27,11 +27,25 @@ export interface VoteView {
   options: OptionView[];
 }
 
+/** Position of one group of countries in a negotiation. */
+export interface BlocPosition {
+  /** Weighted ballots cast by players of this group. */
+  ballots: number;
+  /** Option this group currently backs (most votes, ties to the first option); null = nobody voted. */
+  optionId: string | null;
+}
+
 export interface VoteResult {
   voteId: string;
   title: string;
+  options: OptionView[];
+  /** Adopted option, or the status quo (first option) when the groups disagree. */
   winner: OptionView;
+  /** Weighted ballots per option, all groups together. */
   tally: Record<string, number>;
+  /** true = every group that voted backed the same option. */
+  agreement: boolean;
+  blocs: Record<Region, BlocPosition>;
 }
 
 /** One choice made by the player during the game. */
@@ -55,11 +69,23 @@ export interface PlayerView {
   year: number;
   /** Epoch ms when the current phase ends (null = waiting for the host). */
   phaseEndsAt: number | null;
-  me: { id: string; name: string; role: Role; roleName: string; objective: string; score: number };
+  me: {
+    id: string;
+    name: string;
+    role: Role;
+    roleName: string;
+    objective: string;
+    score: number;
+    region: Region;
+    regionName: string;
+    country: string;
+    /** Number of people this player stands for this era (display only). */
+    represents: number;
+  };
   hand: CardView[];
   /** Outcome texts of the choices made this era. */
   outcomes: string[];
-  vote: (VoteView & { myChoice: string | null }) | null;
+  vote: (VoteView & { myChoice: string | null; myBloc: BlocPosition }) | null;
   lastVoteResult: VoteResult | null;
   /** All choices made by this player since the start of the game. */
   history: ChoiceRecord[];
@@ -93,6 +119,18 @@ export interface TodayStats {
   forestLoss: Measurement;
 }
 
+/** One group of countries, as shown on the screen. */
+export interface RegionView {
+  name: string;
+  players: number;
+  /** Share of the world population this era (0–1). */
+  populationShare: number;
+  /** Share of world CO2 emissions this era (0–1), from emissions per person. */
+  emissionsShare: number;
+  /** Number of people each player of this group stands for this era. */
+  represents: number;
+}
+
 export interface ScreenView {
   phase: Phase;
   year: number;
@@ -100,11 +138,16 @@ export interface ScreenView {
   playerCount: number;
   connectedCount: number;
   roleCounts: RoleCounts;
+  regions: Record<Region, RegionView>;
+  /** Countries where at least one player lives, for the map. */
+  countries: { name: string; region: Region; lon: number; lat: number; players: number }[];
+  /** World population this era. */
+  population: number;
   /** Number of choices made this era / number of cards dealt this era. */
   choicesMade: number;
   cardsDealt: number;
   world: World;
-  vote: (VoteView & { ballots: number }) | null;
+  vote: (VoteView & { ballots: number; blocs: Record<Region, BlocPosition> }) | null;
   lastVoteResult: VoteResult | null;
   /** Tipping points crossed during the last resolved era. */
   newTippingPoints: TippingPointId[];

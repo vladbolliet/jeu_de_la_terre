@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { OptionView, VoteResult } from '@jdlt/shared';
+import { REGIONS, REGION_LABEL } from './roles.ts';
 
 /** Timeline of the reveal (ms from its start). */
 const COUNT_AT = 2400;
@@ -41,6 +42,8 @@ export function VoteReveal({
   const rows = options.map((o) => ({ ...o, votes: result.tally[o.id] ?? 0 }));
   const total = rows.reduce((sum, o) => sum + o.votes, 0);
   const stamped = stage === 'stamp' || stage === 'leave';
+  // Every group agreeing on the status quo is not a deal: nothing changes.
+  const adopted = result.agreement && result.winner.id !== options[0]?.id;
 
   return (
     <div className={`vote-reveal stage-${stage}`}>
@@ -51,7 +54,13 @@ export function VoteReveal({
             ? 'Le monde a choisi…'
             : total === 0
               ? 'Personne n’a voté…'
-              : 'Dépouillement'}
+              : !stamped
+                ? 'Dépouillement'
+                : adopted
+                  ? 'Accord adopté !'
+                  : result.agreement
+                    ? 'Rien ne change'
+                    : 'Pas d’accord'}
         </h2>
         <ol className="reveal-options">
           {rows.map((o, i) => {
@@ -73,12 +82,27 @@ export function VoteReveal({
                   <div style={{ transform: `scaleX(${share * progress})` }} />
                 </div>
                 {stamped && winner && (
-                  <span className="stamp">{total === 0 ? 'Par défaut' : 'Adopté'}</span>
+                  <span className="stamp">
+                    {total === 0 ? 'Par défaut' : adopted ? 'Adopté' : 'Statu quo'}
+                  </span>
                 )}
               </li>
             );
           })}
         </ol>
+        {stamped && total > 0 && (
+          <ul className="reveal-blocs">
+            {REGIONS.map((r) => {
+              const index = options.findIndex((o) => o.id === result.blocs[r].optionId);
+              return (
+                <li key={r} className={`region-${r}`}>
+                  {REGION_LABEL[r]}
+                  <strong>{index < 0 ? 'abstention' : String.fromCharCode(65 + index)}</strong>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { ERAS } from '@jdlt/shared';
-import { initialWorld, resolveEra } from '../src/climate.ts';
+import { initialWorld, meanEffects, resolveEra } from '../src/climate.ts';
 
 const run = (emissions: number) => {
   let w = initialWorld();
   for (const _ of ERAS)
-    w = resolveEra(w, { decisions: [{ emissions }], playerCount: 1, collective: [] }).world;
+    w = resolveEra(w, {
+      decisions: [{ effects: { emissions } }],
+      playerCount: 1,
+      collective: [],
+    }).world;
   return w;
 };
 
@@ -21,5 +25,19 @@ describe('resolveEra', () => {
 
   it('polluting choices warm more than green ones', () => {
     expect(run(8).climate.temperature).toBeGreaterThan(run(-8).climate.temperature);
+  });
+});
+
+describe('meanEffects', () => {
+  it('applies decision weights per effect', () => {
+    const avg = meanEffects(
+      [
+        { effects: { emissions: 4, gdp: 2 }, weight: { emissions: 2 } },
+        { effects: { emissions: 4, gdp: 2 } },
+      ],
+      2,
+    );
+    expect(avg.emissions).toBe(6);
+    expect(avg.gdp).toBe(2);
   });
 });

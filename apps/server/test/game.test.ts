@@ -251,9 +251,14 @@ describe('content mechanics', () => {
         },
         ...base.cards.filter((c) => !c.roles.includes('elite')),
       ],
+      // 1st player lands in developing countries, 2nd in emerging ones (population order).
       roles: base.roles.map((r) => ({
         ...r,
-        share: r.id === 'elite' || r.id === 'politique' ? 1 : 0.0001,
+        share: {
+          riche: 0.0001,
+          emergent: r.id === 'politique' ? 1 : 0.0001,
+          developpement: r.id === 'elite' ? 1 : 0.0001,
+        },
       })),
     };
     const g = new Game(content, opts());
@@ -268,6 +273,86 @@ describe('content mechanics', () => {
     expect(received.fromPlayer).toBe(elite.name);
     g.choose(pol.id, received.instanceId, 'yes');
     expect(g.playerView(elite.id)!.outcomes).toContain('Accepté !');
+    g.stop();
+  });
+
+  it('adopts a negotiated option only when every group that voted backs it', () => {
+    const vote = {
+      id: 'traite',
+      title: 'Traité',
+      text: '',
+      options: [
+        { id: 'statu_quo', label: 'Rien', effects: {}, score: 0 },
+        { id: 'accord', label: 'Accord', effects: { emissions: -5 }, score: 0 },
+      ],
+    };
+    const play = (ballot: (region: string) => string) => {
+      const g = new Game({ ...base, votes: [vote] }, opts());
+      const ids = Array.from({ length: 8 }, (_, i) => g.join(`p${i}`).id);
+      g.start();
+      g.next(); // skip the intro
+      g.next(); // to conflicts
+      for (const id of ids) g.castVote(id, 'traite', ballot(g.playerView(id)!.me.region));
+      expect(g.screenView().vote!.blocs.riche.ballots).toBeGreaterThan(0);
+      g.next(); // close the vote
+      const result = g.screenView().lastVoteResult!;
+      g.stop();
+      return result;
+    };
+    const all = play(() => 'accord');
+    expect(all.agreement).toBe(true);
+    expect(all.winner.id).toBe('accord');
+
+    // Rich countries are outnumbered but still block the deal.
+    const blocked = play((r) => (r === 'riche' ? 'statu_quo' : 'accord'));
+    expect(blocked.agreement).toBe(false);
+    expect(blocked.winner.id).toBe('statu_quo');
+    expect(blocked.tally.accord).toBeGreaterThan(blocked.tally.statu_quo!);
+    expect(blocked.blocs.riche.optionId).toBe('statu_quo');
+  });
+});
+
+describe('groups of countries', () => {
+  it('spreads players by world population and keeps their identity', () => {
+    const g = new Game(content, opts());
+    const ids = Array.from({ length: 100 }, (_, i) => g.join(`p${i}`).id);
+    const regions = g.screenView().regions;
+    expect(regions.riche.players).toBe(16);
+    expect(regions.emergent.players).toBe(35);
+    expect(regions.developpement.players).toBe(49);
+    const me = g.playerView(ids[0]!)!.me;
+    expect(me.country).not.toBe('');
+    expect(me.represents).toBeGreaterThan(5e7);
+    // Developing countries get more farmers than rich ones.
+    const farmers = (region: string) =>
+      ids.filter((id) => {
+        const m = g.playerView(id)!.me;
+        return m.region === region && m.role === 'agriculteur';
+      }).length / regions[region as 'riche'].players;
+    expect(farmers('developpement')).toBeGreaterThan(farmers('riche'));
+  });
+
+  it('only deals cards meant for the player group', () => {
+    const local = {
+      id: 'locale',
+      roles: [...content.roles.map((r) => r.id)],
+      regions: ['riche' as const],
+      title: 'Locale',
+      text: '',
+      interactionOnly: false,
+      options: [
+        { id: 'a', label: 'A', effects: {}, score: 0 },
+        { id: 'b', label: 'B', effects: {}, score: 0 },
+      ],
+    };
+    const g = new Game({ ...content, cards: [local] }, opts());
+    const ids = Array.from({ length: 10 }, (_, i) => g.join(`p${i}`).id);
+    g.start();
+    g.next(); // skip the intro
+    for (const id of ids) {
+      const v = g.playerView(id)!;
+      expect(v.hand.length).toBe(v.me.region === 'riche' ? 1 : 0);
+    }
     g.stop();
   });
 });

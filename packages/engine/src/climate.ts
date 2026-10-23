@@ -20,6 +20,7 @@ import {
   TEMPERATURE_INERTIA,
   TIPPING_POINTS,
 } from './config.ts';
+import type { DecisionWeight } from './regions.ts';
 
 /** Rates in config.ts that are not yearly are calibrated on this era length. */
 const REFERENCE_ERA_YEARS = 20;
@@ -51,8 +52,14 @@ export function initialWorld(climate: Partial<Climate> = {}): World {
 
 const clamp = (v: number, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, v));
 
-/** Mean of each effect key over a list of decisions (missing keys count as 0). */
-export function meanEffects(decisions: Effects[], playerCount: number): Required<Effects> {
+/** One individual choice. `weight` scales each effect (see regionWeights); missing = 1. */
+export interface Decision {
+  effects: Effects;
+  weight?: DecisionWeight;
+}
+
+/** Weighted mean of each effect key over a list of decisions (missing keys count as 0). */
+export function meanEffects(decisions: Decision[], playerCount: number): Required<Effects> {
   const keys: EffectKey[] = [
     'emissions',
     'deforestation',
@@ -64,13 +71,14 @@ export function meanEffects(decisions: Effects[], playerCount: number): Required
   ];
   const n = Math.max(1, playerCount);
   const out = {} as Required<Effects>;
-  for (const k of keys) out[k] = decisions.reduce((s, d) => s + (d[k] ?? 0), 0) / n;
+  for (const k of keys)
+    out[k] = decisions.reduce((s, d) => s + (d.effects[k] ?? 0) * (d.weight?.[k] ?? 1), 0) / n;
   return out;
 }
 
 export interface EraInput {
   /** One entry per individual choice made this era. */
-  decisions: Effects[];
+  decisions: Decision[];
   /** Number of players (inactive players dilute the average). */
   playerCount: number;
   /** Effects of collective votes, applied at full strength. */

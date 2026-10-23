@@ -8,6 +8,8 @@ import {
   CardSchema,
   ERAS,
   EventSchema,
+  REGIONS,
+  roleShare,
   RoleDefSchema,
   ROLES,
   VoteSchema,
@@ -68,12 +70,22 @@ export function loadContent(dir = DEFAULT_CONTENT_DIR): { content: Content; warn
     if (vote.options.some((o) => o.reply || o.sends))
       errors.push(`${vote.id}: reply/sends interdits dans un vote`);
   }
+  for (const region of REGIONS)
+    if (!roles.some((r) => roleShare(r, region) > 0))
+      errors.push(`roles.yaml: aucun rôle n'a de part (share) pour ${region}`);
   for (const era of ERAS) {
-    for (const role of ROLES) {
-      const n = cards.filter(
-        (c) => !c.interactionOnly && c.roles.includes(role) && (!c.eras || c.eras.includes(era)),
-      ).length;
-      if (n === 0) warnings.push(`aucune carte pour ${role} en ${era}`);
+    for (const role of roles) {
+      for (const region of REGIONS) {
+        if (roleShare(role, region) === 0) continue;
+        const n = cards.filter(
+          (c) =>
+            !c.interactionOnly &&
+            c.roles.includes(role.id) &&
+            (!c.eras || c.eras.includes(era)) &&
+            (!c.regions || c.regions.includes(region)),
+        ).length;
+        if (n === 0) warnings.push(`aucune carte pour ${role.id} (${region}) en ${era}`);
+      }
     }
   }
   if (errors.length) throw new Error(errors.join('\n'));

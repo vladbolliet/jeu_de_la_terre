@@ -3,15 +3,18 @@
 import { parseArgs } from 'node:util';
 import {
   ERAS,
+  REGIONS,
   conditionHolds,
   nextEraYear,
+  roleShare,
   type Card,
-  type Effects,
   type Option,
+  type Region,
   type Role,
 } from '@jdlt/shared';
 import { loadContent } from '../load.ts';
-import { initialWorld, resolveEra } from '../climate.ts';
+import { initialWorld, resolveEra, type Decision } from '../climate.ts';
+import { nextRegion, regionWeights } from '../regions.ts';
 import { createRng, pick } from '../rng.ts';
 
 const { values } = parseArgs({
@@ -25,9 +28,25 @@ const players = Number(values.players);
 const rng = createRng(Number(values.seed));
 const { content } = loadContent();
 
-const totalShare = content.roles.reduce((s, r) => s + r.share, 0);
-const roster: Role[] = content.roles.flatMap((r) =>
-  Array<Role>(Math.round((r.share / totalShare) * players)).fill(r.id),
+// Same assignment as the server: group by population, then role by its share in the group.
+const regionCounts: Record<Region, number> = { riche: 0, emergent: 0, developpement: 0 };
+const roster: { role: Role; region: Region }[] = [];
+for (let i = 0; i < players; i++) {
+  const region = nextRegion(0, regionCounts);
+  const inRegion = roster.filter((p) => p.region === region);
+  const total = content.roles.reduce((s, r) => s + roleShare(r, region), 0);
+  const role = content.roles.reduce((best, r) => {
+    const deficit = (d: typeof r) =>
+      (roleShare(d, region) / total) * (inRegion.length + 1) -
+      inRegion.filter((p) => p.role === d.id).length;
+    return deficit(r) > deficit(best) ? r : best;
+  }).id;
+  regionCounts[region]++;
+  roster.push({ role, region });
+}
+console.log(
+  REGIONS.map((r) => `${r}=${regionCounts[r]}`).join(' '),
+  content.roles.map((d) => `${d.id}=${roster.filter((p) => p.role === d.id).length}`).join(' '),
 );
 
 const chooseOption = (card: Card): Option => {
@@ -41,14 +60,19 @@ const chooseOption = (card: Card): Option => {
 let world = initialWorld();
 const fired = new Set<string>();
 const rows = [];
-for (const era of ERAS) {
-  const decisions: Effects[] = [];
-  for (const role of roster) {
+for (const [eraIndex, era] of ERAS.entries()) {
+  const weights = regionWeights(eraIndex, regionCounts);
+  const decisions: Decision[] = [];
+  for (const { role, region } of roster) {
     const pool = content.cards.filter(
-      (c) => !c.interactionOnly && c.roles.includes(role) && (!c.eras || c.eras.includes(era)),
+      (c) =>
+        !c.interactionOnly &&
+        c.roles.includes(role) &&
+        (!c.eras || c.eras.includes(era)) &&
+        (!c.regions || c.regions.includes(region)),
     );
     const card = pick(pool, rng);
-    if (card) decisions.push(chooseOption(card).effects);
+    if (card) decisions.push({ effects: chooseOption(card).effects, weight: weights[region] });
   }
   const events = content.events.filter(
     (e) => !fired.has(e.id) && (!e.eras || e.eras.includes(era)) && conditionHolds(world, e.when),

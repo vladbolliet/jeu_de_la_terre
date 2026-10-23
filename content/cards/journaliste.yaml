@@ -1,0 +1,280 @@
+# Journalistes. Objectif affiché : maximiser ton audience et garder ton poste.
+# Leur dilemme : ce qui fait de l'audience (polémique, catastrophe, faux débat) informe mal,
+# et le média dépend d'annonceurs et d'un propriétaire. Ils jouent surtout sur `awareness`.
+# Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: journaliste_une
+  roles: [journaliste]
+  title: La une de demain
+  text: Il fait 38 °C en juin. Ton rédacteur en chef attend ta proposition pour la une.
+  options:
+    - id: plage
+      label: « Nos 10 plages secrètes pour profiter du soleil »
+      outcome: Record de clics. Pas un mot sur le climat.
+      effects: { awareness: -1 }
+      score: 4
+    - id: lien
+      label: "« Canicule : ce que dit la science sur le lien avec le réchauffement »"
+      outcome: Moins de clics, mais l'article est partagé par des milliers de profs.
+      effects: { awareness: 3 }
+      score: 2
+    - id: apocalypse
+      label: « La fin du monde a commencé »
+      outcome: Ça fait peur et ça clique. Beaucoup de lecteurs se sentent impuissants et décrochent.
+      effects: { awareness: 1, wellbeing: -1 }
+      score: 3
+
+- id: journaliste_plateau
+  roles: [journaliste]
+  title: Le débat du soir
+  text: Tu prépares un débat télé sur le climat. La production veut « du clash pour l'audience ».
+  options:
+    - id: sceptique
+      label: Une climatologue face à un climatosceptique, « pour l'équilibre »
+      outcome: Audience record. Les spectateurs retiennent que « les scientifiques ne sont pas d'accord ».
+      effects: { awareness: -2 }
+      score: 4
+    - id: solutions
+      label: Deux invités qui débattent des solutions (nucléaire, sobriété, prix du carbone)
+      outcome: Un vrai débat, un peu technique. L'audience est correcte.
+      effects: { awareness: 2 }
+      score: 2
+    - id: ministre
+      label: Un·e ministre seul·e face à tes questions
+      outcome: Ton interview est prête. Le ou la ministre arrive au studio.
+      effects: { awareness: 1 }
+      score: 3
+      sends: { card: politique_interview, toRole: politique }
+
+- id: journaliste_annonceur
+  roles: [journaliste]
+  title: Le gros annonceur
+  text: Un constructeur automobile veut acheter un an de publicité pour ses SUV dans ton média. Il serait « gêné » par des articles trop critiques sur la voiture.
+  options:
+    - id: accepter
+      label: Accepter, il faut bien payer les salaires
+      outcome: Le budget est sauvé. Tes collègues de la rubrique environnement baissent le ton.
+      effects: { emissions: 2, awareness: -1 }
+      score: 4
+    - id: refuser
+      label: Refuser toutes les pubs pour les produits les plus polluants
+      outcome: Il manque 15 % du budget. Les abonnements augmentent un peu.
+      effects: { emissions: -1, awareness: 1 }
+      score: 1
+    - id: separer
+      label: Accepter la pub sans rien changer à la ligne éditoriale
+      outcome: L'annonceur ne renouvellera pas. Ta crédibilité est intacte.
+      effects: { emissions: 1 }
+      score: 3
+
+- id: journaliste_enquete
+  roles: [journaliste]
+  title: Ton enquête
+  text: Tu as des preuves qu'un grand groupe sous-déclare ses émissions. Il te faut sa réaction avant de publier.
+  options:
+    - id: contacter
+      label: Contacter l'entreprise et publier quoi qu'elle dise
+      outcome: Tu envoies tes questions. Le service juridique de l'entreprise les lit déjà.
+      effects: { awareness: 2 }
+      score: 3
+      sends: { card: elite_droit_de_reponse, toRole: elite }
+    - id: buzz
+      label: Publier un résumé choc tout de suite, avant les concurrents
+      outcome: Tu sors l'info en premier. Si un chiffre est approximatif, l'entreprise pourra s'en servir pour tout nier.
+      effects: { awareness: 1 }
+      score: 4
+    - id: laisser
+      label: Laisser tomber, l'entreprise est trop puissante
+      effects: {}
+      score: 1
+
+# --- 2026–2035 ---
+- id: journaliste_proprietaire
+  roles: [journaliste]
+  eras: [2026, 2030, 2035, 2040]
+  title: Ton propriétaire
+  text: Ton média vient d'être racheté par un milliardaire qui possède aussi une compagnie pétrolière. Il te demande d'arrêter ta série sur le pétrole.
+  options:
+    - id: obeir
+      label: Arrêter la série
+      outcome: Tu gardes ton poste. Tes sources ne te répondent plus.
+      effects: { awareness: -2 }
+      score: 4
+    - id: demissionner
+      label: Démissionner et lancer un média indépendant
+      outcome: Tout recommencer, sans salaire pendant un an. Tes lecteurs te suivent.
+      effects: { awareness: 2 }
+      score: 1
+    - id: greve
+      label: Organiser une grève de la rédaction
+      outcome: La rédaction fait la une de tous les autres journaux. La série continue, sous tension.
+      effects: { awareness: 3 }
+      score: 2
+
+- id: journaliste_deepfake
+  roles: [journaliste]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Fausse vidéo
+  text: Une vidéo truquée par IA montre une célèbre climatologue « avouer » que le réchauffement est exagéré. Elle fait 20 millions de vues.
+  options:
+    - id: relayer
+      label: En faire un sujet « Polémique autour d'une vidéo »
+      outcome: Tu as fait de l'audience et donné encore plus de visibilité au faux.
+      effects: { awareness: -2 }
+      score: 4
+    - id: verifier
+      label: Faire une vérification détaillée et la publier
+      outcome: Trois jours de travail. Ta vérification fait dix fois moins de vues que le faux.
+      effects: { awareness: 2 }
+      score: 2
+    - id: ignorer
+      label: Ne pas en parler pour ne pas l'amplifier
+      outcome: Le faux continue de circuler.
+      effects: {}
+      score: 2
+
+- id: journaliste_accord
+  roles: [journaliste]
+  eras: [2026, 2030, 2035]
+  title: Le sommet climat
+  text: Un accord vient d'être signé au sommet climat. Il est plein de promesses, mais sans sanction. Tu as 30 minutes pour titrer.
+  options:
+    - id: historique
+      label: « Accord historique pour sauver la planète »
+      outcome: Ton titre est repris partout. Les gens pensent que le problème est réglé.
+      effects: { awareness: -1, approval: 1 }
+      score: 4
+    - id: analyse
+      label: "« Un accord sans sanctions : ce qui va vraiment changer »"
+      outcome: Moins spectaculaire, mais c'est l'article de référence de la semaine.
+      effects: { awareness: 2 }
+      score: 2
+
+# --- 2040–2050 ---
+- id: journaliste_terrain
+  roles: [journaliste]
+  eras: [2040, 2045, 2050, 2060, 2070]
+  title: Envoyé·e spécial·e
+  text: Une inondation a détruit une ville. Tu es sur place avec une caméra.
+  options:
+    - id: emotion
+      label: Filmer les larmes et les maisons détruites
+      outcome: Ton reportage bouleverse le pays. Dans deux semaines, tout le monde aura oublié.
+      effects: { awareness: 1, wellbeing: -1 }
+      score: 4
+    - id: causes
+      label: "Expliquer les causes : sols bétonnés, réchauffement, permis de construire"
+      outcome: Moins regardé, mais ton sujet est utilisé dans une commission d'enquête.
+      effects: { awareness: 3 }
+      score: 2
+    - id: entraide
+      label: Montrer comment les habitants s'organisent
+      outcome: Ton reportage donne des idées à d'autres villes.
+      effects: { awareness: 1, wellbeing: 1 }
+      score: 2
+
+- id: journaliste_menaces
+  roles: [journaliste]
+  eras: [2040, 2045, 2050, 2060]
+  title: Menaces
+  text: Depuis ton enquête sur les pollutions de l'agro-industrie, ta voiture a été vandalisée et tu reçois des menaces.
+  options:
+    - id: arreter
+      label: Arrêter l'enquête pour protéger ta famille
+      outcome: Les menaces cessent. Ceux qui les ont envoyées ont compris que ça marche.
+      effects: { awareness: -1 }
+      score: 3
+    - id: collectif
+      label: Partager ton enquête avec dix autres médias pour la publier ensemble
+      outcome: On ne peut pas menacer dix rédactions à la fois. L'enquête sort partout le même jour.
+      effects: { awareness: 3 }
+      score: 2
+    - id: continuer
+      label: Continuer seul·e
+      outcome: Ton enquête sort. Tu ne dors plus chez toi.
+      effects: { awareness: 2 }
+      score: 3
+
+- id: journaliste_giec
+  roles: [journaliste]
+  eras: [2040, 2045, 2050]
+  title: Le nouveau rapport du GIEC
+  text: Un rapport scientifique de 3 000 pages vient de sortir. Il est nuancé et plein d'incertitudes.
+  options:
+    - id: chiffre_choc
+      label: Extraire le pire scénario pour le titre
+      outcome: Ça clique. Les climatosceptiques t'accusent d'alarmisme, avec un peu de raison.
+      effects: { awareness: 1 }
+      score: 4
+    - id: pedagogie
+      label: Faire une explication claire, avec les incertitudes
+      outcome: Un article long, lu jusqu'au bout. Rare.
+      effects: { awareness: 3 }
+      score: 2
+    - id: rien
+      label: Ne pas en parler, ça n'intéresse plus personne
+      effects: { awareness: -1 }
+      score: 3
+
+# --- 2060–2090 ---
+- id: journaliste_refugies
+  roles: [journaliste]
+  eras: [2060, 2070, 2080, 2090]
+  title: Les réfugiés climatiques
+  text: Des milliers de réfugiés climatiques arrivent. Tu dois choisir l'angle de ton sujet.
+  options:
+    - id: invasion
+      label: "« Vague migratoire : jusqu'où ? »"
+      outcome: Ton sujet est le plus regardé de la semaine. La peur monte.
+      effects: { wellbeing: -2, approval: 1 }
+      score: 4
+    - id: portraits
+      label: Raconter la vie d'une famille, de sa ville inondée à son arrivée
+      outcome: Les spectateurs découvrent des visages. Des dons affluent.
+      effects: { wellbeing: 1, awareness: 2 }
+      score: 2
+    - id: causes
+      label: Expliquer pourquoi ces régions sont devenues invivables
+      outcome: Ton sujet relie les émissions d'ici aux exils de là-bas.
+      effects: { awareness: 3 }
+      score: 2
+
+- id: journaliste_censure
+  roles: [journaliste]
+  eras: [2060, 2070, 2080, 2090]
+  title: État d'urgence
+  text: Pendant une crise climatique, le gouvernement interdit de filmer les émeutes de l'eau « pour éviter la panique ».
+  options:
+    - id: obeir
+      label: Respecter l'interdiction
+      outcome: Ton média reste en règle. Les rumeurs remplacent l'information.
+      effects: { awareness: -2, approval: 1 }
+      score: 3
+    - id: filmer
+      label: Filmer quand même et publier
+      outcome: Ta vidéo fait le tour du monde. Les autorités peuvent saisir ton matériel.
+      effects: { awareness: 3, approval: -2 }
+      score: 3
+    - id: temoins
+      label: Recueillir les témoignages des habitants, sans images
+      outcome: Moins spectaculaire, mais tu racontes ce qui se passe vraiment.
+      effects: { awareness: 2 }
+      score: 2
+
+- id: journaliste_voile_solaire
+  roles: [journaliste]
+  eras: [2060, 2070, 2080, 2090]
+  title: Le voile solaire
+  text: Les premiers avions injectent des aérosols dans le ciel pour refroidir la planète. Les températures baissent un peu.
+  options:
+    - id: miracle
+      label: « La technologie qui va sauver la planète »
+      outcome: Tout le monde est soulagé. Les émissions repartent à la hausse.
+      effects: { emissions: 2, awareness: -2 }
+      score: 4
+    - id: risques
+      label: "Expliquer les risques : mousson déréglée, choc si on arrête"
+      outcome: On te reproche de « gâcher la seule bonne nouvelle de l'année ».
+      effects: { awareness: 2 }
+      score: 2

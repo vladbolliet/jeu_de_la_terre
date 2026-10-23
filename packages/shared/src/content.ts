@@ -2,9 +2,29 @@
 // Any change here must be reflected in docs/CONTENU.md.
 import { z } from 'zod';
 
-export const ROLES = ['elite', 'citoyen', 'politique', 'militant'] as const;
+export const ROLES = [
+  'elite',
+  'citoyen',
+  'politique',
+  'militant',
+  'agriculteur',
+  'journaliste',
+] as const;
 export const RoleSchema = z.enum(ROLES);
 export type Role = z.infer<typeof RoleSchema>;
+
+/**
+ * Groups of countries by development level (World Bank income groups), which is what drives
+ * emissions per person. Each player lives in a country of one group for the whole game.
+ */
+export const REGIONS = ['riche', 'emergent', 'developpement'] as const;
+export const RegionSchema = z.enum(REGIONS);
+export type Region = z.infer<typeof RegionSchema>;
+export const REGION_NAMES: Record<Region, string> = {
+  riche: 'Pays riches',
+  emergent: 'Pays émergents',
+  developpement: 'Pays en développement',
+};
 
 /**
  * First year of each era. The game starts today (the intro film covers 1900 → today)
@@ -62,6 +82,8 @@ export const CardSchema = z
     roles: z.array(RoleSchema).min(1),
     /** Eras where the card can be dealt. Omitted = all eras. */
     eras: z.array(EraSchema).optional(),
+    /** Groups of countries where the card can be dealt. Omitted = everywhere. */
+    regions: z.array(RegionSchema).min(1).optional(),
     title: z.string(),
     text: z.string(),
     /** true = never dealt randomly, only received through another player's `sends`. */
@@ -123,13 +145,28 @@ export const RoleDefSchema = z
     id: RoleSchema,
     name: z.string(),
     objective: z.string(),
-    /** Target share of players (shares are normalised). */
-    share: z.number().positive(),
+    /**
+     * Target share of players (shares are normalised within each group of countries).
+     * A number applies everywhere; an object gives one share per group.
+     */
+    share: z.union([
+      z.number().positive(),
+      z.object({
+        riche: z.number().min(0),
+        emergent: z.number().min(0),
+        developpement: z.number().min(0),
+      }),
+    ]),
     /** Weight of this role's ballot in collective votes. */
     voteWeight: z.number().positive().default(1),
   })
   .strict();
 export type RoleDef = z.infer<typeof RoleDefSchema>;
+
+/** Share of a role in a group of countries (not normalised). */
+export function roleShare(role: RoleDef, region: Region): number {
+  return typeof role.share === 'number' ? role.share : role.share[region];
+}
 
 export interface Content {
   roles: RoleDef[];

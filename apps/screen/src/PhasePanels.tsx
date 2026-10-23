@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Users, Vote } from 'lucide-react';
-import type { ScreenView } from '@jdlt/shared';
-import { ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
+import type { BlocPosition, OptionView, Region, ScreenView } from '@jdlt/shared';
+import { REGIONS, REGION_LABEL, ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
 import { Hemicycle } from './Hemicycle.tsx';
 import { URGENT_S } from './PhaseHeader.tsx';
 
@@ -162,7 +162,7 @@ export function VotePanel({ view }: { view: ScreenView }) {
     <div className={`vote-panel${final ? ' final' : ''}`}>
       <div className="vote-main">
         <div className="vote-kicker">
-          <Vote className="icon" /> Vote collectif
+          <Vote className="icon" /> Négociation mondiale
         </div>
         <h2 className="vote-title">{vote.title}</h2>
         <p className="vote-text">{vote.text}</p>
@@ -177,7 +177,45 @@ export function VotePanel({ view }: { view: ScreenView }) {
       </div>
       <div className="vote-side">
         <Hemicycle voteId={vote.id} ballots={vote.ballots} voters={view.connectedCount} />
+        <Blocs blocs={vote.blocs} options={vote.options} />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Live position of each group of countries. A deal needs every group that votes to back the
+ * same option, so the room can see who blocks and negotiate out loud.
+ */
+function Blocs({ blocs, options }: { blocs: Record<Region, BlocPosition>; options: OptionView[] }) {
+  const voted = REGIONS.filter((r) => blocs[r].optionId !== null);
+  const same =
+    voted.length === REGIONS.length &&
+    voted.every((r) => blocs[r].optionId === blocs[voted[0]!].optionId);
+  // Everyone on the status quo (first option) is not a deal.
+  const agree = same && blocs[voted[0]!].optionId !== options[0]?.id;
+  return (
+    <div className="blocs">
+      <ul>
+        {REGIONS.map((r) => {
+          const index = options.findIndex((o) => o.id === blocs[r].optionId);
+          return (
+            <li key={r} className={`region-${r}`}>
+              <span className="bloc-name">{REGION_LABEL[r]}</span>
+              <span key={index} className={index < 0 ? 'bloc-choice none' : 'bloc-choice'}>
+                {index < 0 ? '–' : String.fromCharCode(65 + index)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className={agree ? 'bloc-status agree' : 'bloc-status'}>
+        {agree
+          ? 'Accord en vue !'
+          : same
+            ? 'Pour l’instant, tout le monde refuse'
+            : 'Il faut que les 3 groupes choisissent la même option'}
+      </p>
     </div>
   );
 }

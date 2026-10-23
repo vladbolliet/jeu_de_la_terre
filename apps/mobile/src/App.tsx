@@ -5,6 +5,7 @@ import {
   Earth,
   Hourglass,
   Layers,
+  MapPin,
   Pause,
   Projector,
   Send,
@@ -12,9 +13,10 @@ import {
   WifiOff,
   type LucideIcon,
 } from 'lucide-react';
-import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
+import { ERAS, REGIONS, REGION_NAMES, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { Ended } from './Ended.tsx';
+import { formatPeople } from './people.ts';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
 import { useWakeLock } from './useWakeLock.ts';
@@ -168,10 +170,19 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
           </span>
         </div>
         <h1>{view.me.roleName}</h1>
+        <p className="reveal-place">
+          <MapPin aria-hidden />
+          {view.me.country} · {view.me.regionName}
+        </p>
         <section className="reveal-card">
           <span className="reveal-label">Ton objectif</span>
           <p className="reveal-objective">{view.me.objective}</p>
         </section>
+        {view.me.represents > 0 && (
+          <p className="reveal-people">
+            Tu représentes ~{formatPeople(view.me.represents)} de personnes.
+          </p>
+        )}
       </div>
       <button onClick={onDone}>Compris</button>
     </main>
@@ -180,7 +191,7 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
 
 const PHASE_LABEL: Partial<Record<PlayerView['phase'], string>> = {
   choices: 'Choisis tes cartes',
-  conflicts: 'Vote collectif',
+  conflicts: 'Négociation mondiale',
   feedback: 'Résultats',
 };
 
@@ -214,7 +225,7 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
         <div className="who">
           <strong>{view.me.roleName}</strong>
           <span>
-            {view.me.name} ·{' '}
+            {view.me.name} · {view.me.country} ·{' '}
             {/* Re-mounted when the score changes so the bump animation replays. */}
             <b key={view.me.score} className="score">
               {view.me.score} pts
@@ -442,21 +453,32 @@ function Choices({ view }: { view: PlayerView }) {
 
 function Vote({ view }: { view: PlayerView }) {
   const vote = view.vote!;
+  const blocChoice = vote.options.find((o) => o.id === vote.myBloc.optionId);
   // Option being sent; the highlighted choice always comes from the server (`myChoice`).
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="play">
       <section className="card vote">
-        <div className="card-band">Tout le monde décide</div>
+        <div className="card-band">Négociation mondiale</div>
         <div className="card-body">
           <div className="vote-icon">
             <BallotIcon aria-hidden />
           </div>
           <h2>{vote.title}</h2>
           <p>{vote.text}</p>
+          <p className="vote-rule">
+            Accord seulement si les 3 groupes de pays choisissent la même option.
+          </p>
         </div>
       </section>
+      <p className="bloc-line">
+        <MapPin aria-hidden />
+        <span>
+          {view.me.regionName} :{' '}
+          <strong>{blocChoice ? blocChoice.label : 'pas encore de vote'}</strong>
+        </span>
+      </p>
       <div className="actions">
         <p className="muted">
           {vote.myChoice
@@ -578,13 +600,33 @@ function Feedback({ view }: { view: PlayerView }) {
             <BallotIcon aria-hidden />
             {result.title}
           </h2>
-          <p className="muted">Décision collective</p>
-          <p className="winner">{result.winner.label}</p>
           <p className="muted">
-            {ballots > 0
-              ? `${result.tally[result.winner.id] ?? 0} voix sur ${ballots}`
-              : "Personne n'a voté."}
+            {!result.agreement
+              ? "Pas d'accord : rien ne change"
+              : result.winner.id === result.options[0]?.id
+                ? 'Tous les groupes refusent : rien ne change'
+                : 'Accord adopté'}
           </p>
+          <p className="winner">{result.winner.label}</p>
+          {ballots > 0 ? (
+            <ul className="blocs">
+              {REGIONS.map((r) => {
+                const id = result.blocs[r].optionId;
+                return (
+                  <li key={r} className={r === view.me.region ? 'mine' : ''}>
+                    <span className="muted">{REGION_NAMES[r]}</span>
+                    <strong>
+                      {id === null
+                        ? "N'a pas voté"
+                        : result.options.find((o) => o.id === id)?.label}
+                    </strong>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="muted">Personne n'a voté.</p>
+          )}
         </section>
       )}
     </div>

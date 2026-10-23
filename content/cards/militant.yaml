@@ -1,0 +1,275 @@
+# Militant·es. Objectif affiché : maximiser la sensibilisation du public et peser sur les décisions.
+# Leur dilemme n'est pas « polluer ou non » mais comment agir : radicalité, crédibilité, alliances.
+# Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: militant_action
+  roles: [militant]
+  title: Mode d'action
+  text: Ton collectif veut frapper fort cette année. Comment faire passer le message ?
+  options:
+    - id: coup_de_poing
+      label: Jeter de la soupe sur la vitre d'un tableau célèbre
+      outcome: Ça tourne en boucle sur toutes les chaînes. Beaucoup de gens sont furieux… contre toi.
+      effects: { awareness: 3, approval: -2 }
+      score: 4
+    - id: manif
+      label: Organiser une grande marche pour le climat
+      outcome: 100 000 personnes dans la rue. Deux minutes au journal de 20 h.
+      effects: { awareness: 3 }
+      score: 3
+    - id: lobby
+      label: Demander un rendez-vous à un·e élu·e
+      outcome: Tu as envoyé ta demande. Réponse sous quinze jours… peut-être.
+      effects: { awareness: 1 }
+      score: 2
+      sends: { card: politique_rencontre_militant, toRole: politique }
+
+- id: militant_enquete
+  roles: [militant]
+  title: Infiltration
+  text: Un·e membre de ton collectif s'est fait embaucher dans une usine soupçonnée de rejeter des produits toxiques dans la rivière.
+  options:
+    - id: diffuser
+      label: Filmer en caméra cachée et confronter la direction
+      outcome: Les images sont accablantes. Tu les envoies à la direction avant publication.
+      effects: { awareness: 2 }
+      score: 3
+      sends: { card: elite_enquete_militant, toRole: elite }
+    - id: plainte
+      label: Faire faire des prélèvements et porter plainte
+      outcome: Les analyses prennent six mois. La justice, trois ans.
+      effects: { wellbeing: 1, awareness: 1 }
+      score: 2
+    - id: abandonner
+      label: Arrêter, c'est trop risqué pour elle
+      effects: {}
+      score: 0
+
+- id: militant_porte_a_porte
+  roles: [militant]
+  title: Convaincre ton quartier
+  text: Les gens de ton quartier ne viennent jamais aux réunions climat. Tu veux aller vers eux.
+  options:
+    - id: porte
+      label: Faire du porte-à-porte
+      outcome: Tu frappes chez un·e inconnu·e. La porte s'ouvre…
+      effects: { awareness: 1 }
+      score: 2
+      sends: { card: citoyen_porte_a_porte, toRole: citoyen }
+    - id: repair_cafe
+      label: Ouvrir un repair café et une cantine pas chère
+      outcome: On vient pour réparer un grille-pain, on reste pour discuter. Lent, mais solide.
+      effects: { awareness: 1, wellbeing: 2, emissions: -1 }
+      score: 2
+    - id: reseaux
+      label: Faire une vidéo choc sur les réseaux
+      outcome: 2 millions de vues. Surtout des gens déjà convaincus.
+      effects: { awareness: 2 }
+      score: 3
+
+- id: militant_viral
+  roles: [militant]
+  title: Ta vidéo est virale… avec une erreur
+  text: Ta vidéo fait 5 millions de vues. Mais tu réalises qu'un chiffre clé est faux (tu as confondu deux études).
+  options:
+    - id: laisser
+      label: Ne rien dire, le message de fond est juste
+      outcome: Ton message continue de circuler. Si quelqu'un vérifie ce chiffre, ta crédibilité peut en prendre un coup.
+      effects: { awareness: 1, approval: 1 }
+      score: 3
+    - id: corriger
+      label: Publier une correction honnête
+      outcome: Moins de vues. Mais des scientifiques reprennent ta vidéo corrigée.
+      effects: { awareness: 2 }
+      score: 3
+    - id: supprimer
+      label: Supprimer la vidéo discrètement
+      outcome: Des captures d'écran circulent déjà.
+      effects: {}
+      score: 1
+
+# --- 2026–2035 ---
+- id: militant_proces
+  roles: [militant]
+  eras: [2026, 2030, 2035, 2040]
+  title: Attaquer l'État en justice
+  text: Des avocats proposent d'attaquer l'État pour inaction climatique. Le procès durera des années et coûtera tout le budget de ton association.
+  options:
+    - id: proces
+      label: Lancer le procès
+      outcome: Deux millions de signatures de soutien. Le jugement tombera dans trois ans.
+      effects: { awareness: 3, emissions: -1 }
+      score: 3
+    - id: campagne
+      label: Garder l'argent pour des campagnes de terrain
+      outcome: Des affiches, des tracts, des conférences. Efficace, mais vite oublié.
+      effects: { awareness: 2 }
+      score: 2
+
+- id: militant_zad
+  roles: [militant]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Le chantier commence lundi
+  text: Une autoroute va raser un bois de chênes centenaires. Les bulldozers arrivent lundi.
+  options:
+    - id: occuper
+      label: Grimper dans les arbres et occuper le site
+      outcome: Tu passes six semaines dans un hamac à 20 m de haut. Les gendarmes encerclent le bois.
+      effects: { deforestation: -2, awareness: 3, approval: -2 }
+      score: 4
+    - id: recours
+      label: Déposer un recours en justice
+      outcome: Le juge suspend les travaux… après l'abattage de la moitié des arbres.
+      effects: { deforestation: -1, awareness: 1 }
+      score: 2
+    - id: alternative
+      label: Proposer un projet alternatif chiffré avec des ingénieur·es
+      outcome: Ton dossier est sérieux. Personne ne le lit, mais il servira plus tard.
+      effects: { awareness: 1 }
+      score: 1
+
+- id: militant_syndicats
+  roles: [militant]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Les ouvriers de la raffinerie
+  text: Tu réclames la fermeture d'une raffinerie. Ses 1 200 ouvriers voient en toi une menace pour leur emploi.
+  options:
+    - id: fermeture
+      label: Exiger la fermeture immédiate
+      outcome: Ton message est clair. Les ouvriers manifestent contre toi.
+      effects: { awareness: 2, employment: -1, approval: -1 }
+      score: 3
+    - id: transition_juste
+      label: Construire avec les syndicats un plan de reconversion
+      outcome: Des mois de réunions tendues. Puis une manif commune, ouvriers et militants côte à côte.
+      effects: { awareness: 2, employment: 1, emissions: -1 }
+      score: 2
+    - id: ignorer
+      label: Changer de cible, c'est trop compliqué
+      effects: {}
+      score: 1
+
+# --- 2040–2050 ---
+- id: militant_desarmer
+  roles: [militant]
+  eras: [2040, 2045, 2050, 2060]
+  title: Jusqu'où aller ?
+  text: Rien ne bouge malgré les marches. Une partie du collectif propose des actions de sabotage. D'autres menacent de partir.
+  options:
+    - id: pipeline
+      label: Saboter un pipeline la nuit
+      outcome: Le pipeline est arrêté trois semaines. La police ouvre une enquête, l'opinion est partagée.
+      effects: { emissions: -2, awareness: 3, approval: -3, wellbeing: -1 }
+      score: 4
+    - id: pneus
+      label: Dégonfler les pneus de SUV en ville
+      outcome: Les propriétaires sont furieux. On parle des SUV pendant une semaine.
+      effects: { awareness: 2, approval: -1 }
+      score: 3
+    - id: non_violence
+      label: Rester strictement non violent·e
+      outcome: Le collectif se divise. Ceux qui restent sont soudés.
+      effects: { awareness: 1 }
+      score: 2
+
+- id: militant_ministere
+  roles: [militant]
+  eras: [2040, 2045, 2050, 2060]
+  title: Un poste au ministère
+  text: Le ministère de l'Environnement te propose de devenir conseiller·e. Ton collectif crie à la récupération.
+  options:
+    - id: accepter
+      label: Accepter et changer les choses de l'intérieur
+      outcome: Tu fais passer deux décrets utiles. On te traite de vendu·e sur les réseaux.
+      effects: { emissions: -2, awareness: -1 }
+      score: 1
+    - id: refuser
+      label: Refuser et rester libre de critiquer
+      outcome: Ta parole reste forte. Le poste va à un·e ancien·ne lobbyiste.
+      effects: { awareness: 2, emissions: 1 }
+      score: 3
+
+- id: militant_ecoanxiete
+  roles: [militant]
+  eras: [2045, 2050, 2060, 2070, 2080, 2090]
+  title: Épuisement
+  text: Cela fait des années que tu ne t'arrêtes jamais. Tu dors mal, tu ne vois plus tes ami·es. Le médecin parle de burn-out.
+  options:
+    - id: continuer
+      label: Continuer coûte que coûte, il y a urgence
+      outcome: Tu tiens. Pour combien de temps ?
+      effects: { awareness: 1, wellbeing: -1 }
+      score: 3
+    - id: relais
+      label: Former la relève et passer le flambeau
+      outcome: Dix jeunes reprennent tes dossiers. Tu redécouvres le sommeil.
+      effects: { awareness: 2, wellbeing: 1 }
+      score: 2
+    - id: pause
+      label: Tout arrêter un an
+      outcome: Le collectif tourne au ralenti. Tu reviendras plus fort·e.
+      effects: { wellbeing: 1 }
+      score: 0
+
+# --- 2060–2090 ---
+- id: militant_inondation
+  roles: [militant]
+  eras: [2060, 2070, 2080, 2090]
+  title: Après l'inondation
+  text: Une crue historique a dévasté une ville voisine. Des milliers de personnes ont tout perdu.
+  options:
+    - id: campagne
+      label: Lancer une campagne médiatique « On vous avait prévenus »
+      outcome: Ton message porte. Certains sinistrés trouvent ça indécent.
+      effects: { awareness: 3 }
+      score: 4
+    - id: entraide
+      label: Organiser l'entraide sur place pendant des semaines
+      outcome: Pelles, repas, hébergement. Les caméras sont parties, toi tu es là.
+      effects: { wellbeing: 3, awareness: 1 }
+      score: 2
+    - id: elus
+      label: Exiger des comptes aux élus qui ont autorisé les constructions
+      outcome: Une commission d'enquête est ouverte.
+      effects: { awareness: 2, approval: -1 }
+      score: 3
+
+- id: militant_heritiers
+  roles: [militant]
+  eras: [2070, 2080, 2090]
+  title: Le procès des pollueurs
+  text: Des archives prouvent que les grandes compagnies pétrolières connaissaient les risques du réchauffement depuis les années 1970. Tu peux les poursuivre.
+  options:
+    - id: proces
+      label: Lancer un procès historique pour obtenir réparation
+      outcome: Le procès du siècle commence. Les compagnies ont des armées d'avocats.
+      effects: { awareness: 4 }
+      score: 4
+    - id: local
+      label: Concentrer ton énergie sur l'adaptation de ta région
+      outcome: Des jardins, des réserves d'eau, des réseaux d'entraide. Moins de bruit, plus de vies sauvées.
+      effects: { wellbeing: 2, awareness: 1 }
+      score: 2
+
+- id: militant_voile_solaire
+  roles: [militant]
+  eras: [2060, 2070, 2080, 2090]
+  title: Voiler le soleil ?
+  text: Des pays veulent refroidir la planète en injectant des aérosols dans le ciel. Le mouvement climat est divisé.
+  options:
+    - id: contre
+      label: S'y opposer, c'est une fuite en avant
+      outcome: Tu organises une campagne mondiale. Des gens qui meurent de chaud ne comprennent pas.
+      effects: { awareness: 3 }
+      score: 3
+    - id: pour
+      label: Le soutenir comme dernier recours
+      outcome: Une partie du mouvement te tourne le dos.
+      effects: { wellbeing: 1, emissions: 1 }
+      score: 1
+    - id: condition
+      label: Exiger qu'il soit lié à une baisse rapide des émissions
+      outcome: Position nuancée. Difficile à faire tenir dans un slogan.
+      effects: { awareness: 1, emissions: -1 }
+      score: 2

@@ -1,0 +1,151 @@
+# Négociations mondiales (phase « Conflits »). Chaque groupe de pays (riches, émergents, en
+# développement) vote de son côté ; un accord n'est adopté que si tous les groupes qui ont voté
+# choisissent la même option. Sinon, c'est la 1re option (statu quo) qui s'applique.
+# → Toujours mettre le statu quo en premier, et prévoir au moins une option de compromis
+#   acceptable pour chaque groupe. Le premier vote dont `eras` et `when` correspondent est joué.
+- id: fonds_pertes_dommages
+  eras: [2026]
+  title: Fonds pertes et dommages
+  text: Les pays les plus exposés subissent des catastrophes qu'ils n'ont presque pas causées. Qui paie les dégâts ?
+  options:
+    - id: rien
+      label: Pas de fonds, chacun pour soi
+      effects: { wellbeing: -1 }
+    - id: volontaire
+      label: Un fonds de dons volontaires
+      effects: { wellbeing: 1, awareness: 1 }
+    - id: obligatoire
+      label: Un fonds obligatoire, payé selon les émissions passées
+      effects: { wellbeing: 3, gdp: -1, awareness: 2 }
+
+- id: sortie_charbon
+  eras: [2030]
+  title: Sortir du charbon
+  text: Le charbon est la 1re source de CO2. Les pays riches s'en sont servis pour se développer ; les autres en ont encore besoin.
+  options:
+    - id: rien
+      label: Pas de traité
+      effects: { emissions: 1, gdp: 1 }
+    - id: differencie
+      label: Sortie en 2040 pour les riches, 2050 pour les autres, avec une aide
+      effects: { emissions: -4, gdp: -1, employment: -1 }
+    - id: immediat
+      label: Sortie en 2035 pour tout le monde
+      effects: { emissions: -5, gdp: -2, employment: -2, wellbeing: -1 }
+
+- id: prix_carbone
+  eras: [2035]
+  title: Un prix mondial du carbone
+  text: Faire payer chaque tonne de CO2 émise, partout. Mais à qui revient l'argent ?
+  options:
+    - id: rien
+      label: Pas de prix mondial
+      effects: { gdp: 1 }
+    - id: national
+      label: Oui, chaque pays garde l'argent
+      effects: { emissions: -4, gdp: -1, wellbeing: -1 }
+    - id: redistribue
+      label: Oui, l'argent va aux pays à faibles revenus et aux ménages modestes
+      effects: { emissions: -4, gdp: -1, wellbeing: 1 }
+
+- id: moratoire_forets
+  eras: [2040]
+  title: Les forêts tropicales
+  text: L'Amazonie, le Congo et l'Indonésie perdent leurs forêts. Les pays forestiers veulent être payés pour les protéger.
+  options:
+    - id: rien
+      label: Chaque pays gère ses forêts
+      effects: { deforestation: 1, gdp: 1 }
+    - id: interdiction
+      label: Interdire la déforestation, sans compensation
+      effects: { deforestation: -4, gdp: -1, employment: -1 }
+    - id: compense
+      label: Interdire, et les pays riches paient les pays forestiers
+      effects: { deforestation: -5, gdp: -1, wellbeing: 1 }
+
+- id: technologies_vertes
+  eras: [2045]
+  title: Les technologies vertes pour tous
+  text: Les brevets des batteries et du solaire coûtent cher. Beaucoup de pays n'ont pas les moyens de les payer.
+  options:
+    - id: rien
+      label: Les brevets restent payants
+      effects: { gdp: 1 }
+    - id: prix_reduit
+      label: Des licences à prix réduit pour les pays à faibles revenus
+      effects: { emissions: -2 }
+    - id: gratuit
+      label: Licences gratuites, inventeurs payés par un fonds public
+      effects: { emissions: -3, gdp: -1, employment: 1 }
+
+- id: accord_methane
+  eras: [2050]
+  title: Le méthane
+  text: Le méthane réchauffe 80 fois plus que le CO2 sur 20 ans. Il vient des fuites de gaz et de l'élevage.
+  options:
+    - id: rien
+      label: Pas d'accord
+      effects: {}
+    - id: fuites
+      label: Colmater les fuites des puits et des gazoducs
+      effects: { emissions: -3, gdp: -1 }
+    - id: elevage
+      label: Colmater les fuites et réduire l'élevage industriel
+      effects: { emissions: -4, employment: -1, approval: -1 }
+
+- id: refugies_climatiques
+  eras: [2060]
+  title: Réfugiés climatiques
+  text: Des dizaines de millions de personnes fuient des régions invivables. Elles n'ont aucun statut légal.
+  options:
+    - id: rien
+      label: Pas de statut, chaque pays décide
+      effects: { wellbeing: -2 }
+    - id: aide_depart
+      label: Aider les pays de départ pour que les gens puissent rester
+      effects: { wellbeing: 1, gdp: -1 }
+    - id: statut
+      label: Un statut de réfugié, accueil réparti entre tous les pays
+      effects: { wellbeing: 3, approval: -2 }
+
+- id: voile_solaire
+  eras: [2070]
+  title: Voiler le soleil ?
+  text: "Des pays veulent refroidir la planète avec des aérosols dans le ciel. Risque : dérégler la mousson."
+  options:
+    - id: rien
+      label: Pas de règle, chacun fait ce qu'il veut
+      effects: { emissions: 1, wellbeing: -1 }
+    - id: interdire
+      label: Interdire, sauf pour la recherche
+      effects: { awareness: 1 }
+    - id: deployer
+      label: Un déploiement mondial encadré par l'ONU
+      effects: { wellbeing: 2, emissions: 2, awareness: -2 }
+
+- id: fleuves_partages
+  eras: [2080]
+  title: Les fleuves partagés
+  text: Nil, Indus, Mékong… Les pays en amont construisent des barrages, ceux en aval manquent d'eau.
+  options:
+    - id: rien
+      label: Pas de traité, chacun pompe ce qu'il peut
+      effects: { wellbeing: -2 }
+    - id: traite
+      label: Un traité de partage de l'eau
+      effects: { wellbeing: 2, gdp: -1 }
+
+- id: villes_cotieres
+  eras: [2090]
+  title: Les villes côtières
+  text: Lagos, Dacca, Jakarta, Miami… La mer monte. Les protéger coûte des milliers de milliards.
+  options:
+    - id: rien
+      label: Chaque pays protège ses côtes avec ses moyens
+      effects: { wellbeing: -2 }
+    - id: fonds
+      label: Un fonds mondial, payé surtout par les gros émetteurs
+      effects: { wellbeing: 3, gdp: -1 }
+    - id: relocaliser
+      label: Déplacer les habitants vers l'intérieur des terres
+      effects: { wellbeing: -1, employment: 1, deforestation: 1 }

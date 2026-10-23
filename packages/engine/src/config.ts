@@ -15,7 +15,7 @@ export const BASELINE_GDP_GROWTH = [
 ];
 
 /** How much the average player emissions effect (-10…+10) changes the persistent emissions factor per era (whatever its length). */
-export const EMISSIONS_SENSITIVITY = 0.07;
+export const EMISSIONS_SENSITIVITY = 0.09;
 export const DEFORESTATION_SENSITIVITY = 0.4;
 /** How much the average society effect (-10…+10) moves a 0–100 indicator per era. */
 export const SOCIETY_SENSITIVITY = 1.5;

@@ -4,20 +4,23 @@ Tout le contenu est dans `content/` en YAML. Pas besoin de coder : on peut édit
 
 ```
 content/
-  roles.yaml       les 4 rôles, leur objectif affiché, leur proportion, leur poids dans les votes
+  roles.yaml       les 6 rôles, leur objectif affiché, leur proportion, leur poids dans les votes
   cards/*.yaml     les cartes de microchoix (un fichier par thème ou par rôle, au choix)
   votes/*.yaml     les votes collectifs (phase « conflits »)
   events/*.yaml    les événements globaux automatiques (crises, catastrophes…)
 ```
 
-Les fichiers `exemples.yaml` de chaque dossier sont des exemples à remplacer.
+Les cartes sont rangées par rôle (`cards/elite.yaml`, `cards/citoyen.yaml`…) ; les cartes reçues d'un autre joueur sont dans `cards/interactions.yaml`. Les négociations sont dans `votes/negociations.yaml` ; `events/exemples.yaml` contient des exemples à remplacer.
+
+Ajouter un rôle demande aussi du code (liste `ROLES` dans `packages/shared/src/content.ts`, icône et couleur dans `apps/mobile/src/roles.ts`, `apps/screen/src/roles.ts` et `apps/screen/src/styles.css`) : demander à Vlad.
 
 ## Une carte
 
 ```yaml
 - id: citoyen_transport          # unique, snake_case, ne plus le changer une fois utilisé
-  roles: [citoyen]               # qui peut la recevoir : elite, citoyen, politique, militant
+  roles: [citoyen]               # qui peut la recevoir : elite, citoyen, politique, militant, agriculteur, journaliste
   eras: [2026, 2030, 2035]       # optionnel : ères où elle peut sortir (défaut : toutes)
+  regions: [riche, emergent]     # optionnel : groupes de pays où elle peut sortir (défaut : partout)
   title: Aller au travail
   text: Ton travail est loin…
   options:                       # 2 à 4 options
@@ -33,6 +36,22 @@ Les fichiers `exemples.yaml` de chaque dossier sont des exemples à remplacer.
 ```
 
 Ères possibles : 2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090 (la partie finit en 2100). Le jeu commence aujourd'hui : le passé depuis 1900 est raconté par le film d'introduction, pas par les cartes.
+
+## Les groupes de pays (`regions`)
+
+Chaque joueur vit dans un pays tiré au sort selon la population mondiale, et le garde toute la partie. Les pays sont rangés en 3 groupes :
+
+| groupe | exemples | part de la population (2026) | émissions par habitant |
+|---|---|---|---|
+| `riche` | États-Unis, UE, Japon, Russie | ~15 % | ~2 × la moyenne mondiale |
+| `emergent` | Chine, Brésil, Indonésie, Mexique | ~35 % | ~1,5 × la moyenne |
+| `developpement` | Inde, Nigeria, Bangladesh, Éthiopie | ~50 % | ~0,3 × la moyenne |
+
+- Une carte sans `regions` peut sortir partout : écrire des situations qui ont du sens dans les trois groupes, ou réserver la carte (`regions: [riche]` pour une ZFE ou une chaudière au fioul).
+- `content:check` signale un rôle qui n'a aucune carte dans un groupe à une ère.
+- Le moteur pondère les choix : un choix pollueur fait aux États-Unis pèse beaucoup plus qu'au Niger. Rien à faire côté contenu, les `effects` s'écrivent toujours à l'échelle d'une personne.
+- Dans `roles.yaml`, `share` peut être un nombre (même part partout) ou une part par groupe : `share: { riche: 4, emergent: 15, developpement: 26 }` (beaucoup plus d'agriculteur·rices dans les pays en développement).
+- Les chiffres (population, émissions par habitant, pays) sont dans `packages/engine/src/regions.ts`.
 
 ## Les effets (`effects`)
 
@@ -80,22 +99,31 @@ Sur une carte reçue via `sends`, une option peut renvoyer un message au joueur 
       reply: L'élu·e a dénoncé ta tentative de corruption.
 ```
 
-## Un vote
+## Un vote (négociation mondiale)
+
+Les votes sont des **négociations internationales**. Chaque groupe de pays vote de son côté (le vote des politiques compte triple) ; la position du groupe est l'option qui a le plus de voix chez lui. **Un accord n'est adopté que si tous les groupes qui ont voté choisissent la même option** (consensus, comme dans les sommets climat). Sinon, rien n'est adopté : c'est la 1re option (statu quo) qui s'applique.
+
+Principe détaillé, exemple et questions ouvertes : [docs/VOTES.md](VOTES.md).
+
+Donc : mettre le statu quo en premier, et écrire au moins une option de **compromis** que chaque groupe peut accepter (ex. « sortie du charbon en 2040 pour les pays riches, 2050 pour les autres, avec une aide »). Une option qui ne profite qu'à un groupe sera bloquée.
 
 ```yaml
-- id: loi_taxe_carbone
-  eras: [2040, 2045]
+- id: prix_carbone
+  eras: [2035, 2040]
   when: { indicator: awareness, gt: 30 }   # optionnel ; indicateurs : co2, temperature, seaLevel,
                                            # biodiversity, forest, gdp, employment, wellbeing, approval, awareness
-  title: Taxe carbone
-  text: Le parlement débat…
+  title: Un prix mondial du carbone
+  text: Faire payer chaque tonne de CO2 émise, partout dans le monde…
   options:
-    - id: contre          # mettre le statu quo en premier : il gagne en cas d'égalité
-      label: Rejeter
+    - id: rien            # statu quo en premier : il s'applique s'il n'y a pas d'accord
+      label: Pas de prix mondial
       effects: { gdp: 1 }
-    - id: pour
-      label: Adopter
-      effects: { emissions: -5, gdp: -1 }
+    - id: national
+      label: Un prix du carbone, chaque pays garde ses recettes
+      effects: { emissions: -4, gdp: -1, wellbeing: -1 }
+    - id: redistribue     # le compromis
+      label: Un prix du carbone, recettes reversées aux pays pauvres
+      effects: { emissions: -4, gdp: -1, wellbeing: 1 }
 ```
 
 À chaque ère, **le premier vote** (dans l'ordre des fichiers) dont `eras` et `when` correspondent est joué. Les effets d'un vote s'appliquent **en entier** (pas moyennés) : un vote pèse autant que tous les joueurs choisissant la même chose.

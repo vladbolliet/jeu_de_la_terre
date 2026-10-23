@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
 import { CircleCheck, Newspaper, TriangleAlert, Vote } from 'lucide-react';
-import type { OptionView, ScreenView } from '@jdlt/shared';
+import type { ScreenView } from '@jdlt/shared';
 import { CLIMATE, SOCIETY, type Indicator } from './Indicators.tsx';
+import { REGIONS, REGION_LABEL } from './roles.ts';
 import { TIPPING } from './tipping.ts';
 
 /** How long each global event stays on screen when there are several. */
 const EVENT_ROTATE_MS = 6000;
 
-/**
- * Full-screen era summary shown during the `feedback` phase.
- * `voteOptions` are the labels seen during the conflicts phase: VoteResult only
- * carries the winner's label, its tally is keyed by option id.
- */
-export function Feedback({ view, voteOptions }: { view: ScreenView; voteOptions: OptionView[] }) {
+/** Full-screen era summary shown during the `feedback` phase. */
+export function Feedback({ view }: { view: ScreenView }) {
   const { world } = view;
   // During feedback the world is already resolved: history[last] is the era just played.
   const prev = world.history.at(-1);
@@ -55,9 +52,7 @@ export function Feedback({ view, voteOptions }: { view: ScreenView; voteOptions:
             </div>
           ))}
           <Events events={view.events} />
-          {view.lastVoteResult && (
-            <VoteResultCard result={view.lastVoteResult} options={voteOptions} />
-          )}
+          {view.lastVoteResult && <VoteResultCard result={view.lastVoteResult} />}
         </div>
       </div>
     </section>
@@ -124,21 +119,19 @@ function Events({ events }: { events: ScreenView['events'] }) {
   );
 }
 
-function VoteResultCard({
-  result,
-  options,
-}: {
-  result: NonNullable<ScreenView['lastVoteResult']>;
-  options: OptionView[];
-}) {
-  const label = (id: string) =>
-    id === result.winner.id ? result.winner.label : (options.find((o) => o.id === id)?.label ?? id);
-  const entries = Object.entries(result.tally).sort((a, b) => b[1] - a[1]);
-  const total = entries.reduce((sum, [, n]) => sum + n, 0);
+function VoteResultCard({ result }: { result: NonNullable<ScreenView['lastVoteResult']> }) {
+  const label = (id: string) => result.options.find((o) => o.id === id)?.label ?? id;
+  const total = Object.values(result.tally).reduce((sum, n) => sum + n, 0);
+  const statusQuo = result.options[0]?.id;
+  const status = !result.agreement
+    ? 'Pas d’accord : rien ne change'
+    : result.winner.id === statusQuo
+      ? 'Tous refusent : rien ne change'
+      : 'Accord adopté';
   return (
     <div className="card vote-result">
       <div className="card-kicker">
-        <Vote className="icon" /> Vote · {result.title}
+        <Vote className="icon" /> Négociation · {result.title}
       </div>
       <h2>
         <CircleCheck className="icon winner-icon" /> {result.winner.label}
@@ -146,17 +139,21 @@ function VoteResultCard({
       {total === 0 ? (
         <p>Personne n'a voté : l'option par défaut s'applique.</p>
       ) : (
-        <ul className="tally">
-          {entries.map(([id, n]) => (
-            <li key={id} className={id === result.winner.id ? 'winner' : ''}>
-              <span className="tally-label">{label(id)}</span>
-              <div className="tally-bar">
-                <div style={{ width: `${total ? (n / total) * 100 : 0}%` }} />
-              </div>
-              <span className="tally-count">{Math.round(n)}</span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="deal-status">{status}</p>
+          <ul className="tally blocs-result">
+            {REGIONS.map((r) => {
+              const id = result.blocs[r].optionId;
+              return (
+                <li key={r} className={`region-${r}${id === result.winner.id ? ' winner' : ''}`}>
+                  <span className="bloc-dot" />
+                  <span className="tally-label">{REGION_LABEL[r]}</span>
+                  <span className="tally-count">{id === null ? 'abstention' : label(id)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </div>
   );

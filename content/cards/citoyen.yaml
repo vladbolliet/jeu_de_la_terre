@@ -1,0 +1,381 @@
+# Citoyen·nes. Objectif affiché : maximiser tes revenus, ta sécurité d'emploi et ton bien-être.
+# Ce sont 60 % des joueurs : leurs choix pèsent lourd dans la moyenne. Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: citoyen_transport
+  roles: [citoyen]
+  regions: [riche, emergent]
+  title: Aller au travail
+  text: Ton travail est à 25 km. La voiture met 30 minutes. Le bus puis le train, 1 h 10 avec une correspondance pas toujours à l'heure.
+  options:
+    - id: voiture
+      label: Voiture
+      outcome: Tu arrives à l'heure et détendu·e. Le plein te coûte cher chaque mois.
+      effects: { emissions: 4, wellbeing: 1 }
+      score: 3
+    - id: transports
+      label: Bus et train
+      outcome: Quand la correspondance saute, tu arrives en retard. Mais tu as lu deux livres ce mois-ci.
+      effects: { emissions: -2 }
+      score: 1
+    - id: covoiturage
+      label: Covoiturer avec deux collègues
+      outcome: Ça marche… tant que tout le monde finit à la même heure.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 2
+
+- id: citoyen_courses
+  roles: [citoyen]
+  regions: [riche, emergent]
+  title: Les courses de la semaine
+  text: Ton budget pour nourrir ta famille cette semaine est serré.
+  options:
+    - id: viande
+      label: Viande à presque tous les repas, plats préparés
+      outcome: Tout le monde est content à table. Le soja qui nourrit ces animaux vient de terres déboisées.
+      effects: { emissions: 3, deforestation: 2, wellbeing: 1 }
+      score: 3
+    - id: flexitarien
+      label: Moins de viande, plus de légumineuses
+      outcome: Il faut apprendre de nouvelles recettes. Les enfants râlent un peu.
+      effects: { emissions: -1, deforestation: -1 }
+      score: 2
+    - id: bio_local
+      label: Un panier hebdomadaire chez un·e agriculteur·rice du coin
+      outcome: Excellent, mais le budget de la semaine explose.
+      effects: { emissions: -1, deforestation: -1, employment: 1 }
+      score: 1
+      sends: { card: agriculteur_panier, toRole: agriculteur }
+
+- id: citoyen_vacances
+  roles: [citoyen]
+  regions: [riche]
+  title: Vacances d'été
+  text: Une compagnie low-cost propose Bali à 450 € aller-retour. Une semaine en Bretagne en train coûte presque pareil.
+  options:
+    - id: avion
+      label: Bali, une fois dans sa vie
+      outcome: Souvenirs inoubliables. Ce vol pèse autant que 2 ans de chauffage.
+      effects: { emissions: 4, wellbeing: 2 }
+      score: 4
+    - id: train
+      label: La Bretagne en train
+      outcome: Il a plu trois jours sur sept. Les enfants se sont quand même baignés.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 2
+    - id: maison
+      label: Rester chez toi et économiser
+      outcome: Tu mets de côté pour la rentrée. Tu tournes un peu en rond.
+      effects: { emissions: -1 }
+      score: 1
+
+- id: citoyen_epargne
+  roles: [citoyen]
+  regions: [riche, emergent]
+  title: Ton épargne
+  text: Ton banquier te propose trois placements pour tes économies.
+  options:
+    - id: rendement
+      label: Le fonds le plus rentable (pétrole, gaz, aviation)
+      outcome: +7 % cette année. Ton argent finance de nouveaux forages.
+      effects: { emissions: 3, gdp: 1 }
+      score: 4
+    - id: vert
+      label: Un fonds labellisé « vert »
+      outcome: +3 %. Tu découvres qu'il contient aussi des actions de compagnies pétrolières.
+      effects: { emissions: -1 }
+      score: 2
+    - id: local
+      label: Une coopérative d'énergie solaire de ta commune
+      outcome: +1 %. Mais les panneaux sur l'école, c'est un peu à toi.
+      effects: { emissions: -2, employment: 1 }
+      score: 1
+
+- id: citoyen_emploi
+  roles: [citoyen]
+  title: Offre d'emploi
+  text: Une raffinerie embauche avec un bon salaire et une prime. Une entreprise de rénovation énergétique paie 20 % de moins.
+  options:
+    - id: raffinerie
+      label: La raffinerie
+      outcome: Bon salaire, bons collègues. Le site risque de fermer d'ici 15 ans.
+      effects: { emissions: 3, employment: 2 }
+      score: 4
+    - id: renovation
+      label: La rénovation énergétique
+      outcome: Moins payé, mais un métier dont on aura besoin pendant des décennies.
+      effects: { emissions: -2, employment: 1 }
+      score: 2
+
+- id: citoyen_alerte
+  roles: [citoyen]
+  title: Ce que tu as vu
+  text: Au travail, tu découvres que ton entreprise cache des fuites de méthane sur un site. Les rapports officiels disent zéro.
+  options:
+    - id: silence
+      label: Ne rien dire, tu as un crédit à rembourser
+      outcome: Rien ne change. Tu y repenses souvent.
+      effects: { emissions: 1 }
+      score: 3
+    - id: interne
+      label: En parler à ta hiérarchie
+      outcome: On te remercie. Tu te demandes si ça aura des conséquences pour toi.
+      effects: {}
+      score: 1
+    - id: militants
+      label: Envoyer les documents à un collectif militant
+      outcome: Tu as envoyé le dossier anonymement. Tu as le cœur qui bat.
+      effects: { awareness: 1 }
+      score: 1
+      sends: { card: militant_lanceur_alerte, toRole: militant }
+
+# --- 2026–2035 ---
+- id: citoyen_chaudiere
+  roles: [citoyen]
+  regions: [riche]
+  eras: [2026, 2030, 2035]
+  title: Ta chaudière lâche
+  text: En plein mois de janvier, ta vieille chaudière au fioul tombe en panne. Il faut décider vite.
+  options:
+    - id: fioul
+      label: Une nouvelle chaudière fioul, installée demain
+      outcome: Tu as chaud ce soir. Elle va tourner 20 ans.
+      effects: { emissions: 4, wellbeing: 1 }
+      score: 4
+    - id: pac
+      label: Une pompe à chaleur avec l'aide de l'État
+      outcome: Trois semaines de dossiers et de radiateurs d'appoint. Puis des factures divisées par trois.
+      effects: { emissions: -3, employment: 1 }
+      score: 2
+    - id: isolation
+      label: Isoler d'abord, puis changer de chauffage
+      outcome: Gros chantier, gros prêt. Ta maison ne sera plus jamais une passoire.
+      effects: { emissions: -4, employment: 1, wellbeing: -1 }
+      score: 1
+
+- id: citoyen_voiture
+  roles: [citoyen]
+  regions: [riche, emergent]
+  eras: [2026, 2030, 2035, 2040]
+  title: Changer de voiture
+  text: Ta voiture a 18 ans. Le concessionnaire te propose un SUV d'occasion en promo ou une petite électrique en location aidée par l'État.
+  options:
+    - id: suv
+      label: Le SUV, spacieux et rassurant
+      outcome: Toute la famille est à l'aise. Il consomme 30 % de plus que ta vieille voiture.
+      effects: { emissions: 4, wellbeing: 1 }
+      score: 4
+    - id: electrique
+      label: La petite électrique en location
+      outcome: Il faut planifier les longs trajets. Le reste du temps, c'est parfait.
+      effects: { emissions: -2 }
+      score: 2
+    - id: garder
+      label: Garder l'ancienne et rouler moins
+      outcome: Elle tient encore. Le garagiste te connaît par ton prénom.
+      effects: { emissions: 1 }
+      score: 2
+
+- id: citoyen_zfe
+  roles: [citoyen]
+  regions: [riche]
+  eras: [2026, 2030, 2035]
+  title: Zone à faibles émissions
+  text: Ta vieille voiture diesel est désormais interdite en centre-ville, là où tu travailles. Tu n'as pas les moyens d'en racheter une.
+  options:
+    - id: petition
+      label: Signer la pétition contre la ZFE
+      outcome: 40 000 signatures en une semaine. Elle part à la mairie.
+      effects: { emissions: 1, approval: -1 }
+      score: 3
+      sends: { card: politique_petition_zfe, toRole: politique }
+    - id: amendes
+      label: Rouler quand même et payer les amendes
+      outcome: 68 € l'amende. Tu en as déjà trois.
+      effects: { emissions: 2 }
+      score: 2
+    - id: velo
+      label: Passer au vélo électrique avec la prime
+      outcome: Les premières semaines sous la pluie sont dures. Puis tu ne veux plus revenir en arrière.
+      effects: { emissions: -2, wellbeing: 1 }
+      score: 1
+
+- id: citoyen_vetements
+  roles: [citoyen]
+  regions: [riche, emergent]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Une notification
+  text: Ton appli de mode préférée propose -70 % sur toute la collection, livraison gratuite depuis l'Asie, ce soir seulement.
+  options:
+    - id: commander
+      label: Remplir le panier
+      outcome: Six colis arrivent. Deux vêtements ne t'iront jamais.
+      effects: { emissions: 2, wellbeing: 1 }
+      score: 3
+    - id: occasion
+      label: Chercher en seconde main
+      outcome: Tu trouves une veste de qualité pour presque rien.
+      effects: { emissions: -1 }
+      score: 2
+    - id: rien
+      label: Supprimer l'appli
+      effects: { emissions: -1 }
+      score: 1
+
+# --- 2040–2050 ---
+- id: citoyen_canicule
+  roles: [citoyen]
+  eras: [2040, 2045, 2050, 2060, 2070]
+  title: 40 °C dans l'appartement
+  text: Troisième canicule de l'été. Il fait 34 °C dans ta chambre la nuit. Tu ne dors plus.
+  options:
+    - id: clim
+      label: Acheter un climatiseur mobile
+      outcome: Enfin une nuit de sommeil. L'air chaud sort dans la rue et réchauffe celle des voisins.
+      effects: { emissions: 3, wellbeing: 2 }
+      score: 4
+    - id: volets
+      label: Volets fermés, ventilateur, journées à la médiathèque climatisée
+      outcome: Ça aide un peu. Tu es épuisé·e en septembre.
+      effects: { wellbeing: -1 }
+      score: 2
+    - id: copro
+      label: Convaincre ta copropriété d'isoler le toit et de planter la cour
+      outcome: Deux ans de réunions. Mais l'été suivant, l'immeuble a perdu 4 °C.
+      effects: { emissions: -1, wellbeing: 2, employment: 1 }
+      score: 1
+
+- id: citoyen_reconversion
+  roles: [citoyen]
+  regions: [riche, emergent]
+  eras: [2040, 2045, 2050]
+  title: Ton usine ferme
+  text: L'usine de moteurs thermiques où tu travailles depuis 20 ans ferme. On te propose une formation de 8 mois dans les pompes à chaleur, payée au salaire minimum.
+  options:
+    - id: formation
+      label: Accepter la formation
+      outcome: Retourner à l'école à 45 ans, c'est dur. Ce métier recrute partout.
+      effects: { employment: 1, emissions: -1 }
+      score: 2
+    - id: ailleurs
+      label: Chercher le même poste dans une usine à l'étranger
+      outcome: Tu pars loin de ta famille, pour le même salaire.
+      effects: { emissions: 1, wellbeing: -1 }
+      score: 3
+    - id: colere
+      label: Bloquer l'usine avec tes collègues
+      outcome: Les médias filment votre colère. Le gouvernement promet un plan social.
+      effects: { approval: -2, awareness: 1 }
+      score: 2
+
+- id: citoyen_maison
+  roles: [citoyen]
+  regions: [riche, emergent]
+  eras: [2040, 2045, 2050, 2060]
+  title: Acheter un logement
+  text: Tu peux enfin devenir propriétaire. Trois annonces correspondent à ton budget.
+  options:
+    - id: pavillon
+      label: Un pavillon neuf en lotissement, à 30 min de tout en voiture
+      outcome: Un jardin pour les enfants. Le lotissement a remplacé un bocage.
+      effects: { emissions: 2, deforestation: 2, wellbeing: 2 }
+      score: 4
+    - id: ancien
+      label: Une maison ancienne à rénover dans un bourg
+      outcome: Deux ans de travaux. Une maison qui consomme presque rien.
+      effects: { emissions: -1, employment: 1 }
+      score: 2
+    - id: appartement
+      label: Un appartement en ville, près du tram
+      outcome: Plus petit, mais tu n'as plus besoin de voiture.
+      effects: { emissions: -2 }
+      score: 2
+
+# --- 2060–2090 ---
+- id: citoyen_inondable
+  roles: [citoyen]
+  eras: [2060, 2070, 2080, 2090]
+  title: Zone inondable
+  text: Ta maison vient d'être classée en zone inondable. Elle a été inondée deux fois en cinq ans. Les prix vont s'effondrer.
+  options:
+    - id: vendre
+      label: Vendre vite, sans trop parler des inondations
+      outcome: Une jeune famille venue d'ailleurs achète. Tu évites de croiser leur regard.
+      effects: { wellbeing: -1 }
+      score: 4
+    - id: rester
+      label: Rester et surélever la maison
+      outcome: Ton épargne y passe. Tu restes chez toi, pour l'instant.
+      effects: { wellbeing: -1, employment: 1 }
+      score: 2
+    - id: relocalisation
+      label: Accepter le programme public de relocalisation
+      outcome: Tu es indemnisé·e à 70 %. Tu quittes le quartier où tu as grandi.
+      effects: { wellbeing: 1 }
+      score: 1
+
+- id: citoyen_chantier
+  roles: [citoyen]
+  eras: [2050, 2060, 2070, 2080, 2090]
+  title: Travailler sous 45 °C
+  text: Tu travailles sur un chantier. Il fait 45 °C à 15 h. Ton chef veut finir dans les délais.
+  options:
+    - id: continuer
+      label: Continuer, la paie est majorée
+      outcome: Un collègue fait un malaise. Le chantier est fini à temps.
+      effects: { wellbeing: -3, gdp: 1 }
+      score: 4
+    - id: horaires
+      label: Proposer de travailler de 4 h à 11 h
+      outcome: Ton chef accepte. Ta vie sociale, elle, en prend un coup.
+      effects: { wellbeing: 1 }
+      score: 2
+    - id: retrait
+      label: Exercer ton droit de retrait avec l'équipe
+      outcome: Le chantier s'arrête. Le syndicat obtient une nouvelle règle pour toute la région.
+      effects: { wellbeing: 2, gdp: -1, awareness: 1 }
+      score: 1
+
+- id: citoyen_voisins
+  roles: [citoyen]
+  regions: [riche, emergent]
+  eras: [2060, 2070, 2080, 2090]
+  title: Nouveaux voisins
+  text: Des familles qui ont dû quitter des côtes inondées s'installent dans ton quartier. Certains habitants s'inquiètent pour les loyers et les écoles.
+  options:
+    - id: indifference
+      label: Ne pas t'en mêler
+      effects: {}
+      score: 3
+    - id: hostile
+      label: Signer la pétition du quartier contre leur arrivée
+      outcome: Le quartier se divise. L'ambiance est lourde à la boulangerie.
+      effects: { wellbeing: -2 }
+      score: 3
+    - id: accueillir
+      label: Aider une famille à s'installer
+      outcome: Tu passes des week-ends en démarches. Les enfants deviennent inséparables.
+      effects: { wellbeing: 2, awareness: 1 }
+      score: 1
+
+- id: citoyen_rationnement
+  roles: [citoyen]
+  eras: [2070, 2080, 2090]
+  title: Coupures d'eau
+  text: L'eau est coupée de 14 h à 20 h tout l'été. Ton voisin a fait creuser un forage illégal dans son jardin et t'en propose.
+  options:
+    - id: forage
+      label: Accepter l'eau du forage
+      outcome: Ta douche quotidienne est sauvée. La nappe baisse pour tout le village.
+      effects: { wellbeing: -1 }
+      score: 3
+    - id: respecter
+      label: Respecter les coupures
+      outcome: Tu apprends à remplir des bidons le matin.
+      effects: { wellbeing: -1 }
+      score: 1
+    - id: recuperation
+      label: Installer une récupération d'eau de pluie avec la rue
+      outcome: Tout le quartier s'y met. Les voisins se parlent de nouveau.
+      effects: { wellbeing: 1, employment: 1 }
+      score: 2
