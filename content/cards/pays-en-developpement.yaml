@@ -91,7 +91,7 @@
     - id: rester
       label: Rester et monter une coopérative d'irrigation au goutte-à-goutte
       outcome: Deux saisons de travail avant les résultats. Puis la région reprend des couleurs.
-      effects: { wellbeing: 1, deforestation: -1 }
+      effects: { wellbeing: 1, deforestation: -1, capture: 1 }
       score: 1
 
 - id: citoyen_cyclone
@@ -116,7 +116,97 @@
       effects: { employment: -1 }
       score: 2
 
+- id: citoyen_bus_rapide
+  roles: [citoyen]
+  regions: [developpement, emergent]
+  eras: [2030, 2035, 2040, 2045, 2050, 2060]
+  title: La nouvelle ligne de bus
+  text: Une ligne de bus rapide sur voie réservée vient d'ouvrir dans ta ville. Ton salaire a augmenté et tu pourrais aussi t'acheter une voiture.
+  options:
+    - id: voiture
+      label: Acheter une voiture d'occasion
+      outcome: Plus de confort, mais tu passes des heures dans les embouteillages.
+      effects: { emissions: 3, wellbeing: 1 }
+      score: 4
+    - id: moto
+      label: Garder ta moto
+      outcome: Rapide et économique. Toujours un peu risqué sous la pluie.
+      effects: { emissions: 1 }
+      score: 3
+    - id: bus
+      label: Prendre le bus rapide
+      outcome: 25 minutes porte à porte, climatisé. Tu lis pendant le trajet.
+      effects: { emissions: -2, wellbeing: 1 }
+      score: 2
+
 # --- Agriculteur·rices ---
+- id: agriculteur_pompe
+  roles: [agriculteur]
+  regions: [developpement, emergent]
+  eras: [2026, 2030, 2035, 2040, 2045, 2050]
+  title: La pompe d'irrigation
+  text: Ta pompe d'irrigation est en panne. Un fournisseur propose deux modèles, et ta coopérative a un projet commun.
+  options:
+    - id: diesel
+      label: Une pompe au diesel, la moins chère à l'achat
+      outcome: Elle tourne dès demain. Le prix du carburant varie beaucoup.
+      effects: { emissions: 2, gdp: 1 }
+      score: 4
+    - id: solaire
+      label: Une pompe solaire, payée en trois saisons
+      outcome: Plus chère au départ, puis plus aucun carburant à acheter.
+      effects: { emissions: -2 }
+      score: 2
+    - id: goutte
+      label: Un réseau de goutte-à-goutte partagé avec la coopérative
+      outcome: Deux fois moins d'eau pour la même récolte. Il faut s'organiser à plusieurs.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 2
+
+- id: agriculteur_vente_ville
+  roles: [agriculteur]
+  regions: [developpement, emergent]
+  title: Vendre en ville
+  text: Une appli met en relation les producteurs et les restaurants de la capitale. Il faut livrer vite et garder les produits frais.
+  options:
+    - id: pickup
+      label: Acheter un pick-up diesel d'occasion pour livrer toi-même
+      outcome: Tu vends plus cher et tu gardes toute la marge. Le pick-up consomme beaucoup.
+      effects: { emissions: 2, gdp: 1 }
+      score: 4
+    - id: cooperative
+      label: Regrouper les livraisons avec la coopérative
+      outcome: Une tournée commune trois fois par semaine. Moins de marge, moins de route.
+      effects: { emissions: -1, employment: 1 }
+      score: 2
+    - id: froid
+      label: Une chambre froide solaire pour vendre au meilleur moment
+      outcome: Plus rien ne se perd. Tu vends quand les prix sont hauts.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 3
+
+- id: agriculteur_arbres
+  roles: [agriculteur]
+  regions: [developpement, emergent]
+  eras: [2040, 2045, 2050, 2060, 2070, 2080, 2090]
+  title: Planter des arbres
+  text: Une entreprise propose de te payer pour planter des arbres sur une partie de tes terres, en échange de crédits carbone.
+  options:
+    - id: eucalyptus
+      label: Planter des eucalyptus, qui poussent vite et paient vite
+      outcome: Paiement rapide. Ces arbres boivent beaucoup d'eau et la biodiversité ne revient pas.
+      effects: { wellbeing: -1, gdp: 1 }
+      score: 4
+    - id: fruitiers
+      label: Planter des arbres fruitiers et des essences locales entre tes cultures
+      outcome: Moins payé, mais tu récoltes des fruits et ton sol se porte mieux.
+      effects: { deforestation: -2, wellbeing: 1, capture: 2 }
+      score: 2
+    - id: refuser
+      label: Refuser et garder toutes tes terres en cultures
+      effects: {}
+      score: 2
+
 - id: agriculteur_brulis
   roles: [agriculteur]
   regions: [developpement, emergent]
@@ -136,7 +226,7 @@
     - id: agroforesterie
       label: Planter le cacao sous les grands arbres
       outcome: Rendements plus faibles, mais la forêt reste debout et ta terre ne s'épuise plus.
-      effects: { deforestation: -2 }
+      effects: { deforestation: -2, capture: 1 }
       score: 1
 
 - id: agriculteur_semences

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadContent } from '@jdlt/engine/load';
-import { createRng } from '@jdlt/engine';
+import { createRng, greenOptionIds } from '@jdlt/engine';
 import { Game, type GameOptions } from '../src/game.ts';
 import { FALLBACK_TODAY } from '../src/today.ts';
 
@@ -353,6 +353,57 @@ describe('groups of countries', () => {
       const v = g.playerView(id)!;
       expect(v.hand.length).toBe(v.me.region === 'riche' ? 1 : 0);
     }
+    g.stop();
+  });
+});
+
+describe('cards never repeat', () => {
+  it('deals every player a different card in each of the 10 eras', () => {
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const g = new Game(content, opts({ rng: createRng(seed) }));
+      const ids = Array.from({ length: 100 }, (_, i) => g.join(`p${i}`).id);
+      const got = new Map<string, string[]>(ids.map((id) => [id, []]));
+      g.start();
+      g.next(); // skip the intro
+      for (let era = 0; era < 10; era++) {
+        for (const id of ids) {
+          const card = g.playerView(id)!.hand[0];
+          expect(card, `seed ${seed}, era ${era}: no card`).toBeDefined();
+          got.get(id)!.push(card!.cardId);
+          g.choose(id, card!.instanceId, card!.options[0]!.id);
+        }
+        g.next(); // conflicts
+        g.next(); // feedback
+        g.next(); // next era (or the end)
+      }
+      expect(g.phase).toBe('ended');
+      for (const cards of got.values()) expect(new Set(cards).size).toBe(cards.length);
+      g.stop();
+    }
+  });
+});
+
+describe('green ranking', () => {
+  it('counts green choices and ranks players by them', () => {
+    const g = new Game(content, opts());
+    const ids = Array.from({ length: 6 }, (_, i) => g.join(`p${i}`).id);
+    g.start();
+    g.next(); // skip the intro
+    ids.forEach((id, i) => {
+      const card = g.playerView(id)!.hand[0]!;
+      const full = content.cards.find((c) => c.id === card.cardId)!;
+      const green = greenOptionIds(full);
+      // Even players pick a green option when there is one, odd players the worst one.
+      const pick =
+        i % 2 === 0 && green.length
+          ? green[0]!
+          : full.options.find((o) => !green.includes(o.id))!.id;
+      g.choose(id, card.instanceId, pick);
+      expect(g.playerView(id)!.me.green).toBe(i % 2 === 0 && green.length ? 1 : 0);
+    });
+    const board = g.screenView().leaderboard;
+    for (let i = 1; i < board.length; i++)
+      expect(board[i - 1]!.green).toBeGreaterThanOrEqual(board[i]!.green);
     g.stop();
   });
 });

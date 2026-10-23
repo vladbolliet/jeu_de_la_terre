@@ -15,7 +15,11 @@ export const BASELINE_GDP_GROWTH = [
 ];
 
 /** How much the average player emissions effect (-10…+10) changes the persistent emissions factor per era (whatever its length). */
-export const EMISSIONS_SENSITIVITY = 0.09;
+export const EMISSIONS_SENSITIVITY = 0.12;
+/** Gt/yr of lasting CO2 removal built per era by an average `capture` effect of 1. */
+export const CAPTURE_SENSITIVITY = 3;
+/** Upper bound of CO2 removal (Gt/yr): land and storage sites are limited. */
+export const MAX_CAPTURE_RATE = 20;
 export const DEFORESTATION_SENSITIVITY = 0.4;
 /** How much the average society effect (-10…+10) moves a 0–100 indicator per era. */
 export const SOCIETY_SENSITIVITY = 1.5;

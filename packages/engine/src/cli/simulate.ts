@@ -15,6 +15,7 @@ import {
 import { loadContent } from '../load.ts';
 import { initialWorld, resolveEra, type Decision } from '../climate.ts';
 import { nextRegion, regionWeights } from '../regions.ts';
+import { climateCost, dealableCards, pickFreshCard } from '../cards.ts';
 import { createRng, pick } from '../rng.ts';
 
 const { values } = parseArgs({
@@ -30,7 +31,7 @@ const { content } = loadContent();
 
 // Same assignment as the server: group by population, then role by its share in the group.
 const regionCounts: Record<Region, number> = { riche: 0, emergent: 0, developpement: 0 };
-const roster: { role: Role; region: Region }[] = [];
+const roster: { role: Role; region: Region; seen: Set<string> }[] = [];
 for (let i = 0; i < players; i++) {
   const region = nextRegion(0, regionCounts);
   const inRegion = roster.filter((p) => p.region === region);
@@ -42,7 +43,7 @@ for (let i = 0; i < players; i++) {
     return deficit(r) > deficit(best) ? r : best;
   }).id;
   regionCounts[region]++;
-  roster.push({ role, region });
+  roster.push({ role, region, seen: new Set() });
 }
 console.log(
   REGIONS.map((r) => `${r}=${regionCounts[r]}`).join(' '),
@@ -53,7 +54,7 @@ const chooseOption = (card: Card): Option => {
   const opts = card.options;
   if (values.strategy === 'greedy') return opts.reduce((a, b) => (b.score > a.score ? b : a));
   if (values.strategy === 'green')
-    return opts.reduce((a, b) => ((b.effects.emissions ?? 0) < (a.effects.emissions ?? 0) ? b : a));
+    return opts.reduce((a, b) => (climateCost(b.effects) < climateCost(a.effects) ? b : a));
   return pick(opts, rng)!;
 };
 
@@ -63,16 +64,12 @@ const rows = [];
 for (const [eraIndex, era] of ERAS.entries()) {
   const weights = regionWeights(eraIndex, regionCounts);
   const decisions: Decision[] = [];
-  for (const { role, region } of roster) {
-    const pool = content.cards.filter(
-      (c) =>
-        !c.interactionOnly &&
-        c.roles.includes(role) &&
-        (!c.eras || c.eras.includes(era)) &&
-        (!c.regions || c.regions.includes(region)),
-    );
-    const card = pick(pool, rng);
-    if (card) decisions.push({ effects: chooseOption(card).effects, weight: weights[region] });
+  for (const { role, region, seen } of roster) {
+    // Same dealing as the server: a player never gets the same card twice.
+    const card = pickFreshCard(dealableCards(content.cards, role, region), era, seen, rng);
+    if (!card) continue;
+    seen.add(card.id);
+    decisions.push({ effects: chooseOption(card).effects, weight: weights[region] });
   }
   const events = content.events.filter(
     (e) => !fired.has(e.id) && (!e.eras || e.eras.includes(era)) && conditionHolds(world, e.when),
@@ -94,6 +91,7 @@ for (const [eraIndex, era] of ERAS.entries()) {
     biodiv: c.biodiversity.toFixed(0),
     PIB: world.society.gdp.toFixed(0),
     'Gt/an': res.emissions.toFixed(1),
+    'captage Gt/an': world.captureRate.toFixed(1),
     bascules: res.newTippingPoints.join(' '),
     événements: events.map((e) => e.id).join(' '),
   });

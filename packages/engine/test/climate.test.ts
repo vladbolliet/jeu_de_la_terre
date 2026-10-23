@@ -23,6 +23,20 @@ describe('resolveEra', () => {
     expect(run(0).climate.temperature).toBeGreaterThan(1.5);
   });
 
+  it('a very green game makes the temperature go back down before 2100', () => {
+    let w = initialWorld();
+    let peak = w.climate.temperature;
+    for (const _ of ERAS) {
+      w = resolveEra(w, {
+        decisions: [{ effects: { emissions: -5, capture: 3 } }],
+        playerCount: 1,
+        collective: [],
+      }).world;
+      peak = Math.max(peak, w.climate.temperature);
+    }
+    expect(w.climate.temperature).toBeLessThan(peak - 0.2);
+  });
+
   it('polluting choices warm more than green ones', () => {
     expect(run(8).climate.temperature).toBeGreaterThan(run(-8).climate.temperature);
   });

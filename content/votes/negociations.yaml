@@ -61,7 +61,7 @@
       effects: { deforestation: -4, gdp: -1, employment: -1 }
     - id: compense
       label: Interdire, et les pays riches paient les pays forestiers
-      effects: { deforestation: -5, gdp: -1, wellbeing: 1 }
+      effects: { deforestation: -5, gdp: -1, wellbeing: 1, capture: 2 }
 
 - id: technologies_vertes
   eras: [2045]
@@ -122,6 +122,9 @@
     - id: deployer
       label: Un déploiement mondial encadré par l'ONU
       effects: { wellbeing: 2, emissions: 2, awareness: -2 }
+    - id: capture
+      label: Plutôt un fonds mondial pour retirer le CO2 de l'air
+      effects: { capture: 3, gdp: -1 }
 
 - id: fleuves_partages
   eras: [2080]

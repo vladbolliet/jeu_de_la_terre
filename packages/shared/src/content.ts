@@ -43,12 +43,14 @@ const EraSchema = z.literal(ERAS);
  * Effects of a choice. Scale: -10 (very negative) … +10 (very positive) per player.
  * The engine averages effects over all players, so balance does not depend on head count.
  * - emissions / deforestation: drivers of the climate model (positive = more pollution)
+ * - capture: CO2 removed from the air (reforestation, soils, direct capture); builds a lasting capacity
  * - the others: society indicators (positive = increases)
  */
 export const EffectsSchema = z
   .object({
     emissions: z.number().min(-10).max(10).optional(),
     deforestation: z.number().min(-10).max(10).optional(),
+    capture: z.number().min(0).max(10).optional(),
     gdp: z.number().min(-10).max(10).optional(),
     employment: z.number().min(-10).max(10).optional(),
     wellbeing: z.number().min(-10).max(10).optional(),

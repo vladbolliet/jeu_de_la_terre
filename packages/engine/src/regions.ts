@@ -83,6 +83,7 @@ export function regionWeights(
     out[r] = {
       emissions: representation * emissions[r],
       deforestation: representation * deforestation[r],
+      capture: representation,
       gdp: representation,
       employment: representation,
       wellbeing: representation,

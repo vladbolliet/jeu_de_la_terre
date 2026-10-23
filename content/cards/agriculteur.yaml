@@ -87,7 +87,7 @@
     - id: planter
       label: Planter des haies et des arbres dans tes champs (agroforesterie)
       outcome: Les oiseaux reviennent et mangent les ravageurs. Les arbres rapporteront dans 15 ans.
-      effects: { deforestation: -3, emissions: -1 }
+      effects: { deforestation: -3, emissions: -1, capture: 2 }
       score: 1
 
 # --- 2026–2035 ---
@@ -266,7 +266,7 @@
     - id: mediterraneen
       label: Planter oliviers, amandiers et pistachiers
       outcome: Les premiers fruits dans sept ans. Il faut tenir jusque-là.
-      effects: { emissions: -1, deforestation: -1 }
+      effects: { emissions: -1, deforestation: -1, capture: 1 }
       score: 2
     - id: semences
       label: Sélectionner tes propres semences avec d'autres paysan·nes

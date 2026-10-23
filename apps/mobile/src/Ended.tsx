@@ -27,7 +27,7 @@ const VERDICT = {
 
 /** End of the game: final score, then the impact of every choice (effects are only sent now). */
 export function Ended({ view }: { view: PlayerView }) {
-  const score = useCountUp(view.me.score);
+  const green = useCountUp(view.me.green);
   const { trend, polluting, clean } = emissionsBalance(view.history);
   const verdict = VERDICT[trend];
   const VerdictIcon = verdict.icon;
@@ -37,9 +37,13 @@ export function Ended({ view }: { view: PlayerView }) {
         <div className="final-flag">
           <Flag aria-hidden />
         </div>
-        <p className="final-label">Fin de la partie · score final</p>
+        <p className="final-label">Fin de la partie · tes choix verts</p>
         <p className="final-score">
-          {score} <small>pts</small>
+          {green} <small>{view.me.green > 1 ? 'choix verts' : 'choix vert'}</small>
+        </p>
+        <p className="muted">
+          Le classement final compte les choix les plus verts. Ton score de rôle : {view.me.score}{' '}
+          pts.
         </p>
       </section>
 

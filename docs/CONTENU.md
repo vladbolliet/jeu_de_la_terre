@@ -35,6 +35,8 @@ Ajouter un rôle demande aussi du code (liste `ROLES` dans `packages/shared/src/
       score: 1
 ```
 
+**Pas de répétition** : un joueur ne reçoit jamais deux fois la même carte (ni tirée au hasard, ni envoyée par un autre joueur). Chaque rôle a donc besoin, dans chaque groupe de pays, d'assez de cartes différentes pour couvrir les 10 ères ; `pnpm content:check` le vérifie. Une carte sans `eras` peut sortir à n'importe quelle ère, mais une seule fois par joueur.
+
 Ères possibles : 2026, 2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090 (la partie finit en 2100). Le jeu commence aujourd'hui : le passé depuis 1900 est raconté par le film d'introduction, pas par les cartes.
 
 ## Les groupes de pays (`regions`)
@@ -61,6 +63,7 @@ Chaque joueur vit dans un pays tiré au sort selon la population mondiale, et le
 |---|---|
 | `emissions` | + = plus de CO2 (accumule : un choix pollueur rend toutes les ères suivantes plus polluantes) |
 | `deforestation` | + = plus de forêts détruites |
+| `capture` | + = CO2 retiré de l'air (reboisement, mangroves, sols, capture directe), de 0 à 10. Construit une capacité qui dure : c'est ce qui fait **redescendre** la température |
 | `gdp` | + = croissance économique |
 | `employment` | + = plus d'emplois |
 | `wellbeing` | + = bien-être de la population |
@@ -68,6 +71,14 @@ Chaque joueur vit dans un pays tiré au sort selon la population mondiale, et le
 | `awareness` | + = sensibilisation du public (débloque des votes, ex. taxe carbone si > 30) |
 
 **Règle d'or** : le joueur ne voit jamais les effets, seulement le `label`. L'option la plus rentable pour son `score` (son objectif de rôle) doit souvent être la plus polluante. C'est le cœur pédagogique.
+
+## Le classement final : les choix les plus verts
+
+Le podium de fin classe les joueurs par **nombre de choix verts** (à égalité : le score de rôle). Sur chaque carte, l'option verte est celle qui coûte le moins à la planète :
+
+`emissions + deforestation − capture − ½ × awareness`
+
+La sensibilisation compte à moitié pour que journalistes et militant·es puissent aussi faire des choix verts. Une carte dont toutes les options ont le même coût (ex. un dilemme purement social) n'offre pas de choix vert. Le `score` des options reste le score de rôle (objectif affiché), montré sur le téléphone à la fin.
 
 ## Impact croisé entre joueurs (`sends`)
 
@@ -150,5 +161,5 @@ pnpm simulate --strategy green         # tout le monde choisit l'option la moins
 pnpm simulate --strategy random
 ```
 
-Objectif d'équilibrage suggéré : `greedy` → ~3,5–4,5 °C en 2100, `green` → < 2 °C. Si `green` dépasse 2 °C, les cartes n'offrent pas assez de vraies alternatives ; si `greedy` reste sous 2 °C, les incitations ne sont pas assez fortes.
+Objectif d'équilibrage suggéré : `greedy` → ~3,5–4,5 °C en 2100, `green` → < 2 °C, avec un pic vers 2045–2050 puis une baisse (`green` choisit l'option où `emissions − capture` est le plus bas). Si `green` dépasse 2 °C, les cartes n'offrent pas assez de vraies alternatives ; si `greedy` reste sous 2 °C, les incitations ne sont pas assez fortes.
 Les constantes du modèle (émissions de base par ère, seuils des points de bascule…) sont dans `packages/engine/src/config.ts` : à modifier avec Vlad.

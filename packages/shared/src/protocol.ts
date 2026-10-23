@@ -76,6 +76,8 @@ export interface PlayerView {
     roleName: string;
     objective: string;
     score: number;
+    /** Choices that were the best for the planet on their card (see greenOptionIds). */
+    green: number;
     region: Region;
     regionName: string;
     country: string;
@@ -151,7 +153,8 @@ export interface ScreenView {
   lastVoteResult: VoteResult | null;
   /** Tipping points crossed during the last resolved era. */
   newTippingPoints: TippingPointId[];
-  leaderboard: { role: Role; name: string; score: number }[];
+  /** Top players by number of green choices (ties: role score). */
+  leaderboard: { role: Role; name: string; score: number; green: number }[];
   roleStats: Record<Role, RoleEraStats>;
   /** Global events that fired at the end of the last resolved era (shown during feedback). */
   events: { id: string; title: string; text: string }[];

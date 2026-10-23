@@ -9,6 +9,7 @@ import {
   regionWeights,
 } from '../src/regions.ts';
 import { createRng } from '../src/rng.ts';
+import { climateCost, greenOptionIds } from '../src/cards.ts';
 
 const fill = (n: number, eraIndex = 0) => {
   const counts: Record<Region, number> = { riche: 0, emergent: 0, developpement: 0 };
@@ -57,5 +58,30 @@ describe('regions', () => {
       expect(COUNTRIES).toContain(c);
       expect(c.region).toBe(r);
     }
+  });
+});
+
+describe('green choices', () => {
+  const option = (id: string, effects: Record<string, number>) => ({
+    id,
+    label: id,
+    effects,
+    score: 0,
+  });
+  it('the green option is the best for the planet', () => {
+    const card = {
+      options: [
+        option('car', { emissions: 3 }),
+        option('bike', { emissions: -2 }),
+        option('trees', { emissions: -1, capture: 2 }),
+      ],
+    };
+    expect(greenOptionIds(card)).toEqual(['trees']);
+    expect(climateCost({ emissions: 2, capture: 1, awareness: 2 })).toBe(0);
+  });
+  it('a card whose options all cost the same has no green option', () => {
+    expect(
+      greenOptionIds({ options: [option('a', { gdp: 2 }), option('b', { gdp: -1 })] }),
+    ).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { Trophy } from 'lucide-react';
+import { Sprout } from 'lucide-react';
 import '@fontsource-variable/space-grotesk';
 import type { ScreenView } from '@jdlt/shared';
 import { ROLE_ICON, ROLE_LABEL } from './roles.ts';
@@ -8,15 +8,15 @@ type Entry = ScreenView['leaderboard'][number];
 /** Podium order: 2nd on the left, 1st in the middle, 3rd on the right. */
 const PODIUM_ORDER = [1, 0, 2];
 
-/** Final ranking: podium for the top 3, then the others with score bars. */
+/** Final ranking by number of green choices: podium for the top 3, then the others with bars. */
 export function Leaderboard({ entries }: { entries: Entry[] }) {
-  const top = Math.max(1, ...entries.map((e) => e.score));
+  const top = Math.max(1, ...entries.map((e) => e.green));
   const rest = entries.slice(3);
 
   return (
     <div className="card leaderboard">
       <div className="card-kicker">
-        <Trophy className="icon" /> Classement
+        <Sprout className="icon" /> Les choix les plus verts
       </div>
       {entries.length === 0 ? (
         <p className="leaderboard-empty">Aucun joueur</p>
@@ -42,9 +42,9 @@ export function Leaderboard({ entries }: { entries: Entry[] }) {
                   </span>
                   <span className="name">{e.name}</span>
                   <span className="bar">
-                    <i style={{ width: `${(Math.max(0, e.score) / top) * 100}%` }} />
+                    <i style={{ width: `${(e.green / top) * 100}%` }} />
                   </span>
-                  <span className="score">{e.score}</span>
+                  <span className="score">{e.green}</span>
                 </li>
               );
             })}
@@ -67,8 +67,8 @@ function PodiumPlace({ rank, entry }: { rank: number; entry: Entry }) {
         </span>
       </div>
       <div className="podium-step">
-        <span className="score">{entry.score}</span>
-        <span className="unit">pts</span>
+        <span className="score">{entry.green}</span>
+        <span className="unit">choix verts</span>
       </div>
     </div>
   );

@@ -39,6 +39,8 @@ export interface World {
   society: Society;
   /** Persistent multiplier on baseline emissions, shaped by accumulated choices. */
   emissionsFactor: number;
+  /** CO2 removed from the air each year (Gt/yr): forests, soils, capture plants built by choices. */
+  captureRate: number;
   tippingPoints: TippingPointId[];
   history: EraSnapshot[];
 }

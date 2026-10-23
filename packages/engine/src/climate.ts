@@ -12,9 +12,11 @@ import {
   BASELINE_DEFORESTATION,
   BASELINE_EMISSIONS,
   BASELINE_GDP_GROWTH,
+  CAPTURE_SENSITIVITY,
   CLIMATE_SENSITIVITY,
   DEFORESTATION_SENSITIVITY,
   EMISSIONS_SENSITIVITY,
+  MAX_CAPTURE_RATE,
   PREINDUSTRIAL_CO2,
   SOCIETY_SENSITIVITY,
   TEMPERATURE_INERTIA,
@@ -29,7 +31,7 @@ const GT_PER_PPM = 7.8;
 /** Share of emitted CO2 staying in the atmosphere at first (the rest goes to oceans and plants). */
 const AIRBORNE_FRACTION = 0.75;
 /** Share of the CO2 excess over pre-industrial absorbed back by natural sinks each year. */
-const CO2_SINK = 0.012;
+const CO2_SINK = 0.014;
 
 /** Today's world (2026). `climate` overrides it with real measurements (see the server). */
 export function initialWorld(climate: Partial<Climate> = {}): World {
@@ -45,6 +47,7 @@ export function initialWorld(climate: Partial<Climate> = {}): World {
     },
     society: { gdp: 100, employment: 60, wellbeing: 55, approval: 50, awareness: 35 },
     emissionsFactor: 1,
+    captureRate: 0,
     tippingPoints: [],
     history: [],
   };
@@ -63,6 +66,7 @@ export function meanEffects(decisions: Decision[], playerCount: number): Require
   const keys: EffectKey[] = [
     'emissions',
     'deforestation',
+    'capture',
     'gdp',
     'employment',
     'wellbeing',
@@ -108,7 +112,13 @@ export function resolveEra(world: World, input: EraInput): EraResult {
     0.05,
     world.emissionsFactor * (1 + avg.emissions * EMISSIONS_SENSITIVITY),
   );
-  const emissions = (BASELINE_EMISSIONS[eraIndex] ?? 0) * emissionsFactor;
+  // Removal capacity lasts, like planted forests or capture plants (missing in old saves).
+  const captureRate = Math.min(
+    MAX_CAPTURE_RATE,
+    Math.max(0, (world.captureRate ?? 0) + avg.capture * CAPTURE_SENSITIVITY),
+  );
+  // Net emissions (Gt/yr): negative once removals exceed what is still emitted.
+  const emissions = (BASELINE_EMISSIONS[eraIndex] ?? 0) * emissionsFactor - captureRate;
 
   const c = { ...world.climate };
   const crossedBefore = new Set(world.tippingPoints);
@@ -159,6 +169,7 @@ export function resolveEra(world: World, input: EraInput): EraResult {
       climate: c,
       society: s,
       emissionsFactor,
+      captureRate,
       tippingPoints: [...world.tippingPoints, ...newTippingPoints],
       history: [
         ...world.history,

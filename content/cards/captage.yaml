@@ -1,0 +1,149 @@
+# Retirer du CO2 de l'air (effet `capture`) : reboisement, mangroves, tourbières, sols agricoles,
+# matériaux qui stockent le carbone, capture directe. C'est ce qui permet à la température de
+# redescendre avant 2100. Voir docs/CONTENU.md.
+
+# --- Élite industrielle ---
+- id: elite_capture_directe
+  roles: [elite]
+  eras: [2040, 2045, 2050, 2060, 2070, 2080, 2090]
+  title: Aspirer le CO2
+  text: Des ingénieurs te proposent de construire une usine qui retire le CO2 de l'air et le stocke sous terre, alimentée par l'énergie géothermique. Rentable seulement à long terme.
+  options:
+    - id: habituel
+      label: Investir plutôt dans tes activités habituelles
+      outcome: Tes marges restent confortables cette année.
+      effects: { emissions: 1, gdp: 1 }
+      score: 4
+    - id: promesses
+      label: Vendre des crédits de « captage futur » sans rien construire
+      outcome: L'argent rentre tout de suite. L'usine reste sur le papier.
+      effects: { awareness: -1 }
+      score: 3
+    - id: construire
+      label: Construire l'usine
+      outcome: Des années avant d'être rentable. Elle retirera des millions de tonnes de CO2.
+      effects: { capture: 4, gdp: -1, employment: 1 }
+      score: 1
+
+- id: elite_beton_carbone
+  roles: [elite]
+  eras: [2030, 2035, 2040, 2045, 2050, 2060, 2070]
+  title: Un béton qui stocke le carbone
+  text: Une startup a mis au point un béton qui absorbe du CO2 en durcissant, et des panneaux en bois et chanvre. Ils coûtent un peu plus cher que le béton classique.
+  options:
+    - id: classique
+      label: Rester au béton classique
+      outcome: Tes chantiers tournent comme avant.
+      effects: { emissions: 2, gdp: 1 }
+      score: 4
+    - id: carbone
+      label: Passer au béton qui stocke le CO2
+      outcome: Tes nouveaux immeubles gardent du carbone dans leurs murs pour des siècles.
+      effects: { capture: 2, emissions: -1 }
+      score: 2
+    - id: bois
+      label: Construire en bois et en chanvre issus de forêts gérées
+      outcome: Un nouveau savoir-faire à apprendre. Chaque bâtiment devient un puits de carbone.
+      effects: { capture: 3, employment: 1, gdp: -1 }
+      score: 1
+
+# --- Politiques ---
+- id: politique_reboisement
+  roles: [politique]
+  title: Un grand plan de reboisement
+  text: Ton ministère propose de reboiser des millions d'hectares de terres abîmées. Le budget est serré.
+  options:
+    - id: impots
+      label: Garder l'argent pour baisser les impôts
+      outcome: Mesure populaire. Les terres restent nues.
+      effects: { approval: 2 }
+      score: 4
+    - id: affichage
+      label: Planter vite une seule espèce, pour les photos
+      outcome: Belles images. Beaucoup de jeunes arbres meurent à la première sécheresse.
+      effects: { capture: 1, approval: 1 }
+      score: 3
+    - id: forets
+      label: Restaurer des forêts variées avec les habitants
+      outcome: Lent et peu spectaculaire. Dans dix ans, ces forêts absorberont énormément de CO2.
+      effects: { capture: 3, deforestation: -3, employment: 1, approval: -1 }
+      score: 1
+
+- id: politique_mangroves
+  roles: [politique]
+  eras: [2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090]
+  title: Protéger les côtes
+  text: La mer menace le littoral. On peut construire une digue en béton ou restaurer les mangroves et les marais qui amortissent les vagues.
+  options:
+    - id: digue
+      label: Une grande digue en béton
+      outcome: Un chantier impressionnant, inauguré devant les caméras.
+      effects: { emissions: 2, approval: 2, employment: 1 }
+      score: 4
+    - id: mangroves
+      label: Restaurer les mangroves et les marais
+      outcome: Ça prend quelques années. Ces zones humides stockent 4 fois plus de carbone qu'une forêt.
+      effects: { capture: 3, wellbeing: 1, approval: -1 }
+      score: 2
+
+# --- Citoyen·nes ---
+- id: citoyen_plantation
+  roles: [citoyen]
+  title: Un week-end de plantation
+  text: Ta commune organise une grande plantation d'arbres et de haies ce week-end. Tu avais prévu de te reposer.
+  options:
+    - id: repos
+      label: Te reposer, ta semaine a été longue
+      outcome: Un vrai week-end de repos.
+      effects: { wellbeing: 1 }
+      score: 3
+    - id: planter
+      label: Aller planter avec tes voisin·es
+      outcome: Mal au dos, mais 300 arbres plantés et des voisin·es rencontré·es.
+      effects: { capture: 1, wellbeing: 1 }
+      score: 2
+    - id: financer
+      label: Financer chaque mois un projet de reboisement vérifié
+      outcome: Une petite somme chaque mois. Le projet publie ses mesures chaque année.
+      effects: { capture: 2 }
+      score: 1
+
+# --- Agriculteur·rices ---
+- id: agriculteur_sols
+  roles: [agriculteur]
+  title: Le carbone de tes sols
+  text: Un agronome t'explique que tes sols pourraient stocker beaucoup de carbone si tu changes ta façon de travailler la terre.
+  options:
+    - id: labour
+      label: Continuer à labourer en profondeur avec beaucoup d'engrais
+      outcome: Tes rendements restent élevés cette année. Ton sol s'appauvrit.
+      effects: { emissions: 2, gdp: 1 }
+      score: 4
+    - id: couverts
+      label: Arrêter le labour et couvrir le sol toute l'année
+      outcome: Deux saisons d'adaptation. Puis ton sol devient plus noir, plus riche, plus vivant.
+      effects: { capture: 2, emissions: -1 }
+      score: 2
+    - id: biochar
+      label: Enfouir du biochar (charbon végétal) fabriqué avec tes déchets de récolte
+      outcome: Un four à construire. Le carbone reste dans ton sol pour des siècles.
+      effects: { capture: 3 }
+      score: 1
+
+# --- Militant·es ---
+- id: militant_tourbieres
+  roles: [militant]
+  eras: [2030, 2035, 2040, 2045, 2050, 2060, 2070, 2080, 2090]
+  title: Les tourbières
+  text: Les tourbières ne couvrent que 3 % des terres mais stockent deux fois plus de carbone que toutes les forêts du monde. Un projet minier veut en assécher une.
+  options:
+    - id: blocage
+      label: Bloquer l'entrée du chantier avec une action spectaculaire
+      outcome: Les images font le tour des réseaux. Le chantier est suspendu une semaine.
+      effects: { awareness: 3, approval: -1 }
+      score: 4
+    - id: restauration
+      label: Monter avec des bénévoles un projet pour remettre l'eau et restaurer la tourbière
+      outcome: Des mois de travail les pieds dans la boue. La tourbière se remet à stocker du carbone.
+      effects: { capture: 2, awareness: 1 }
+      score: 2

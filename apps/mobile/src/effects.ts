@@ -7,6 +7,7 @@ import {
   HardHat,
   Megaphone,
   Smile,
+  Sprout,
   ThumbsDown,
   ThumbsUp,
   TreeDeciduous,
@@ -35,6 +36,11 @@ interface Wording {
 
 const WORDING: Record<EffectKey, Wording> = {
   emissions: { more: [Factory, 'plus de CO₂'], less: [Wind, 'moins de CO₂'], moreIsBad: true },
+  capture: {
+    more: [Sprout, "du CO₂ retiré de l'air"],
+    less: [Sprout, "moins de CO₂ retiré de l'air"],
+    moreIsBad: false,
+  },
   deforestation: {
     more: [Axe, 'plus de forêts détruites'],
     less: [TreeDeciduous, 'moins de forêts détruites'],
@@ -96,7 +102,8 @@ export function emissionsBalance(history: ChoiceRecord[]) {
   let polluting = 0;
   let clean = 0;
   for (const h of history) {
-    const e = h.effects?.emissions ?? 0;
+    // CO2 removed from the air counts as clean as CO2 not emitted.
+    const e = (h.effects?.emissions ?? 0) - (h.effects?.capture ?? 0);
     total += e;
     if (e > 0) polluting++;
     if (e < 0) clean++;

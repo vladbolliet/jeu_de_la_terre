@@ -214,7 +214,7 @@
     - id: bois
       label: Te diversifier dans la construction bois
       outcome: Le marché est prometteur, mais il faut gérer les forêts sans les raser.
-      effects: { emissions: -2, deforestation: 1, employment: 1 }
+      effects: { emissions: -2, deforestation: 1, employment: 1, capture: 1 }
       score: 2
 
 - id: elite_eau
@@ -276,7 +276,7 @@
     - id: capture
       label: Financer plutôt la capture directe du CO2 dans l'air
       outcome: Lent et très cher. Mais c'est du CO2 vraiment retiré.
-      effects: { emissions: -3, gdp: -1 }
+      effects: { capture: 3, gdp: -1 }
       score: 2
     - id: rien
       label: Ne rien financer

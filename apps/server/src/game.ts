@@ -31,12 +31,15 @@ import {
 } from '@jdlt/shared';
 import {
   COUNTRIES,
+  dealableCards,
+  greenOptionIds,
   emissionsShare,
   initialWorld,
   nextRegion,
   peoplePerPlayer,
   pick,
   pickCountry,
+  pickFreshCard,
   populationShare,
   regionWeights,
   resolveEra,
@@ -63,7 +66,11 @@ interface Player {
   /** Number of open sockets bound to this player (a phone can briefly have two while reconnecting). */
   connections: number;
   score: number;
+  /** Choices that were the best for the planet on their card: the final ranking. */
+  green: number;
   hand: DealtCard[];
+  /** Ids of every card this player has received (dealt or sent): a card never comes back. */
+  seen: string[];
   outcomes: string[];
   history: Required<ChoiceRecord>[];
 }
@@ -88,8 +95,12 @@ export interface GameSnapshot {
   /** Remaining time of the current phase; null if the phase has no timer. */
   remainingMs: number | null;
   paused: boolean;
-  players: (Omit<Player, 'hand' | 'connections' | 'region' | 'country'> & {
+  players: (Omit<Player, 'hand' | 'connections' | 'region' | 'country' | 'seen' | 'green'> & {
     hand: { instanceId: string; cardId: string; fromPlayer?: string; fromPlayerId?: string }[];
+    /** Missing in snapshots saved before cards stopped repeating. */
+    seen?: string[];
+    /** Missing in snapshots saved before the green ranking. */
+    green?: number;
     /** Missing in snapshots saved before groups of countries existed. */
     region?: Region;
     country?: string;
@@ -177,7 +188,9 @@ export class Game {
       country: pickCountry(region, this.rng).name,
       connections: 1,
       score: 0,
+      green: 0,
       hand: [],
+      seen: [],
       outcomes: [],
       history: [],
     };
@@ -237,6 +250,7 @@ export class Game {
 
     p.hand = p.hand.filter((d) => d !== dealt);
     p.score += option.score;
+    if (greenOptionIds(dealt.card).includes(option.id)) p.green++;
     this.decisions.push({ role: p.role, region: p.region, effects: option.effects });
     p.history.push({
       year: this.world.year,
@@ -249,14 +263,18 @@ export class Game {
       this.players.get(dealt.fromPlayerId)?.outcomes.push(option.reply);
 
     if (option.sends) {
+      const { card: cardId, toRole } = option.sends;
+      // Only to someone who has never received this card (no repeats); otherwise it is not sent.
       const target = pick(
         [...this.players.values()].filter(
-          (o) => o.connections > 0 && o.role === option.sends!.toRole && o.id !== p.id,
+          (o) =>
+            o.connections > 0 && o.role === toRole && o.id !== p.id && !o.seen.includes(cardId),
         ),
         this.rng,
       );
-      const card = this.content.cards.find((c) => c.id === option.sends!.card);
+      const card = this.content.cards.find((c) => c.id === cardId);
       if (target && card) {
+        target.seen.push(card.id);
         target.hand.push({
           instanceId: randomUUID(),
           card,
@@ -407,15 +425,10 @@ export class Game {
   }
 
   private deal(p: Player) {
-    const pool = this.content.cards.filter(
-      (c) =>
-        !c.interactionOnly &&
-        c.roles.includes(p.role) &&
-        this.inEra(c.eras) &&
-        (!c.regions || c.regions.includes(p.region)),
-    );
-    const card = pick(pool, this.rng);
+    const cards = dealableCards(this.content.cards, p.role, p.region);
+    const card = pickFreshCard(cards, this.world.year, new Set(p.seen), this.rng);
     if (!card) return;
+    p.seen.push(card.id);
     p.hand.push({ instanceId: randomUUID(), card });
     this.cardsDealt++;
   }
@@ -521,6 +534,7 @@ export class Game {
         roleName: role.name,
         objective: role.objective,
         score: p.score,
+        green: p.green,
         region: p.region,
         regionName: REGION_NAMES[p.region],
         country: p.country,
@@ -578,9 +592,9 @@ export class Game {
       lastVoteResult: this.lastVoteResult,
       newTippingPoints: this.newTippingPoints,
       leaderboard: players
-        .sort((a, b) => b.score - a.score)
+        .sort((a, b) => b.green - a.green || b.score - a.score)
         .slice(0, 10)
-        .map((p) => ({ role: p.role, name: p.name, score: p.score })),
+        .map((p) => ({ role: p.role, name: p.name, score: p.score, green: p.green })),
       roleStats: this.roleStats(),
       events: this.eraEvents.map((e) => ({ id: e.id, title: e.title, text: e.text })),
       joinUrl: this.publicUrl,
@@ -668,13 +682,23 @@ export class Game {
       });
       const region = sp.region ?? nextRegion(0, g.regionCounts());
       const country = sp.country ?? pickCountry(region, g.rng).name;
-      const p: Player = { ...sp, region, country, hand, connections: 0 };
+      const seen = sp.seen ?? sp.hand.map((h) => h.cardId);
+      const p: Player = {
+        ...sp,
+        region,
+        country,
+        seen,
+        green: sp.green ?? 0,
+        hand,
+        connections: 0,
+      };
       g.players.set(p.id, p);
       g.byToken.set(p.token, p);
     }
     g.phase = snap.phase;
     if (snap.today) g.today = snap.today;
-    g.world = snap.world;
+    // Worlds saved before CO2 removal existed have no captureRate.
+    g.world = { ...snap.world, captureRate: snap.world.captureRate ?? 0 };
     g.decisions = snap.decisions;
     g.cardsDealt = snap.cardsDealt;
     g.vote = content.votes.find((v) => v.id === snap.voteId) ?? null;
