@@ -4,7 +4,7 @@ Tout le contenu est dans `content/` en YAML. Pas besoin de coder : on peut édit
 
 ```
 content/
-  roles.yaml       les 6 rôles, leur objectif affiché, leur proportion, leur poids dans les votes
+  roles.yaml       les 6 rôles, ce que chaque rôle attend du joueur (`objective`), leur proportion, leur poids dans les votes
   cards/*.yaml     les cartes de microchoix (un fichier par thème ou par rôle, au choix)
   votes/*.yaml     les votes collectifs (phase « conflits »)
   events/*.yaml    les événements globaux automatiques (crises, catastrophes…)
@@ -78,7 +78,9 @@ Le podium de fin classe les joueurs par **nombre de choix verts** (à égalité 
 
 `emissions + deforestation − capture − ½ × awareness`
 
-La sensibilisation compte à moitié pour que journalistes et militant·es puissent aussi faire des choix verts. Une carte dont toutes les options ont le même coût (ex. un dilemme purement social) n'offre pas de choix vert. Le `score` des options reste le score de rôle (objectif affiché), montré sur le téléphone à la fin.
+La sensibilisation compte à moitié pour que journalistes et militant·es puissent aussi faire des choix verts. Une carte dont toutes les options ont le même coût (ex. un dilemme purement social) n'offre pas de choix vert. Le `score` des options reste le score de rôle, montré sur le téléphone à la fin.
+
+L'`objective` d'un rôle s'écrit comme une **pression**, pas comme un ordre : « Tes actionnaires attendent toujours plus de profits » plutôt que « Maximise ton capital ». Le joueur comprend ce qu'on attend de lui, mais reste libre de ses choix.
 
 ## Impact croisé entre joueurs (`sends`)
 

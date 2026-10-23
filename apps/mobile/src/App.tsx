@@ -175,7 +175,7 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
           {view.me.country} · {view.me.regionName}
         </p>
         <section className="reveal-card">
-          <span className="reveal-label">Ton objectif</span>
+          <span className="reveal-label">Ce qu'on attend de toi</span>
           <p className="reveal-objective">{view.me.objective}</p>
         </section>
         {view.me.represents > 0 && (
@@ -261,7 +261,7 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
         )}
       </header>
       <p className="objective">
-        <span className="tag">Objectif</span>
+        <span className="tag">Ton rôle</span>
         {view.me.objective}
       </p>
       {label && (
