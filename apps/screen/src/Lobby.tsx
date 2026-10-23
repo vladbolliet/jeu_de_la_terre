@@ -45,7 +45,7 @@ export function Lobby({ view }: { view: ScreenView }) {
             <li
               key={r}
               className={`region-${r}`}
-              style={{ flexGrow: Math.max(view.regions[r].players, 0.001) }}
+              style={{ flexGrow: view.playerCount > 0 ? view.regions[r].players : 1 }}
             >
               <span className="world-label">{REGION_LABEL[r]}</span>
               <span key={view.regions[r].players} className="world-count">

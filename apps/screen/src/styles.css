@@ -136,8 +136,10 @@ body {
   grid-template:
     'main join' 1fr
     'stripes stripes' auto / 1.15fr 1fr;
-  gap: 32px 64px;
-  padding: 56px 72px 40px;
+  gap: min(32px, 3vh) 64px;
+  /* Vertical sizes in the lobby are capped by the viewport height: identical at 1080p,
+     smaller on shorter screens (laptops, 768p projectors) so nothing overflows. */
+  padding: min(56px, 5.2vh) 72px min(40px, 3.7vh);
   background:
     radial-gradient(ellipse 60% 70% at 85% 30%, rgb(60 195 211 / 0.1), transparent 70%),
     radial-gradient(ellipse 50% 50% at 10% 100%, rgb(240 83 58 / 0.1), transparent 70%), var(--bg);
@@ -190,7 +192,7 @@ body {
 }
 .lobby-kicker {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: min(1.9rem, 2.8vh);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -199,7 +201,7 @@ body {
 .lobby-title {
   margin: 8px 0 0;
   font-family: var(--font-display);
-  font-size: 6.6rem;
+  font-size: min(6.6rem, 9.8vh);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -219,8 +221,8 @@ body {
   padding-right: 0.08em;
 }
 .lobby-lede {
-  margin: 20px 0 0;
-  font-size: 2.4rem;
+  margin: min(20px, 1.9vh) 0 0;
+  font-size: min(2.4rem, 3.6vh);
   color: var(--muted);
   max-width: 22ch;
   line-height: 1.25;
@@ -229,11 +231,11 @@ body {
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-top: 32px;
+  margin-top: min(32px, 3vh);
 }
 .lobby-count-number {
   font-family: var(--font-display);
-  font-size: 7rem;
+  font-size: min(7rem, 10.4vh);
   font-weight: 800;
   line-height: 0.9;
   font-variant-numeric: tabular-nums lining-nums;
@@ -247,18 +249,18 @@ body {
   }
 }
 .lobby-count-label {
-  font-size: 2.2rem;
+  font-size: min(2.2rem, 3.3vh);
   font-weight: 600;
   line-height: 1.1;
   color: var(--muted);
 }
 .lobby-roles {
   list-style: none;
-  margin: 20px 0 0;
+  margin: min(20px, 1.9vh) 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 18px;
+  gap: min(14px, 1.3vh) 18px;
   max-width: 900px;
 }
 .lobby-roles li {
@@ -266,12 +268,12 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 14px 22px;
+  padding: min(14px, 1.3vh) 22px;
   border-radius: 999px;
   background: rgb(14 34 48 / 0.75);
   border: 2px solid var(--role-color);
   backdrop-filter: blur(6px);
-  font-size: 1.9rem;
+  font-size: min(1.9rem, 2.8vh);
 }
 .role-elite {
   --role-color: #c08457;
@@ -2963,13 +2965,13 @@ aside {
 .lobby-count-label small {
   display: block;
   margin-top: 6px;
-  font-size: 1.5rem;
+  font-size: min(1.5rem, 2.2vh);
   font-weight: 600;
   color: var(--ocean);
 }
 .lobby-world {
   list-style: none;
-  margin: 28px 0 0;
+  margin: min(28px, 2.6vh) 0 0;
   padding: 0;
   display: flex;
   gap: 6px;
@@ -2977,16 +2979,17 @@ aside {
 }
 .lobby-world li {
   flex: 1 1 0;
-  min-width: 220px;
+  /* Never narrower than its label; the extra width is shared by player count. */
+  min-width: max-content;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 20px;
+  padding: min(12px, 1.1vh) 20px;
   background: var(--region-color);
   color: var(--bg);
   white-space: nowrap;
-  font-size: 1.45rem;
+  font-size: min(1.45rem, 2.15vh);
   font-weight: 700;
   line-height: 1.1;
   transition: flex-grow 0.8s cubic-bezier(0.3, 1.2, 0.5, 1);
@@ -2999,7 +3002,7 @@ aside {
 }
 .world-count {
   font-family: var(--font-display);
-  font-size: 1.9rem;
+  font-size: min(1.9rem, 2.8vh);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   animation: pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
