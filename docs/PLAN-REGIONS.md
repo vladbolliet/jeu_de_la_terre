@@ -2,7 +2,7 @@
 
 Objectif : les joueurs représentent l'humanité. Chacun vit dans un pays tiré au sort selon la
 population mondiale, son choix pèse selon les émissions de sa région, et les votes deviennent des
-négociations internationales décidées par consensus entre blocs.
+négociations internationales décidées à la majorité.
 
 ## Décisions
 
@@ -27,10 +27,9 @@ négociations internationales décidées par consensus entre blocs.
 - **« 1 joueur = X personnes »** : affichage seulement (X = population du groupe ÷ joueurs du
   groupe). On ne multiplie jamais les effets par la population : la croissance démographique est
   déjà dans `BASELINE_EMISSIONS`.
-- **Votes = négociations mondiales, consensus par bloc** : chaque groupe vote (politiques ×3) ; la
-  position du groupe est son option majoritaire ; l'accord n'est adopté que si tous les groupes
-  qui ont voté choisissent la même option. Sinon statu quo (1re option). L'écran montre en direct la
-  position de chaque bloc pour que la salle négocie.
+- **Votes = négociations mondiales, à la majorité** : tous les joueurs votent ensemble (politiques
+  ×3), l'option qui a le plus de voix l'emporte, égalité = statu quo (1re option). Le consensus par
+  groupe de pays a été essayé puis retiré : trop compliqué à expliquer en classe.
 - **Contenu** : champ optionnel `regions` sur les cartes (comme `eras`). Les cartes trop
   « françaises » sont réservées aux pays riches ; on ajoute des cartes propres aux pays en
   développement. Les votes sont réécrits en négociations mondiales avec des options de compromis.
@@ -63,10 +62,10 @@ Fonctionnement des votes et points à discuter : [VOTES.md](VOTES.md).
 - [x] Attribution groupe → rôle → pays.
 - [x] Cartes filtrées par groupe.
 - [x] Poids des décisions à la fin de l'ère.
-- [x] Vote par consensus des blocs.
+- [x] Vote à la majorité (le consensus par bloc a été retiré).
 - [x] Vues et sauvegarde (anciens fichiers de sauvegarde sans groupe : groupe attribué au
   chargement).
-- [x] Tests : répartition à 8 / 30 / 100 joueurs, consensus, poids.
+- [x] Tests : répartition à 8 / 30 / 100 joueurs, vote à la majorité, poids.
 
 ### 4. Contenu
 - [x] `roles.yaml` : parts par groupe (plus d'agriculteur·rices dans les pays en développement…).
@@ -77,12 +76,12 @@ Fonctionnement des votes et points à discuter : [VOTES.md](VOTES.md).
 ### 5. Mobile
 - [x] Identité : « Tu vis au Nigeria · Agriculteur·rice », « Tu représentes 120 millions de
   personnes ».
-- [x] Vote : position actuelle de ton bloc.
+- [x] Vote : règle de la majorité rappelée.
 
 ### 6. Écran
 - [x] Lobby : répartition par groupe.
-- [x] Vote : 3 colonnes (position de chaque bloc en direct).
-- [x] Résultat : « Accord adopté » / « Pas d'accord : bloqué par … ».
+- [x] Vote : hémicycle des votants et règle de la majorité.
+- [x] Résultat : « Accord adopté » / « Rien ne change », voix par option.
 - [ ] Bilan : part de population vs part des émissions par groupe (données déjà dans `ScreenView.regions`).
 - [ ] Carte : points des joueurs dans leur pays (données déjà dans `ScreenView.countries`).
 

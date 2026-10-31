@@ -1,8 +1,7 @@
-# Négociations mondiales (phase « Conflits »). Chaque groupe de pays (riches, émergents, en
-# développement) vote de son côté ; un accord n'est adopté que si tous les groupes qui ont voté
-# choisissent la même option. Sinon, c'est la 1re option (statu quo) qui s'applique.
-# → Toujours mettre le statu quo en premier, et prévoir au moins une option de compromis
-#   acceptable pour chaque groupe. Le premier vote dont `eras` et `when` correspondent est joué.
+# Négociations mondiales (phase « Conflits »). Tous les joueurs votent ensemble : l'option qui a
+# le plus de voix l'emporte (le vote des politiques compte triple). En cas d'égalité, c'est la
+# 1re option (statu quo) qui s'applique.
+# → Toujours mettre le statu quo en premier. Le premier vote dont `eras` et `when` correspondent est joué.
 - id: fonds_pertes_dommages
   eras: [2026]
   title: Fonds pertes et dommages

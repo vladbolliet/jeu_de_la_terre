@@ -8,7 +8,6 @@ import {
   ROLES,
   conditionHolds,
   roleShare,
-  type BlocPosition,
   type Card,
   type CardView,
   type ChoiceRecord,
@@ -441,52 +440,31 @@ export class Game {
       null;
   }
 
-  /** Weighted ballots per option, for one group of countries or for everyone. */
-  private tally(vote: Vote, region?: Region): Record<string, number> {
+  /** Weighted ballots per option (a politician's ballot counts `voteWeight` times). */
+  private tally(vote: Vote): Record<string, number> {
     const weights = new Map(this.content.roles.map((r) => [r.id, r.voteWeight]));
     const tally: Record<string, number> = Object.fromEntries(vote.options.map((o) => [o.id, 0]));
     for (const [playerId, optionId] of this.ballots) {
       const p = this.players.get(playerId);
-      if (p && (!region || p.region === region))
-        tally[optionId] = (tally[optionId] ?? 0) + (weights.get(p.role) ?? 1);
+      if (p) tally[optionId] = (tally[optionId] ?? 0) + (weights.get(p.role) ?? 1);
     }
     return tally;
   }
 
-  /** Option each group currently backs. Ties go to the first option (status quo listed first). */
-  private blocs(vote: Vote): Record<Region, BlocPosition> {
-    const out = {} as Record<Region, BlocPosition>;
-    for (const region of REGIONS) {
-      const tally = this.tally(vote, region);
-      const ballots = Object.values(tally).reduce((s, n) => s + n, 0);
-      const best = vote.options.reduce((a, b) => ((tally[b.id] ?? 0) > (tally[a.id] ?? 0) ? b : a));
-      out[region] = { ballots, optionId: ballots > 0 ? best.id : null };
-    }
-    return out;
-  }
-
-  /**
-   * International negotiation: an option is adopted only if every group that voted backs it
-   * (consensus, as in climate summits). Otherwise the status quo (first option) stays.
-   */
+  /** Global negotiation: the option with the most votes wins. Ties go to the status quo (first option). */
   private closeVote() {
     const vote = this.vote;
     this.vote = null;
     if (!vote) return;
-    const blocs = this.blocs(vote);
-    const positions = REGIONS.map((r) => blocs[r].optionId).filter((id) => id !== null);
-    const agreement = positions.length > 0 && positions.every((id) => id === positions[0]);
-    const winner =
-      (agreement && vote.options.find((o) => o.id === positions[0])) || vote.options[0]!;
+    const tally = this.tally(vote);
+    const winner = vote.options.reduce((a, b) => ((tally[b.id] ?? 0) > (tally[a.id] ?? 0) ? b : a));
     this.collective.push(winner.effects);
     this.lastVoteResult = {
       voteId: vote.id,
       title: vote.title,
       options: vote.options.map((o) => ({ id: o.id, label: o.label })),
       winner: { id: winner.id, label: winner.label },
-      tally: this.tally(vote),
-      agreement,
-      blocs,
+      tally,
     };
   }
 
@@ -549,7 +527,6 @@ export class Game {
             text: vote.text,
             options: vote.options.map((o) => ({ id: o.id, label: o.label })),
             myChoice: this.ballots.get(p.id) ?? null,
-            myBloc: this.blocs(vote)[p.region],
           }
         : null,
       lastVoteResult: this.lastVoteResult,
@@ -586,7 +563,6 @@ export class Game {
             text: vote.text,
             options: vote.options.map((o) => ({ id: o.id, label: o.label })),
             ballots: this.ballots.size,
-            blocs: this.blocs(vote),
           }
         : null,
       lastVoteResult: this.lastVoteResult,
@@ -703,8 +679,8 @@ export class Game {
     g.cardsDealt = snap.cardsDealt;
     g.vote = content.votes.find((v) => v.id === snap.voteId) ?? null;
     g.ballots = new Map(snap.ballots);
-    // Results saved before negotiations by group have no `blocs`: drop them.
-    g.lastVoteResult = snap.lastVoteResult?.blocs ? snap.lastVoteResult : null;
+    // Results saved before options were part of the result: drop them.
+    g.lastVoteResult = snap.lastVoteResult?.options ? snap.lastVoteResult : null;
     g.collective = snap.collective;
     g.newTippingPoints = snap.newTippingPoints;
     g.firedEvents = new Set(snap.firedEvents);

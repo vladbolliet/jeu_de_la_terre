@@ -27,25 +27,14 @@ export interface VoteView {
   options: OptionView[];
 }
 
-/** Position of one group of countries in a negotiation. */
-export interface BlocPosition {
-  /** Weighted ballots cast by players of this group. */
-  ballots: number;
-  /** Option this group currently backs (most votes, ties to the first option); null = nobody voted. */
-  optionId: string | null;
-}
-
 export interface VoteResult {
   voteId: string;
   title: string;
   options: OptionView[];
-  /** Adopted option, or the status quo (first option) when the groups disagree. */
+  /** Option with the most votes; ties go to the status quo (first option). */
   winner: OptionView;
-  /** Weighted ballots per option, all groups together. */
+  /** Weighted ballots per option. */
   tally: Record<string, number>;
-  /** true = every group that voted backed the same option. */
-  agreement: boolean;
-  blocs: Record<Region, BlocPosition>;
 }
 
 /** One choice made by the player during the game. */
@@ -87,7 +76,7 @@ export interface PlayerView {
   hand: CardView[];
   /** Outcome texts of the choices made this era. */
   outcomes: string[];
-  vote: (VoteView & { myChoice: string | null; myBloc: BlocPosition }) | null;
+  vote: (VoteView & { myChoice: string | null }) | null;
   lastVoteResult: VoteResult | null;
   /** All choices made by this player since the start of the game. */
   history: ChoiceRecord[];
@@ -149,7 +138,7 @@ export interface ScreenView {
   choicesMade: number;
   cardsDealt: number;
   world: World;
-  vote: (VoteView & { ballots: number; blocs: Record<Region, BlocPosition> }) | null;
+  vote: (VoteView & { ballots: number }) | null;
   lastVoteResult: VoteResult | null;
   /** Tipping points crossed during the last resolved era. */
   newTippingPoints: TippingPointId[];

@@ -13,7 +13,7 @@ import {
   WifiOff,
   type LucideIcon,
 } from 'lucide-react';
-import { ERAS, REGIONS, REGION_NAMES, type CardView, type PlayerView } from '@jdlt/shared';
+import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { Ended } from './Ended.tsx';
 import { formatPeople } from './people.ts';
@@ -453,7 +453,6 @@ function Choices({ view }: { view: PlayerView }) {
 
 function Vote({ view }: { view: PlayerView }) {
   const vote = view.vote!;
-  const blocChoice = vote.options.find((o) => o.id === vote.myBloc.optionId);
   // Option being sent; the highlighted choice always comes from the server (`myChoice`).
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -467,18 +466,9 @@ function Vote({ view }: { view: PlayerView }) {
           </div>
           <h2>{vote.title}</h2>
           <p>{vote.text}</p>
-          <p className="vote-rule">
-            Accord seulement si les 3 groupes de pays choisissent la même option.
-          </p>
+          <p className="vote-rule">L'option qui a le plus de voix l'emporte.</p>
         </div>
       </section>
-      <p className="bloc-line">
-        <MapPin aria-hidden />
-        <span>
-          {view.me.regionName} :{' '}
-          <strong>{blocChoice ? blocChoice.label : 'pas encore de vote'}</strong>
-        </span>
-      </p>
       <div className="actions">
         <p className="muted">
           {vote.myChoice
@@ -601,32 +591,14 @@ function Feedback({ view }: { view: PlayerView }) {
             {result.title}
           </h2>
           <p className="muted">
-            {!result.agreement
-              ? "Pas d'accord : rien ne change"
-              : result.winner.id === result.options[0]?.id
-                ? 'Tous les groupes refusent : rien ne change'
-                : 'Accord adopté'}
+            {result.winner.id === result.options[0]?.id ? 'Rien ne change' : 'Accord adopté'}
           </p>
           <p className="winner">{result.winner.label}</p>
-          {ballots > 0 ? (
-            <ul className="blocs">
-              {REGIONS.map((r) => {
-                const id = result.blocs[r].optionId;
-                return (
-                  <li key={r} className={r === view.me.region ? 'mine' : ''}>
-                    <span className="muted">{REGION_NAMES[r]}</span>
-                    <strong>
-                      {id === null
-                        ? "N'a pas voté"
-                        : result.options.find((o) => o.id === id)?.label}
-                    </strong>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="muted">Personne n'a voté.</p>
-          )}
+          <p className="muted">
+            {ballots > 0
+              ? `${result.tally[result.winner.id] ?? 0} voix sur ${ballots}`
+              : "Personne n'a voté."}
+          </p>
         </section>
       )}
     </div>

@@ -114,11 +114,11 @@ Sur une carte reçue via `sends`, une option peut renvoyer un message au joueur 
 
 ## Un vote (négociation mondiale)
 
-Les votes sont des **négociations internationales**. Chaque groupe de pays vote de son côté (le vote des politiques compte triple) ; la position du groupe est l'option qui a le plus de voix chez lui. **Un accord n'est adopté que si tous les groupes qui ont voté choisissent la même option** (consensus, comme dans les sommets climat). Sinon, rien n'est adopté : c'est la 1re option (statu quo) qui s'applique.
+Les votes sont des **négociations internationales**. Tous les joueurs votent ensemble, quel que soit leur pays : **l'option qui a le plus de voix l'emporte** (le vote des politiques compte triple). En cas d'égalité, c'est la 1re option (statu quo) qui s'applique.
 
-Principe détaillé, exemple et questions ouvertes : [docs/VOTES.md](VOTES.md).
+Principe détaillé et exemple : [docs/VOTES.md](VOTES.md).
 
-Donc : mettre le statu quo en premier, et écrire au moins une option de **compromis** que chaque groupe peut accepter (ex. « sortie du charbon en 2040 pour les pays riches, 2050 pour les autres, avec une aide »). Une option qui ne profite qu'à un groupe sera bloquée.
+Donc : mettre le statu quo en premier.
 
 ```yaml
 - id: prix_carbone

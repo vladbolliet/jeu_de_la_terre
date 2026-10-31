@@ -1622,7 +1622,7 @@ header {
   }
 }
 
-/* ---- Groups of countries: where the player lives, negotiation blocs ---- */
+/* ---- Groups of countries: where the player lives; negotiation rule ---- */
 .reveal-place {
   display: inline-flex;
   align-items: center;
@@ -1651,23 +1651,4 @@ header {
   margin-top: 10px;
   font-size: 0.9rem;
   opacity: 0.75;
-}
-.bloc-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 0;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: rgb(14 34 48 / 0.94);
-}
-.bloc-line svg {
-  flex-shrink: 0;
-  width: 1.2em;
-  height: 1.2em;
-  color: var(--role);
-}
-.panel .blocs li.mine strong {
-  color: var(--role);
 }

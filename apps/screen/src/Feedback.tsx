@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { CircleCheck, Newspaper, TriangleAlert, Vote } from 'lucide-react';
 import type { ScreenView } from '@jdlt/shared';
 import { CLIMATE, SOCIETY, type Indicator } from './Indicators.tsx';
-import { REGIONS, REGION_LABEL } from './roles.ts';
 import { TIPPING } from './tipping.ts';
 
 /** How long each global event stays on screen when there are several. */
@@ -121,13 +120,9 @@ function Events({ events }: { events: ScreenView['events'] }) {
 
 function VoteResultCard({ result }: { result: NonNullable<ScreenView['lastVoteResult']> }) {
   const label = (id: string) => result.options.find((o) => o.id === id)?.label ?? id;
-  const total = Object.values(result.tally).reduce((sum, n) => sum + n, 0);
-  const statusQuo = result.options[0]?.id;
-  const status = !result.agreement
-    ? 'Pas d’accord : rien ne change'
-    : result.winner.id === statusQuo
-      ? 'Tous refusent : rien ne change'
-      : 'Accord adopté';
+  const entries = Object.entries(result.tally).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((sum, [, n]) => sum + n, 0);
+  const adopted = result.winner.id !== result.options[0]?.id;
   return (
     <div className="card vote-result">
       <div className="card-kicker">
@@ -140,18 +135,19 @@ function VoteResultCard({ result }: { result: NonNullable<ScreenView['lastVoteRe
         <p>Personne n'a voté : l'option par défaut s'applique.</p>
       ) : (
         <>
-          <p className="deal-status">{status}</p>
-          <ul className="tally blocs-result">
-            {REGIONS.map((r) => {
-              const id = result.blocs[r].optionId;
-              return (
-                <li key={r} className={`region-${r}${id === result.winner.id ? ' winner' : ''}`}>
-                  <span className="bloc-dot" />
-                  <span className="tally-label">{REGION_LABEL[r]}</span>
-                  <span className="tally-count">{id === null ? 'abstention' : label(id)}</span>
-                </li>
-              );
-            })}
+          <p className={adopted ? 'deal-status adopted' : 'deal-status'}>
+            {adopted ? 'Accord adopté' : 'Rien ne change'}
+          </p>
+          <ul className="tally">
+            {entries.map(([id, n]) => (
+              <li key={id} className={id === result.winner.id ? 'winner' : ''}>
+                <span className="tally-label">{label(id)}</span>
+                <div className="tally-bar">
+                  <div style={{ width: `${(n / total) * 100}%` }} />
+                </div>
+                <span className="tally-count">{Math.round(n)}</span>
+              </li>
+            ))}
           </ul>
         </>
       )}

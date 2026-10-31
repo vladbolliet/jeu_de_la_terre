@@ -276,7 +276,7 @@ describe('content mechanics', () => {
     g.stop();
   });
 
-  it('adopts a negotiated option only when every group that voted backs it', () => {
+  it('adopts the option with the most votes, whatever the group of countries', () => {
     const vote = {
       id: 'traite',
       title: 'Traité',
@@ -293,22 +293,18 @@ describe('content mechanics', () => {
       g.next(); // skip the intro
       g.next(); // to conflicts
       for (const id of ids) g.castVote(id, 'traite', ballot(g.playerView(id)!.me.region));
-      expect(g.screenView().vote!.blocs.riche.ballots).toBeGreaterThan(0);
+      expect(g.screenView().vote!.ballots).toBe(8);
       g.next(); // close the vote
       const result = g.screenView().lastVoteResult!;
       g.stop();
       return result;
     };
-    const all = play(() => 'accord');
-    expect(all.agreement).toBe(true);
-    expect(all.winner.id).toBe('accord');
+    expect(play(() => 'accord').winner.id).toBe('accord');
 
-    // Rich countries are outnumbered but still block the deal.
-    const blocked = play((r) => (r === 'riche' ? 'statu_quo' : 'accord'));
-    expect(blocked.agreement).toBe(false);
-    expect(blocked.winner.id).toBe('statu_quo');
-    expect(blocked.tally.accord).toBeGreaterThan(blocked.tally.statu_quo!);
-    expect(blocked.blocs.riche.optionId).toBe('statu_quo');
+    // Rich countries voting against no longer block a majority.
+    const majority = play((r) => (r === 'riche' ? 'statu_quo' : 'accord'));
+    expect(majority.winner.id).toBe('accord');
+    expect(majority.tally.accord).toBeGreaterThan(majority.tally.statu_quo!);
   });
 });
 
