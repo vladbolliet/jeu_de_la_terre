@@ -7,7 +7,7 @@ import {
   Tractor,
   type LucideIcon,
 } from 'lucide-react';
-import type { Region, Role } from '@jdlt/shared';
+import type { Role } from '@jdlt/shared';
 
 // Display names mirror content/roles.yaml (not part of ScreenView).
 export const ROLE_LABEL: Record<Role, string> = {
@@ -31,10 +31,3 @@ export const ROLE_ICON: Record<Role, LucideIcon> = {
   journaliste: Newspaper,
 };
 
-// Mirrors REGION_NAMES in packages/shared (not imported: it would bundle zod).
-export const REGION_LABEL: Record<Region, string> = {
-  riche: 'Pays riches',
-  emergent: 'Pays émergents',
-  developpement: 'Pays en développement',
-};
-export const REGIONS = Object.keys(REGION_LABEL) as Region[];

@@ -6,7 +6,7 @@ import type { GeometryCollection, Topology } from 'topojson-specification';
 import type { ScreenView } from '@jdlt/shared';
 import land110m from 'world-atlas/land-110m.json';
 import { formatPeople } from './people.ts';
-import { REGIONS, REGION_LABEL, ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
+import { ROLES, ROLE_ICON, ROLE_LABEL } from './roles.ts';
 import { END_YEAR, ERAS, temperatureColor } from './stripes.ts';
 
 export function Lobby({ view }: { view: ScreenView }) {
@@ -38,22 +38,6 @@ export function Lobby({ view }: { view: ScreenView }) {
             )}
           </span>
         </div>
-
-        {/* The world split by groups of countries, each segment as wide as its players. */}
-        <ul className="lobby-world reveal" style={{ animationDelay: '0.65s' }}>
-          {REGIONS.map((r) => (
-            <li
-              key={r}
-              className={`region-${r}`}
-              style={{ flexGrow: view.playerCount > 0 ? view.regions[r].players : 1 }}
-            >
-              <span className="world-label">{REGION_LABEL[r]}</span>
-              <span key={view.regions[r].players} className="world-count">
-                {view.regions[r].players}
-              </span>
-            </li>
-          ))}
-        </ul>
 
         <ul className="lobby-roles reveal" style={{ animationDelay: '0.7s' }}>
           {ROLES.map((role) => {

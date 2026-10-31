@@ -2952,16 +2952,6 @@ aside {
   color: var(--sand);
 }
 
-/* ---------- Groups of countries ---------- */
-.region-riche {
-  --region-color: #e2795b;
-}
-.region-emergent {
-  --region-color: #e2b23b;
-}
-.region-developpement {
-  --region-color: #4fb0e8;
-}
 .lobby-count-label small {
   display: block;
   margin-top: 6px;
@@ -2969,45 +2959,6 @@ aside {
   font-weight: 600;
   color: var(--ocean);
 }
-.lobby-world {
-  list-style: none;
-  margin: min(28px, 2.6vh) 0 0;
-  padding: 0;
-  display: flex;
-  gap: 6px;
-  max-width: 900px;
-}
-.lobby-world li {
-  flex: 1 1 0;
-  /* Never narrower than its label; the extra width is shared by player count. */
-  min-width: max-content;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: min(12px, 1.1vh) 20px;
-  background: var(--region-color);
-  color: var(--bg);
-  white-space: nowrap;
-  font-size: min(1.45rem, 2.15vh);
-  font-weight: 700;
-  line-height: 1.1;
-  transition: flex-grow 0.8s cubic-bezier(0.3, 1.2, 0.5, 1);
-}
-.lobby-world li:first-child {
-  border-radius: 999px 0 0 999px;
-}
-.lobby-world li:last-child {
-  border-radius: 0 999px 999px 0;
-}
-.world-count {
-  font-family: var(--font-display);
-  font-size: min(1.9rem, 2.8vh);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  animation: pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
-}
-
 /* Majority rule under the hemicycle during a negotiation. */
 .vote-side .hemicycle {
   width: 88%;
