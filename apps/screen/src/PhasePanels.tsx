@@ -162,7 +162,7 @@ export function VotePanel({ view }: { view: ScreenView }) {
     <div className={`vote-panel${final ? ' final' : ''}`}>
       <div className="vote-main">
         <div className="vote-kicker">
-          <Vote className="icon" /> Vote collectif
+          <Vote className="icon" /> Négociation mondiale
         </div>
         <h2 className="vote-title">{vote.title}</h2>
         <p className="vote-text">{vote.text}</p>
@@ -177,6 +177,7 @@ export function VotePanel({ view }: { view: ScreenView }) {
       </div>
       <div className="vote-side">
         <Hemicycle voteId={vote.id} ballots={vote.ballots} voters={view.connectedCount} />
+        <p className="vote-rule">L’option qui a le plus de voix l’emporte</p>
       </div>
     </div>
   );

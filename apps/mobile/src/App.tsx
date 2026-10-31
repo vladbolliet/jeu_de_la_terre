@@ -5,6 +5,7 @@ import {
   Earth,
   Hourglass,
   Layers,
+  MapPin,
   Pause,
   Projector,
   Send,
@@ -15,6 +16,7 @@ import {
 import { ERAS, type CardView, type PlayerView } from '@jdlt/shared';
 import { choose, join, socket, storage, vote as sendVote } from './socket.ts';
 import { Ended } from './Ended.tsx';
+import { formatPeople } from './people.ts';
 import { ROLE_STYLE } from './roles.ts';
 import { useCountdown } from './useCountdown.ts';
 import { useWakeLock } from './useWakeLock.ts';
@@ -168,10 +170,19 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
           </span>
         </div>
         <h1>{view.me.roleName}</h1>
+        <p className="reveal-place">
+          <MapPin aria-hidden />
+          {view.me.country} · {view.me.regionName}
+        </p>
         <section className="reveal-card">
-          <span className="reveal-label">Ton objectif</span>
+          <span className="reveal-label">Ce qu'on attend de toi</span>
           <p className="reveal-objective">{view.me.objective}</p>
         </section>
+        {view.me.represents > 0 && (
+          <p className="reveal-people">
+            Tu représentes ~{formatPeople(view.me.represents)} de personnes.
+          </p>
+        )}
       </div>
       <button onClick={onDone}>Compris</button>
     </main>
@@ -180,7 +191,7 @@ function RoleReveal({ view, onDone }: { view: PlayerView; onDone: () => void }) 
 
 const PHASE_LABEL: Partial<Record<PlayerView['phase'], string>> = {
   choices: 'Choisis tes cartes',
-  conflicts: 'Vote collectif',
+  conflicts: 'Négociation mondiale',
   feedback: 'Résultats',
 };
 
@@ -214,7 +225,7 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
         <div className="who">
           <strong>{view.me.roleName}</strong>
           <span>
-            {view.me.name} ·{' '}
+            {view.me.name} · {view.me.country} ·{' '}
             {/* Re-mounted when the score changes so the bump animation replays. */}
             <b key={view.me.score} className="score">
               {view.me.score} pts
@@ -250,7 +261,7 @@ function TopBar({ view, connected }: { view: PlayerView; connected: boolean }) {
         )}
       </header>
       <p className="objective">
-        <span className="tag">Objectif</span>
+        <span className="tag">Ton rôle</span>
         {view.me.objective}
       </p>
       {label && (
@@ -448,13 +459,14 @@ function Vote({ view }: { view: PlayerView }) {
   return (
     <div className="play">
       <section className="card vote">
-        <div className="card-band">Tout le monde décide</div>
+        <div className="card-band">Négociation mondiale</div>
         <div className="card-body">
           <div className="vote-icon">
             <BallotIcon aria-hidden />
           </div>
           <h2>{vote.title}</h2>
           <p>{vote.text}</p>
+          <p className="vote-rule">L'option qui a le plus de voix l'emporte.</p>
         </div>
       </section>
       <div className="actions">
@@ -578,7 +590,9 @@ function Feedback({ view }: { view: PlayerView }) {
             <BallotIcon aria-hidden />
             {result.title}
           </h2>
-          <p className="muted">Décision collective</p>
+          <p className="muted">
+            {result.winner.id === result.options[0]?.id ? 'Rien ne change' : 'Accord adopté'}
+          </p>
           <p className="winner">{result.winner.label}</p>
           <p className="muted">
             {ballots > 0

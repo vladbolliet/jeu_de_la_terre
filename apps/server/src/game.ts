@@ -2,8 +2,12 @@
 import { randomUUID } from 'node:crypto';
 import {
   END_YEAR,
+  ERAS,
+  REGIONS,
+  REGION_NAMES,
   ROLES,
   conditionHolds,
+  roleShare,
   type Card,
   type CardView,
   type ChoiceRecord,
@@ -12,6 +16,8 @@ import {
   type GameEvent,
   type Phase,
   type PlayerView,
+  type Region,
+  type RegionView,
   type Role,
   type RoleCounts,
   type RoleEraStats,
@@ -22,7 +28,22 @@ import {
   type VoteResult,
   type World,
 } from '@jdlt/shared';
-import { initialWorld, pick, resolveEra } from '@jdlt/engine';
+import {
+  COUNTRIES,
+  dealableCards,
+  greenOptionIds,
+  emissionsShare,
+  initialWorld,
+  nextRegion,
+  peoplePerPlayer,
+  pick,
+  pickCountry,
+  pickFreshCard,
+  populationShare,
+  regionWeights,
+  resolveEra,
+  WORLD_POPULATION,
+} from '@jdlt/engine';
 import { FALLBACK_TODAY } from './today.ts';
 
 interface DealtCard {
@@ -38,10 +59,17 @@ interface Player {
   token: string;
   name: string;
   role: Role;
+  /** Group of countries and country the player lives in, fixed for the whole game. */
+  region: Region;
+  country: string;
   /** Number of open sockets bound to this player (a phone can briefly have two while reconnecting). */
   connections: number;
   score: number;
+  /** Choices that were the best for the planet on their card: the final ranking. */
+  green: number;
   hand: DealtCard[];
+  /** Ids of every card this player has received (dealt or sent): a card never comes back. */
+  seen: string[];
   outcomes: string[];
   history: Required<ChoiceRecord>[];
 }
@@ -66,10 +94,17 @@ export interface GameSnapshot {
   /** Remaining time of the current phase; null if the phase has no timer. */
   remainingMs: number | null;
   paused: boolean;
-  players: (Omit<Player, 'hand' | 'connections'> & {
+  players: (Omit<Player, 'hand' | 'connections' | 'region' | 'country' | 'seen' | 'green'> & {
     hand: { instanceId: string; cardId: string; fromPlayer?: string; fromPlayerId?: string }[];
+    /** Missing in snapshots saved before cards stopped repeating. */
+    seen?: string[];
+    /** Missing in snapshots saved before the green ranking. */
+    green?: number;
+    /** Missing in snapshots saved before groups of countries existed. */
+    region?: Region;
+    country?: string;
   })[];
-  decisions: { role: Role; effects: Effects }[];
+  decisions: EraDecision[];
   cardsDealt: number;
   voteId: string | null;
   ballots: [string, string][];
@@ -80,6 +115,13 @@ export interface GameSnapshot {
   eraEvents: string[];
   /** Missing in snapshots saved before the intro existed. */
   today?: TodayStats;
+}
+
+interface EraDecision {
+  role: Role;
+  /** Missing in snapshots saved before groups of countries existed (counted as unweighted). */
+  region?: Region;
+  effects: Effects;
 }
 
 /** Minimum time left to a restored phase, so players have time to reconnect. */
@@ -96,7 +138,7 @@ export class Game {
   private phaseEndsAt: number | null = null;
   private pausedRemainingMs: number | null = null;
   private timer: NodeJS.Timeout | null = null;
-  private decisions: { role: Role; effects: Effects }[] = [];
+  private decisions: EraDecision[] = [];
   private cardsDealt = 0;
   private vote: Vote | null = null;
   private ballots = new Map<string, string>();
@@ -135,14 +177,19 @@ export class Game {
       return existing;
     }
     if (this.players.size >= this.maxPlayers) throw new GameError('La partie est complète');
+    const region = nextRegion(this.eraIndex(), this.regionCounts());
     const player: Player = {
       id: randomUUID(),
       token: randomUUID(),
       name: name.trim().slice(0, 24) || 'Anonyme',
-      role: this.nextRole(),
+      role: this.nextRole(region),
+      region,
+      country: pickCountry(region, this.rng).name,
       connections: 1,
       score: 0,
+      green: 0,
       hand: [],
+      seen: [],
       outcomes: [],
       history: [],
     };
@@ -160,24 +207,36 @@ export class Game {
     this.onChange();
   }
 
-  /** Assigns the role whose current count is furthest below its target share. */
-  private nextRole(): Role {
-    const counts = this.roleCounts();
-    const total = this.content.roles.reduce((s, r) => s + r.share, 0);
-    const n = this.players.size + 1;
+  /** Assigns the role whose count in the group is furthest below its share in that group. */
+  private nextRole(region: Region): Role {
+    const counts = this.roleCounts(region);
+    const total = this.content.roles.reduce((s, r) => s + roleShare(r, region), 0);
+    const n = this.regionCounts()[region] + 1;
     let best = this.content.roles[0]!;
     let bestDeficit = -Infinity;
     for (const r of this.content.roles) {
-      const deficit = (r.share / total) * n - counts[r.id];
+      const deficit = (roleShare(r, region) / total) * n - counts[r.id];
       if (deficit > bestDeficit) [best, bestDeficit] = [r, deficit];
     }
     return best.id;
   }
 
-  private roleCounts(): RoleCounts {
+  private roleCounts(region?: Region): RoleCounts {
     const counts = Object.fromEntries(ROLES.map((r) => [r, 0])) as RoleCounts;
-    for (const p of this.players.values()) counts[p.role]++;
+    for (const p of this.players.values()) if (!region || p.region === region) counts[p.role]++;
     return counts;
+  }
+
+  private regionCounts(): Record<Region, number> {
+    const counts = Object.fromEntries(REGIONS.map((r) => [r, 0])) as Record<Region, number>;
+    for (const p of this.players.values()) counts[p.region]++;
+    return counts;
+  }
+
+  /** Index of the current era in ERAS (the last one once the game has ended). */
+  private eraIndex(): number {
+    const i = ERAS.indexOf(this.world.year as (typeof ERAS)[number]);
+    return i < 0 ? ERAS.length - 1 : i;
   }
 
   choose(playerId: string, instanceId: string, optionId: string): string | null {
@@ -190,7 +249,8 @@ export class Game {
 
     p.hand = p.hand.filter((d) => d !== dealt);
     p.score += option.score;
-    this.decisions.push({ role: p.role, effects: option.effects });
+    if (greenOptionIds(dealt.card).includes(option.id)) p.green++;
+    this.decisions.push({ role: p.role, region: p.region, effects: option.effects });
     p.history.push({
       year: this.world.year,
       cardTitle: dealt.card.title,
@@ -202,14 +262,18 @@ export class Game {
       this.players.get(dealt.fromPlayerId)?.outcomes.push(option.reply);
 
     if (option.sends) {
+      const { card: cardId, toRole } = option.sends;
+      // Only to someone who has never received this card (no repeats); otherwise it is not sent.
       const target = pick(
         [...this.players.values()].filter(
-          (o) => o.connections > 0 && o.role === option.sends!.toRole && o.id !== p.id,
+          (o) =>
+            o.connections > 0 && o.role === toRole && o.id !== p.id && !o.seen.includes(cardId),
         ),
         this.rng,
       );
-      const card = this.content.cards.find((c) => c.id === option.sends!.card);
+      const card = this.content.cards.find((c) => c.id === cardId);
       if (target && card) {
+        target.seen.push(card.id);
         target.hand.push({
           instanceId: randomUUID(),
           card,
@@ -360,11 +424,10 @@ export class Game {
   }
 
   private deal(p: Player) {
-    const pool = this.content.cards.filter(
-      (c) => !c.interactionOnly && c.roles.includes(p.role) && this.inEra(c.eras),
-    );
-    const card = pick(pool, this.rng);
+    const cards = dealableCards(this.content.cards, p.role, p.region);
+    const card = pickFreshCard(cards, this.world.year, new Set(p.seen), this.rng);
     if (!card) return;
+    p.seen.push(card.id);
     p.hand.push({ instanceId: randomUUID(), card });
     this.cardsDealt++;
   }
@@ -377,22 +440,29 @@ export class Game {
       null;
   }
 
-  private closeVote() {
-    const vote = this.vote;
-    this.vote = null;
-    if (!vote) return;
+  /** Weighted ballots per option (a politician's ballot counts `voteWeight` times). */
+  private tally(vote: Vote): Record<string, number> {
     const weights = new Map(this.content.roles.map((r) => [r.id, r.voteWeight]));
     const tally: Record<string, number> = Object.fromEntries(vote.options.map((o) => [o.id, 0]));
     for (const [playerId, optionId] of this.ballots) {
       const p = this.players.get(playerId);
       if (p) tally[optionId] = (tally[optionId] ?? 0) + (weights.get(p.role) ?? 1);
     }
-    // Ties go to the first option (status quo should be listed first).
+    return tally;
+  }
+
+  /** Global negotiation: the option with the most votes wins. Ties go to the status quo (first option). */
+  private closeVote() {
+    const vote = this.vote;
+    this.vote = null;
+    if (!vote) return;
+    const tally = this.tally(vote);
     const winner = vote.options.reduce((a, b) => ((tally[b.id] ?? 0) > (tally[a.id] ?? 0) ? b : a));
     this.collective.push(winner.effects);
     this.lastVoteResult = {
       voteId: vote.id,
       title: vote.title,
+      options: vote.options.map((o) => ({ id: o.id, label: o.label })),
       winner: { id: winner.id, label: winner.label },
       tally,
     };
@@ -411,8 +481,12 @@ export class Game {
       this.firedEvents.add(e.id);
       this.collective.push(e.effects);
     }
+    const weights = regionWeights(this.eraIndex(), this.regionCounts());
     const res = resolveEra(this.world, {
-      decisions: this.decisions.map((d) => d.effects),
+      decisions: this.decisions.map((d) => ({
+        effects: d.effects,
+        weight: d.region && weights[d.region],
+      })),
       playerCount: Math.max(1, this.players.size),
       collective: this.collective,
     });
@@ -426,6 +500,7 @@ export class Game {
     const p = this.players.get(playerId);
     if (!p) return null;
     const role = this.content.roles.find((r) => r.id === p.role)!;
+    const vote = this.vote;
     return {
       phase: this.phase,
       year: this.world.year,
@@ -437,15 +512,20 @@ export class Game {
         roleName: role.name,
         objective: role.objective,
         score: p.score,
+        green: p.green,
+        region: p.region,
+        regionName: REGION_NAMES[p.region],
+        country: p.country,
+        represents: peoplePerPlayer(p.region, this.eraIndex(), this.regionCounts()[p.region]),
       },
       hand: p.hand.map(toCardView),
       outcomes: p.outcomes,
-      vote: this.vote
+      vote: vote
         ? {
-            id: this.vote.id,
-            title: this.vote.title,
-            text: this.vote.text,
-            options: this.vote.options.map((o) => ({ id: o.id, label: o.label })),
+            id: vote.id,
+            title: vote.title,
+            text: vote.text,
+            options: vote.options.map((o) => ({ id: o.id, label: o.label })),
             myChoice: this.ballots.get(p.id) ?? null,
           }
         : null,
@@ -456,6 +536,7 @@ export class Game {
 
   screenView(): ScreenView {
     const players = [...this.players.values()];
+    const vote = this.vote;
     return {
       phase: this.phase,
       year: this.world.year,
@@ -463,29 +544,55 @@ export class Game {
       playerCount: players.length,
       connectedCount: players.filter((p) => p.connections > 0).length,
       roleCounts: this.roleCounts(),
+      regions: this.regionViews(),
+      countries: COUNTRIES.map((c) => ({
+        name: c.name,
+        region: c.region,
+        lon: c.lon,
+        lat: c.lat,
+        players: players.filter((p) => p.country === c.name).length,
+      })).filter((c) => c.players > 0),
+      population: (WORLD_POPULATION[this.eraIndex()] ?? 0) * 1e9,
       choicesMade: this.decisions.length,
       cardsDealt: this.cardsDealt,
       world: this.world,
-      vote: this.vote
+      vote: vote
         ? {
-            id: this.vote.id,
-            title: this.vote.title,
-            text: this.vote.text,
-            options: this.vote.options.map((o) => ({ id: o.id, label: o.label })),
+            id: vote.id,
+            title: vote.title,
+            text: vote.text,
+            options: vote.options.map((o) => ({ id: o.id, label: o.label })),
             ballots: this.ballots.size,
           }
         : null,
       lastVoteResult: this.lastVoteResult,
       newTippingPoints: this.newTippingPoints,
       leaderboard: players
-        .sort((a, b) => b.score - a.score)
+        .sort((a, b) => b.green - a.green || b.score - a.score)
         .slice(0, 10)
-        .map((p) => ({ role: p.role, name: p.name, score: p.score })),
+        .map((p) => ({ role: p.role, name: p.name, score: p.score, green: p.green })),
       roleStats: this.roleStats(),
       events: this.eraEvents.map((e) => ({ id: e.id, title: e.title, text: e.text })),
       joinUrl: this.publicUrl,
       today: this.today,
     };
+  }
+
+  private regionViews(): Record<Region, RegionView> {
+    const counts = this.regionCounts();
+    const era = this.eraIndex();
+    return Object.fromEntries(
+      REGIONS.map((r) => [
+        r,
+        {
+          name: REGION_NAMES[r],
+          players: counts[r],
+          populationShare: populationShare(r, era),
+          emissionsShare: emissionsShare(r, era),
+          represents: peoplePerPlayer(r, era, counts[r]),
+        },
+      ]),
+    ) as Record<Region, RegionView>;
   }
 
   private roleStats(): Record<Role, RoleEraStats> {
@@ -549,18 +656,31 @@ export class Game {
         const card = cards.get(h.cardId);
         return card ? [{ ...h, card }] : [];
       });
-      const p: Player = { ...sp, hand, connections: 0 };
+      const region = sp.region ?? nextRegion(0, g.regionCounts());
+      const country = sp.country ?? pickCountry(region, g.rng).name;
+      const seen = sp.seen ?? sp.hand.map((h) => h.cardId);
+      const p: Player = {
+        ...sp,
+        region,
+        country,
+        seen,
+        green: sp.green ?? 0,
+        hand,
+        connections: 0,
+      };
       g.players.set(p.id, p);
       g.byToken.set(p.token, p);
     }
     g.phase = snap.phase;
     if (snap.today) g.today = snap.today;
-    g.world = snap.world;
+    // Worlds saved before CO2 removal existed have no captureRate.
+    g.world = { ...snap.world, captureRate: snap.world.captureRate ?? 0 };
     g.decisions = snap.decisions;
     g.cardsDealt = snap.cardsDealt;
     g.vote = content.votes.find((v) => v.id === snap.voteId) ?? null;
     g.ballots = new Map(snap.ballots);
-    g.lastVoteResult = snap.lastVoteResult;
+    // Results saved before options were part of the result: drop them.
+    g.lastVoteResult = snap.lastVoteResult?.options ? snap.lastVoteResult : null;
     g.collective = snap.collective;
     g.newTippingPoints = snap.newTippingPoints;
     g.firedEvents = new Set(snap.firedEvents);

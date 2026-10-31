@@ -41,6 +41,8 @@ export function VoteReveal({
   const rows = options.map((o) => ({ ...o, votes: result.tally[o.id] ?? 0 }));
   const total = rows.reduce((sum, o) => sum + o.votes, 0);
   const stamped = stage === 'stamp' || stage === 'leave';
+  // The status quo winning is not a deal: nothing changes.
+  const adopted = result.winner.id !== options[0]?.id;
 
   return (
     <div className={`vote-reveal stage-${stage}`}>
@@ -51,7 +53,11 @@ export function VoteReveal({
             ? 'Le monde a choisi…'
             : total === 0
               ? 'Personne n’a voté…'
-              : 'Dépouillement'}
+              : !stamped
+                ? 'Dépouillement'
+                : adopted
+                  ? 'Accord adopté !'
+                  : 'Rien ne change'}
         </h2>
         <ol className="reveal-options">
           {rows.map((o, i) => {
@@ -73,7 +79,9 @@ export function VoteReveal({
                   <div style={{ transform: `scaleX(${share * progress})` }} />
                 </div>
                 {stamped && winner && (
-                  <span className="stamp">{total === 0 ? 'Par défaut' : 'Adopté'}</span>
+                  <span className="stamp">
+                    {total === 0 ? 'Par défaut' : adopted ? 'Adopté' : 'Statu quo'}
+                  </span>
                 )}
               </li>
             );

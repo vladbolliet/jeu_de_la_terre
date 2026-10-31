@@ -6,7 +6,7 @@ Vous travaillez dans `content/` (fichiers YAML). Pas besoin d'installer quoi que
 ## J1
 - [ ] **D1.** Trancher les questions de design ci-dessous et noter les réponses en bas de ce fichier.
 - [ ] **D2.** `content/roles.yaml` définitif (noms, objectifs affichés, proportions, poids de vote).
-- [ ] **D3.** Au moins 2 cartes par rôle et par ère (10 ères × 4 rôles), du présent jusqu'à 2100 (sortie des énergies fossiles, voiture électrique, rénovation, agriculture, adaptation aux canicules et à la montée des eaux, migrations climatiques…). L'histoire 1900 → aujourd'hui est dans le film d'introduction. Répartition proposée : Ilyes = élite, Rémi = citoyens, Mo = politiques, Matteo = militants + votes.
+- [ ] **D3.** Au moins 2 cartes par rôle et par ère (10 ères × 6 rôles), du présent jusqu'à 2100 (sortie des énergies fossiles, voiture électrique, rénovation, agriculture, adaptation aux canicules et à la montée des eaux, migrations climatiques…). L'histoire 1900 → aujourd'hui est dans le film d'introduction. Répartition proposée : Ilyes = élite, Rémi = citoyens, Mo = politiques, Matteo = militants + votes.
 - [ ] **D4.** Au moins 1 vote par ère.
 
 ## J2

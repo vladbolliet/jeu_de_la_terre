@@ -29,7 +29,7 @@ export function loadConfig(env = process.env): ServerConfig {
     durations: {
       intro: Number(env.INTRO_S ?? 180),
       choices: Number(env.CHOICES_S ?? 60),
-      conflicts: Number(env.CONFLICTS_S ?? 40),
+      conflicts: Number(env.CONFLICTS_S ?? 90),
       feedback: Number(env.FEEDBACK_S ?? 20),
     },
     liveData: env.LIVE_DATA !== '0',

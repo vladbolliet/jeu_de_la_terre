@@ -1,0 +1,385 @@
+# Cartes reçues uniquement de la part d'un autre joueur (via `sends`).
+# Chaque option a un `reply` : le message que verra le joueur qui a envoyé la carte.
+
+# --- Reçues par les politiques ---
+- id: politique_pot_de_vin
+  roles: [politique]
+  interactionOnly: true
+  title: Une enveloppe
+  text: Une entreprise te propose de l'argent pour ignorer un dépôt de déchets toxiques.
+  options:
+    - id: accepter
+      label: Accepter discrètement
+      effects: { wellbeing: -2 }
+      score: 4
+      reply: L'élu·e a accepté ton enveloppe. Les déchets restent cachés.
+    - id: denoncer
+      label: Dénoncer publiquement
+      outcome: Scandale ! Le public t'applaudit.
+      effects: { approval: 3, awareness: 2 }
+      score: 3
+      reply: L'élu·e a dénoncé ta tentative de corruption. Ton entreprise est dans tous les journaux.
+      sends: { card: journaliste_scandale, toRole: journaliste }
+
+- id: politique_lobby_industrie
+  roles: [politique]
+  interactionOnly: true
+  title: Un dîner discret
+  text: Un grand patron t'invite à dîner. Il propose de « soutenir ta prochaine campagne » si la loi climat sur son secteur est assouplie.
+  options:
+    - id: assouplir
+      label: Assouplir la loi
+      outcome: Ta campagne sera bien financée. La loi n'a plus que le nom.
+      effects: { emissions: 3, gdp: 1 }
+      score: 4
+      reply: L'élu·e a assoupli la loi. Ton secteur respire.
+    - id: refuser
+      label: Refuser poliment
+      outcome: Le dîner était excellent. La loi passe telle quelle.
+      effects: { emissions: -1 }
+      score: 2
+      reply: L'élu·e a refusé. La loi passe sans changement.
+    - id: reveler
+      label: Raconter ce dîner à la presse
+      outcome: Ton intégrité fait la une. Tu t'es fait un ennemi puissant.
+      effects: { approval: 2, awareness: 2, emissions: -1 }
+      score: 3
+      reply: L'élu·e a tout raconté à la presse. Ton nom est partout.
+
+- id: politique_rencontre_militant
+  roles: [politique]
+  interactionOnly: true
+  title: Rendez-vous militant
+  text: Un·e militant·e pour le climat demande à te rencontrer avec un dossier de propositions.
+  options:
+    - id: loi
+      label: Le/la recevoir et reprendre une proposition dans une loi
+      outcome: Ton parti trouve ça risqué. La mesure est adoptée.
+      effects: { emissions: -2, awareness: 2 }
+      score: 2
+      reply: L'élu·e t'a reçu·e et a repris une de tes propositions dans une loi !
+    - id: photo
+      label: Le/la recevoir pour la photo, sans rien promettre
+      outcome: Belle photo sur tes réseaux.
+      effects: { approval: 1 }
+      score: 3
+      reply: L'élu·e t'a reçu·e, a fait une photo… et rien d'autre.
+    - id: ignorer
+      label: Ignorer la demande
+      effects: { approval: -1 }
+      score: 1
+      reply: L'élu·e n'a jamais répondu.
+
+- id: politique_petition_zfe
+  roles: [politique]
+  interactionOnly: true
+  title: Pétition contre la ZFE
+  text: Une pétition de 40 000 signatures réclame la suppression de la zone à faibles émissions. Beaucoup de signataires n'ont pas les moyens de changer de voiture.
+  options:
+    - id: supprimer
+      label: Supprimer la ZFE
+      outcome: Les signataires sont ravis. Les médecins rappellent que la pollution de l'air tue.
+      effects: { emissions: 2, approval: 2, wellbeing: -1 }
+      score: 4
+      reply: L'élu·e a supprimé la ZFE. Ta vieille voiture peut revenir en ville.
+    - id: aider
+      label: Garder la ZFE et doubler les aides pour changer de véhicule
+      outcome: La mesure coûte cher, mais personne n'est laissé sur le bord de la route.
+      effects: { emissions: -1, gdp: -1, approval: 1 }
+      score: 2
+      reply: L'élu·e garde la ZFE mais double les aides. Tu peux en profiter.
+    - id: maintenir
+      label: Maintenir la ZFE sans rien changer
+      effects: { emissions: -1, approval: -2 }
+      score: 1
+      reply: L'élu·e n'a rien changé. La ZFE reste.
+
+# --- Reçues par l'élite ---
+- id: elite_contrat_transition
+  roles: [elite]
+  interactionOnly: true
+  title: Le contrat de l'État
+  text: Un·e élu·e te propose 200 millions d'aides publiques. En échange, tu dois réduire tes émissions de 30 % en cinq ans.
+  options:
+    - id: signer
+      label: Signer et tenir l'engagement
+      outcome: Tes usines se transforment. L'argent public aide à passer le cap.
+      effects: { emissions: -3, employment: 1 }
+      score: 2
+      reply: Le groupe a signé et tient ses engagements.
+    - id: tricher
+      label: Signer, toucher l'argent, et traîner des pieds
+      outcome: Cinq ans plus tard, -5 %. Les avocats négocient les pénalités.
+      effects: { emissions: 1, gdp: 1 }
+      score: 5
+      reply: Le groupe a encaissé l'argent… et n'a presque rien fait.
+    - id: refuser
+      label: Refuser, l'État n'a pas à te dicter ta stratégie
+      effects: {}
+      score: 3
+      reply: Le groupe a refusé ton contrat.
+
+- id: elite_enquete_militant
+  roles: [elite]
+  interactionOnly: true
+  title: Caméra cachée
+  text: Des militant·es ont filmé dans ton usine des rejets toxiques dans la rivière. Ils te demandent de réagir avant de publier.
+  options:
+    - id: baillon
+      label: Les attaquer en diffamation pour les ruiner en frais d'avocat
+      outcome: La procédure va durer des années. Les vidéos circulent quand même.
+      effects: { wellbeing: -1, awareness: 1 }
+      score: 4
+      reply: L'entreprise vous attaque en justice pour diffamation.
+    - id: depolluer
+      label: Reconnaître les faits et dépolluer la rivière
+      outcome: Ça coûte cher. Les pêcheurs reviennent deux ans plus tard.
+      effects: { wellbeing: 2, gdp: -1 }
+      score: 1
+      reply: L'entreprise reconnaît les faits et s'engage à dépolluer la rivière !
+    - id: influence
+      label: Payer des influenceurs pour décrédibiliser les militants
+      outcome: Une campagne parle d'« écoterroristes ». Le doute s'installe.
+      effects: { awareness: -2 }
+      score: 3
+      reply: Une campagne en ligne vous traite d'écoterroristes. Elle est financée par l'entreprise.
+
+# --- Reçues par les citoyen·nes ---
+- id: citoyen_porte_a_porte
+  roles: [citoyen]
+  interactionOnly: true
+  title: On sonne à ta porte
+  text: Un·e militant·e pour le climat te propose de venir à une réunion de quartier sur les factures d'énergie et la rénovation.
+  options:
+    - id: venir
+      label: Y aller
+      outcome: Tu repars avec un plan pour isoler tes combles à moitié prix.
+      effects: { emissions: -1, awareness: 1 }
+      score: 2
+      reply: Ton voisin·e est venu·e à la réunion et va isoler sa maison.
+    - id: ecouter
+      label: Écouter poliment, sans promettre
+      effects: {}
+      score: 2
+      reply: On t'a écouté·e poliment. Rien de plus.
+    - id: claquer
+      label: Fermer la porte, tu as assez de soucis
+      effects: {}
+      score: 2
+      reply: La porte s'est refermée sans un mot.
+
+# --- Reçues par les militant·es ---
+- id: militant_lanceur_alerte
+  roles: [militant]
+  interactionOnly: true
+  title: Un dossier anonyme
+  text: Un·e salarié·e t'envoie des documents prouvant que son entreprise cache des fuites de méthane.
+  options:
+    - id: publier
+      label: Publier tout de suite
+      outcome: Énorme écho. L'entreprise pourrait chercher qui a parlé.
+      effects: { awareness: 4, emissions: -1 }
+      score: 4
+      reply: Le collectif a tout publié immédiatement. Ton entreprise pourrait chercher la source.
+    - id: journalistes
+      label: Vérifier avec des journalistes et protéger la source
+      outcome: Trois mois d'enquête. L'article est inattaquable.
+      effects: { awareness: 3, emissions: -2 }
+      score: 3
+      reply: Des journalistes enquêtent. Ton identité est protégée.
+      sends: { card: journaliste_dossier_methane, toRole: journaliste }
+    - id: ignorer
+      label: Trop risqué, ne rien faire
+      effects: {}
+      score: 0
+      reply: Le collectif n'a jamais donné suite.
+
+# --- Reçues par les agriculteur·rices ---
+- id: agriculteur_contrat
+  roles: [agriculteur]
+  interactionOnly: true
+  title: Le contrat de l'industriel
+  text: Un groupe agroalimentaire te propose un contrat. Il fournit les poulets et leur nourriture, tu les élèves dans un bâtiment de 40 000 places. Il fixe le prix.
+  options:
+    - id: signer
+      label: Signer, c'est un revenu garanti
+      outcome: Plus de risque sur les prix. Plus de liberté non plus.
+      effects: { emissions: 2, deforestation: 2 }
+      score: 4
+      reply: L'éleveur·se a signé ton contrat.
+    - id: negocier
+      label: Accepter seulement avec des poulets en plein air
+      outcome: Plus petit, mieux payé, sous ton nom.
+      effects: { emissions: -1 }
+      score: 2
+      reply: L'éleveur·se exige du plein air. Ça te coûtera plus cher.
+    - id: refuser
+      label: Refuser et garder ton indépendance
+      effects: {}
+      score: 2
+      reply: L'éleveur·se a refusé ton contrat.
+
+- id: agriculteur_panier
+  roles: [agriculteur]
+  interactionOnly: true
+  title: Un nouveau client
+  text: Un·e habitant·e de la ville veut s'abonner à un panier de légumes chaque semaine, payé six mois à l'avance.
+  options:
+    - id: groupe
+      label: Lui proposer de monter un réseau de 50 familles
+      outcome: Un revenu garanti, payé d'avance. Les familles viennent aider aux récoltes.
+      effects: { emissions: -1, employment: 1, wellbeing: 1 }
+      score: 3
+      reply: L'agriculteur·rice monte un réseau de paniers avec 50 familles. Tu es le premier abonné·e !
+    - id: accepter
+      label: Accepter ce client
+      effects: { emissions: -1 }
+      score: 2
+      reply: L'agriculteur·rice t'a ajouté·e à sa liste. Premier panier vendredi.
+    - id: refuser
+      label: Refuser, tu vends tout à la coopérative
+      effects: {}
+      score: 2
+      reply: L'agriculteur·rice vend déjà tout à la coopérative. Pas de panier pour toi.
+
+- id: politique_blocage_agricole
+  roles: [politique]
+  interactionOnly: true
+  title: Des tracteurs devant ta permanence
+  text: Des agriculteur·rices déversent du fumier devant ta permanence. Ils et elles réclament des prix justes et moins de normes.
+  options:
+    - id: normes
+      label: Promettre de supprimer des normes environnementales
+      outcome: Les tracteurs repartent. Les écologistes dénoncent un recul historique.
+      effects: { deforestation: 2, emissions: 1, approval: 2 }
+      score: 4
+      reply: L'élu·e promet de supprimer des normes environnementales.
+    - id: prix
+      label: Imposer aux supermarchés un prix plancher pour les producteurs
+      outcome: La grande distribution menace de répercuter sur les prix en rayon.
+      effects: { wellbeing: 1, approval: 1, gdp: -1 }
+      score: 3
+      reply: L'élu·e veut imposer un prix minimum aux supermarchés.
+    - id: rien
+      label: Faire nettoyer et ne rien promettre
+      effects: { approval: -2 }
+      score: 1
+      reply: L'élu·e n'a rien promis. Le fumier a été nettoyé.
+
+# --- Reçues par les journalistes ---
+- id: journaliste_scandale
+  roles: [journaliste]
+  interactionOnly: true
+  title: Un·e élu·e te contacte
+  text: Un·e élu·e te raconte qu'une grande entreprise a essayé de l'acheter pour cacher des déchets toxiques. Il ou elle a des preuves.
+  options:
+    - id: publier
+      label: Vérifier et publier l'enquête
+      outcome: Ton article fait la une. L'entreprise pourrait t'attaquer en justice.
+      effects: { awareness: 3, wellbeing: 1 }
+      score: 3
+      reply: Le ou la journaliste a publié l'enquête. Tout le pays en parle.
+    - id: buzz
+      label: Publier tout de suite le nom de l'entreprise, sans vérifier
+      outcome: Énorme buzz. La moindre erreur pourrait permettre à l'entreprise de contre-attaquer.
+      effects: { awareness: 1 }
+      score: 4
+      reply: Le ou la journaliste a publié trop vite. L'entreprise s'en sert pour se défendre.
+    - id: enterrer
+      label: Ne rien publier, l'entreprise est un gros annonceur
+      effects: { awareness: -1 }
+      score: 2
+      reply: Le ou la journaliste n'a rien publié.
+
+- id: journaliste_dossier_methane
+  roles: [journaliste]
+  interactionOnly: true
+  title: Le dossier méthane
+  text: Un collectif militant te transmet des documents prouvant qu'une entreprise cache des fuites de méthane. La source doit rester anonyme.
+  options:
+    - id: enquete
+      label: Enquêter trois mois et protéger la source
+      outcome: Ton enquête est inattaquable. L'entreprise est forcée de colmater ses fuites.
+      effects: { emissions: -2, awareness: 3 }
+      score: 3
+      reply: Le ou la journaliste a publié une enquête solide. Les fuites vont être colmatées.
+    - id: rapide
+      label: Publier vite pour avoir l'exclusivité
+      outcome: Tu as le scoop. Un détail du document pourrait permettre d'identifier la source.
+      effects: { awareness: 2 }
+      score: 4
+      reply: Le ou la journaliste a publié trop vite. Ta source risque d'être identifiée.
+
+- id: journaliste_pression_annonceur
+  roles: [journaliste]
+  interactionOnly: true
+  title: Un coup de fil
+  text: Ta direction te prévient qu'un gros annonceur est « inquiet » de ta série sur son secteur. Il pourrait retirer 2 millions de publicité.
+  options:
+    - id: adoucir
+      label: Adoucir la série
+      outcome: La pub est sauvée. Ta série ne dit plus grand-chose.
+      effects: { awareness: -2 }
+      score: 4
+      reply: Le média a adouci sa série. Ta publicité continue.
+    - id: maintenir
+      label: Publier la série telle quelle
+      outcome: L'annonceur part. Tes lecteurs, eux, restent.
+      effects: { awareness: 3 }
+      score: 2
+      reply: Le média a publié la série sans rien changer. Ta pression n'a pas marché.
+    - id: reveler
+      label: Raconter publiquement la pression subie
+      outcome: L'affaire de la pression fait plus de bruit que la série elle-même.
+      effects: { awareness: 3, approval: -1 }
+      score: 3
+      reply: Le média a révélé ta pression. Tu es dans tous les journaux.
+
+- id: politique_interview
+  roles: [politique]
+  interactionOnly: true
+  title: Interview en direct
+  text: En direct, un·e journaliste te demande pourquoi le pays ne tient pas ses objectifs climat.
+  options:
+    - id: langue_de_bois
+      label: Répondre que « beaucoup a été fait » et changer de sujet
+      outcome: Tu t'en sors sans dégâts. Personne n'a rien appris.
+      effects: { awareness: -1 }
+      score: 3
+      reply: L'élu·e a pratiqué la langue de bois.
+    - id: annoncer
+      label: Reconnaître le retard et annoncer une mesure concrète
+      outcome: Ton parti n'était pas prévenu. La mesure est maintenant obligatoire.
+      effects: { emissions: -2, awareness: 2, approval: 1 }
+      score: 2
+      reply: L'élu·e a reconnu le retard et annoncé une mesure en direct !
+    - id: attaquer
+      label: Accuser les médias de faire peur aux gens
+      outcome: Ta base adore. Le clip tourne en boucle.
+      effects: { awareness: -2, approval: 1 }
+      score: 4
+      reply: L'élu·e s'en est pris aux médias en direct.
+
+- id: elite_droit_de_reponse
+  roles: [elite]
+  interactionOnly: true
+  title: Questions d'un·e journaliste
+  text: Un·e journaliste a des preuves que ton groupe sous-déclare ses émissions et te demande une réaction avant publication.
+  options:
+    - id: menacer
+      label: Menacer de poursuites et de retirer ta publicité
+      outcome: Tes avocats envoient une lettre. Le média hésite.
+      effects: { awareness: -1 }
+      score: 4
+      reply: L'entreprise menace ton média de poursuites.
+    - id: reconnaitre
+      label: Reconnaître l'erreur et publier tes vrais chiffres
+      outcome: Mauvaise semaine en bourse. Ta parole redevient crédible.
+      effects: { emissions: -2, awareness: 2 }
+      score: 1
+      reply: L'entreprise reconnaît les faits et publie ses vrais chiffres.
+    - id: sans_commentaire
+      label: « Pas de commentaire »
+      effects: {}
+      score: 3
+      reply: L'entreprise n'a pas souhaité répondre.

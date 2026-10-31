@@ -1,21 +1,35 @@
 # Rôles. `share` = proportion de joueurs, `voteWeight` = poids du bulletin dans les votes collectifs.
+# `share` peut être un nombre (même part partout) ou une part par groupe de pays :
+# riche (pays riches), emergent (pays émergents), developpement (pays en développement).
+# Les parts sont normalisées dans chaque groupe. Ex. : l'agriculture emploie ~3 % des actifs
+# dans les pays riches et ~40 % dans les pays en développement.
 - id: elite
   name: Élite industrielle
-  objective: Maximiser ton capital et la puissance de ton industrie.
-  share: 15
+  objective: Tes actionnaires attendent toujours plus de profits et de croissance.
+  share: { riche: 14, emergent: 12, developpement: 8 }
   voteWeight: 1
 - id: citoyen
   name: Citoyen·ne
-  objective: Maximiser tes revenus, ta sécurité d'emploi et ton bien-être.
-  share: 60
+  objective: Ta famille compte sur ton salaire, ton emploi et ton confort.
+  share: { riche: 52, emergent: 45, developpement: 40 }
   voteWeight: 1
 - id: politique
   name: Politique
-  objective: Maximiser ton approbation et garder une économie stable.
-  share: 10
+  objective: Tes électeurs te jugeront sur l'économie et ta popularité.
+  share: 8
   voteWeight: 3
 - id: militant
   name: Militant·e
-  objective: Maximiser la sensibilisation du public et peser sur les décisions politiques.
-  share: 15
+  objective: Ton mouvement attend que tu fasses parler du climat et que tu pèses sur les décisions.
+  share: { riche: 14, emergent: 10, developpement: 10 }
+  voteWeight: 1
+- id: agriculteur
+  name: Agriculteur·rice
+  objective: Ta ferme doit rester rentable, quelle que soit la météo.
+  share: { riche: 4, emergent: 15, developpement: 26 }
+  voteWeight: 1
+- id: journaliste
+  name: Journaliste
+  objective: Ta rédaction attend de l'audience, sinon ton poste est menacé.
+  share: { riche: 8, emergent: 10, developpement: 8 }
   voteWeight: 1

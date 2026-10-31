@@ -1,0 +1,373 @@
+# Élite industrielle. Ce que le rôle attend : Tes actionnaires attendent toujours plus de profits et de croissance.
+# Périodes : 2026–2035 = sortie des fossiles, 2040–2050 = actifs échoués et sécheresses,
+# 2060–2090 = adaptation, géo-ingénierie, migrations. Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: elite_greenwashing
+  roles: [elite]
+  title: Campagne de pub
+  text: Ton service marketing veut afficher « neutre en carbone » sur tes produits. Il suffit d'acheter des crédits carbone forestiers à bas prix, sans vérifier s'ils protègent vraiment des arbres.
+  options:
+    - id: credits
+      label: Acheter les crédits et afficher « neutre en carbone »
+      outcome: Les ventes grimpent. Personne n'a encore vérifié ce que valent vraiment ces crédits.
+      effects: { emissions: 2, deforestation: 1 }
+      score: 4
+    - id: plan
+      label: Publier un vrai plan de réduction, chiffré et vérifiable
+      outcome: Les analystes saluent ta transparence. Ton action perd 3 % dans la journée.
+      effects: { emissions: -3, gdp: -1, awareness: 1 }
+      score: 1
+    - id: silence
+      label: Ne rien afficher du tout
+      outcome: Personne ne parle de toi, ni en bien ni en mal.
+      effects: { emissions: 1 }
+      score: 3
+
+- id: elite_lobby
+  roles: [elite]
+  title: Une loi te menace
+  text: Le gouvernement prépare une loi qui imposerait à ton secteur de réduire ses émissions de 40 % en dix ans. Tes concurrents étrangers n'auront pas cette contrainte.
+  options:
+    - id: lobby
+      label: Inviter un·e élu·e à dîner pour « discuter » du texte
+      outcome: Ton directeur des affaires publiques réserve une table discrète.
+      effects: { emissions: 2 }
+      score: 4
+      sends: { card: politique_lobby_industrie, toRole: politique }
+    - id: anticiper
+      label: Anticiper et transformer tes usines avant la loi
+      outcome: Tu prends de l'avance technologique, mais tes coûts explosent cette année.
+      effects: { emissions: -3, gdp: -1, employment: 1 }
+      score: 2
+    - id: menacer
+      label: Annoncer que tu délocaliseras si la loi passe
+      outcome: Les syndicats paniquent, la presse parle de chantage.
+      effects: { emissions: 1, employment: -1, approval: -1 }
+      score: 3
+
+- id: elite_actionnaires
+  roles: [elite]
+  title: Assemblée générale
+  text: L'année a été excellente. Un groupe d'actionnaires dépose une résolution climat ; les autres veulent leur part des bénéfices.
+  options:
+    - id: dividende
+      label: Verser un dividende record
+      outcome: Ovation dans la salle. Ton bonus est indexé dessus.
+      effects: { emissions: 2, gdp: 1 }
+      score: 5
+    - id: investir
+      label: Réinvestir les bénéfices dans la décarbonation
+      outcome: La résolution climat passe. Les fonds spéculatifs vendent tes actions.
+      effects: { emissions: -3, employment: 1 }
+      score: 1
+    - id: rachat
+      label: Racheter tes propres actions pour faire monter le cours
+      outcome: Le cours monte de 8 %. Rien n'a changé dans tes usines.
+      effects: { emissions: 1 }
+      score: 4
+
+- id: elite_dechets
+  roles: [elite]
+  title: Déchets toxiques
+  text: Ton usine produit des déchets chimiques. Les traiter correctement coûte cher, et un contrôle est prévu le mois prochain.
+  options:
+    - id: traiter
+      label: Les traiter correctement
+      effects: { gdp: -1, wellbeing: 2 }
+      score: 1
+    - id: soudoyer
+      label: Payer un·e élu·e pour fermer les yeux
+      outcome: Une enveloppe est partie vers la mairie…
+      effects: { wellbeing: -3 }
+      score: 4
+      sends: { card: politique_pot_de_vin, toRole: politique }
+    - id: exporter
+      label: Les expédier dans un pays aux normes plus faibles
+      outcome: Un cargo part vers un port lointain. Problème réglé, chez toi.
+      effects: { wellbeing: -1, emissions: 1 }
+      score: 3
+
+# --- 2026–2035 : sortir des fossiles ? ---
+- id: elite_usine_charbon
+  roles: [elite]
+  eras: [2026, 2030, 2035, 2040]
+  title: Nouvelle centrale
+  text: Tu peux construire une centrale au gaz, rentable tout de suite, ou un parc solaire avec batteries, plus cher au départ.
+  options:
+    - id: charbon
+      label: Centrale au gaz
+      outcome: Rentable dès la première année. Elle tournera encore dans 40 ans.
+      effects: { emissions: 6, gdp: 4, employment: 3 }
+      score: 5
+    - id: propre
+      label: Solaire et batteries
+      outcome: Tes marges baissent, tes actionnaires grognent.
+      effects: { emissions: -1, gdp: 1 }
+      score: 1
+
+- id: elite_datacenter
+  roles: [elite]
+  eras: [2026, 2030, 2035]
+  title: Data center pour l'IA
+  text: Tes clients réclament de la puissance de calcul pour l'IA. Ton nouveau data center consommera autant qu'une ville de 200 000 habitants. Il faut l'alimenter.
+  options:
+    - id: gaz
+      label: Turbines à gaz sur place, opérationnel dans 6 mois
+      outcome: Tu doubles tes parts de marché. Tes émissions aussi.
+      effects: { emissions: 5, gdp: 3 }
+      score: 5
+    - id: contrat_vert
+      label: Contrat d'électricité renouvelable, ouverture dans 2 ans
+      outcome: Ton concurrent ouvre avant toi et rafle deux gros clients.
+      effects: { emissions: -1, gdp: 1 }
+      score: 2
+    - id: sobriete
+      label: Refuser les projets les plus gourmands et optimiser l'existant
+      outcome: Ton équipe technique est fière. Ton conseil d'administration, beaucoup moins.
+      effects: { emissions: -2 }
+      score: 1
+
+- id: elite_flotte
+  roles: [elite]
+  eras: [2026, 2030, 2035, 2040]
+  title: Renouveler les camions
+  text: Ta flotte de 500 camions de livraison arrive en fin de vie. Les camions électriques coûtent deux fois plus cher, le fret ferroviaire est plus lent.
+  options:
+    - id: diesel
+      label: Nouveaux camions diesel
+      outcome: Pas cher, fiable, et bons pour 15 ans de route.
+      effects: { emissions: 4, gdp: 1 }
+      score: 4
+    - id: electrique
+      label: Camions électriques avec aide publique
+      outcome: Il faut installer des bornes dans tous tes dépôts. Gros chantier.
+      effects: { emissions: -2, gdp: -1, employment: 1 }
+      score: 2
+    - id: rail
+      label: Passer au train pour les longues distances
+      outcome: Tes délais de livraison s'allongent d'un jour. Certains clients partent.
+      effects: { emissions: -3, gdp: -1 }
+      score: 1
+
+- id: elite_jet
+  roles: [elite]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Rendez-vous à Milan
+  text: Tu as une réunion importante à Milan demain matin. Ton jet privé est prêt. Le train met 7 heures.
+  options:
+    - id: jet
+      label: Prendre le jet
+      outcome: Un compte qui suit les jets privés publie ton trajet. 2 000 partages.
+      effects: { emissions: 2, awareness: 1 }
+      score: 4
+    - id: train
+      label: Prendre le train et travailler pendant le trajet
+      outcome: Tu arrives fatigué·e mais ton dossier est prêt.
+      effects: { emissions: -1 }
+      score: 2
+    - id: visio
+      label: Faire la réunion en visio
+      outcome: Ton partenaire est vexé. Le contrat est signé quand même, à de moins bonnes conditions.
+      effects: { emissions: -1 }
+      score: 1
+
+# --- 2040–2050 : le monde change de règles ---
+- id: elite_actifs_echoues
+  roles: [elite]
+  eras: [2040, 2045, 2050]
+  title: Tes gisements de pétrole
+  text: Si le monde tient ses objectifs climat, tes gisements ne vaudront bientôt plus rien. Un fonds étranger peu regardant propose de les racheter.
+  options:
+    - id: vendre
+      label: Vendre au fonds étranger
+      outcome: Tu empoches le cash. L'acheteur, lui, va tout pomper.
+      effects: { emissions: 3, gdp: 2 }
+      score: 4
+    - id: pomper
+      label: Pomper au maximum tant que ça rapporte
+      outcome: Tes profits battent des records. Pour l'instant.
+      effects: { emissions: 5, gdp: 2 }
+      score: 5
+    - id: fermer
+      label: Fermer les puits et encaisser la perte
+      outcome: Tu perds des milliards. Le pétrole reste sous terre.
+      effects: { emissions: -4, gdp: -2, employment: -2 }
+      score: 0
+
+- id: elite_ciment
+  roles: [elite]
+  eras: [2040, 2045, 2050, 2060]
+  title: Ta cimenterie
+  text: Le ciment représente 8 % des émissions mondiales. Une nouvelle norme arrive. Trois ingénieurs te proposent trois solutions.
+  options:
+    - id: capture
+      label: Promettre la capture de carbone « dans 10 ans »
+      outcome: Le pilote capte 10 % du CO2. Les communiqués disent « ciment décarboné ».
+      effects: { emissions: 2 }
+      score: 4
+    - id: procede
+      label: Changer de procédé (ciment bas carbone)
+      outcome: Il faut tout réapprendre. Tes ouvriers se forment pendant six mois.
+      effects: { emissions: -4, gdp: -1, employment: 1 }
+      score: 1
+    - id: bois
+      label: Te diversifier dans la construction bois
+      outcome: Le marché est prometteur, mais il faut gérer les forêts sans les raser.
+      effects: { emissions: -2, deforestation: 1, employment: 1, capture: 1 }
+      score: 2
+
+- id: elite_eau
+  roles: [elite]
+  eras: [2040, 2045, 2050, 2060, 2070]
+  title: Sécheresse
+  text: La rivière est au plus bas. Les agriculteurs ont interdiction d'irriguer, mais ton usine d'embouteillage a un permis de pompage illimité.
+  options:
+    - id: pomper
+      label: Continuer à pomper, c'est légal
+      outcome: Ta production est intacte. Les agriculteurs voisins, eux, n'ont pas le droit d'arroser.
+      effects: { wellbeing: -3, gdp: 1 }
+      score: 4
+    - id: reduire
+      label: Réduire la production de moitié
+      outcome: Tu perds de l'argent, mais les champs voisins sont sauvés.
+      effects: { wellbeing: 2, gdp: -1 }
+      score: 1
+    - id: recycler
+      label: Investir dans le recyclage de l'eau
+      outcome: Cher, mais ton usine consomme 60 % d'eau en moins pour les années à venir.
+      effects: { wellbeing: 1, employment: 1 }
+      score: 2
+
+# --- 2060–2090 : vivre dans un monde plus chaud ---
+- id: elite_climatisation
+  roles: [elite]
+  eras: [2050, 2060, 2070, 2080, 2090]
+  title: Le marché de la clim
+  text: Les canicules font exploser la demande de climatiseurs. Tu peux vendre des modèles bon marché avec un gaz réfrigérant très polluant, ou des pompes à chaleur efficaces deux fois plus chères.
+  options:
+    - id: bas_de_gamme
+      label: Inonder le marché de clims bon marché
+      outcome: Tu vends 10 millions d'unités. Chaque fuite de gaz réchauffe autant que des tonnes de CO2.
+      effects: { emissions: 4, wellbeing: 2, gdp: 2 }
+      score: 5
+    - id: efficace
+      label: Ne vendre que des pompes à chaleur efficaces
+      outcome: Seuls les ménages aisés peuvent se les payer.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 2
+    - id: urbanisme
+      label: Vendre des solutions de rafraîchissement urbain (ombre, végétation, réseaux de froid)
+      outcome: Contrats longs avec les villes. Moins de marge, plus de stabilité.
+      effects: { emissions: -2, wellbeing: 2, deforestation: -1 }
+      score: 1
+
+- id: elite_voile_solaire
+  roles: [elite]
+  eras: [2060, 2070, 2080, 2090]
+  title: Voiler le soleil
+  text: Une startup propose d'injecter du soufre dans la haute atmosphère pour refroidir la planète, comme un volcan artificiel. Elle cherche un investisseur.
+  options:
+    - id: financer
+      label: Financer l'injection et continuer à produire comme avant
+      outcome: La température baisse un peu. Mais si l'injection s'arrête, tout le réchauffement revient d'un coup.
+      effects: { emissions: 3, wellbeing: 1 }
+      score: 4
+    - id: capture
+      label: Financer plutôt la capture directe du CO2 dans l'air
+      outcome: Lent et très cher. Mais c'est du CO2 vraiment retiré.
+      effects: { capture: 3, gdp: -1 }
+      score: 2
+    - id: rien
+      label: Ne rien financer
+      effects: {}
+      score: 3
+
+- id: elite_assurance
+  roles: [elite]
+  eras: [2060, 2070, 2080, 2090]
+  title: Plus aucun assureur
+  text: Tes usines côtières ne sont plus assurables. Des milliers de familles quittent la région et vendent leurs terres à bas prix.
+  options:
+    - id: racheter
+      label: Racheter leurs terres à prix cassés en zone sûre
+      outcome: Tu deviens le premier propriétaire foncier de la région.
+      effects: { wellbeing: -3, gdp: 1 }
+      score: 5
+    - id: renflouement
+      label: Exiger que l'État paie la protection de tes sites
+      outcome: Tes avocats rédigent la demande. L'argent public n'est pas infini.
+      effects: { gdp: -1, wellbeing: -1 }
+      score: 3
+    - id: demenager
+      label: Déménager tes usines et garder tes salariés
+      outcome: Coûteux, mais personne ne perd son emploi.
+      effects: { employment: 2, wellbeing: 1, gdp: -1 }
+      score: 1
+
+- id: elite_main_oeuvre
+  roles: [elite]
+  eras: [2060, 2070, 2080, 2090]
+  title: Réfugiés climatiques
+  text: Des milliers de réfugiés climatiques arrivent dans ta région. Ils cherchent du travail, n'importe lequel.
+  options:
+    - id: exploiter
+      label: Les embaucher sans contrat, à bas salaire
+      outcome: Tes coûts de main d'œuvre baissent de 30 %. L'inspection du travail peut te rendre visite.
+      effects: { wellbeing: -3, gdp: 2 }
+      score: 5
+    - id: former
+      label: Les embaucher légalement et les former
+      outcome: Plus cher au début. Six mois plus tard, ce sont tes meilleures équipes.
+      effects: { wellbeing: 2, employment: 2 }
+      score: 2
+    - id: refuser
+      label: N'embaucher personne de nouveau
+      effects: { employment: -1 }
+      score: 2
+
+# --- Liens avec les agriculteur·rices et les journalistes ---
+- id: elite_agro
+  roles: [elite]
+  eras: [2026, 2030, 2035, 2040, 2045, 2050, 2060]
+  title: Ton empire agroalimentaire
+  text: Ton groupe vend des plats préparés. Pour baisser les coûts, tu peux faire signer aux éleveurs des contrats où tu fournis tout (animaux, aliments) et fixes le prix.
+  options:
+    - id: integration
+      label: Proposer le contrat aux éleveurs
+      outcome: Ton équipe commerciale part sillonner les campagnes.
+      effects: { emissions: 1, deforestation: 1 }
+      score: 4
+      sends: { card: agriculteur_contrat, toRole: agriculteur }
+    - id: importer
+      label: Importer la viande d'Amérique du Sud, moins chère
+      outcome: Tes marges grimpent. Les éleveurs d'ici perdent un gros client.
+      effects: { emissions: 2, deforestation: 3, employment: -1 }
+      score: 5
+    - id: vegetal
+      label: Lancer une gamme végétale avec des légumineuses locales
+      outcome: Un pari. Les premiers mois, les ventes sont timides.
+      effects: { emissions: -2, deforestation: -2, employment: 1 }
+      score: 1
+
+- id: elite_media
+  roles: [elite]
+  title: Ton budget publicité
+  text: Un grand média prépare une série d'articles sur l'impact climatique de ton secteur. Tu es l'un de ses plus gros annonceurs.
+  options:
+    - id: pression
+      label: Rappeler au média combien tu dépenses chez lui
+      outcome: Ton directeur de la communication passe un coup de fil à la rédaction.
+      effects: { awareness: -1 }
+      score: 4
+      sends: { card: journaliste_pression_annonceur, toRole: journaliste }
+    - id: racheter
+      label: Racheter le média
+      outcome: Tu deviens propriétaire. La série est « reportée ».
+      effects: { awareness: -2, gdp: -1 }
+      score: 3
+    - id: repondre
+      label: Accepter l'interview et répondre à toutes les questions
+      outcome: L'article est dur, mais tu as eu la parole. Certains clients apprécient ta franchise.
+      effects: { awareness: 1 }
+      score: 2

@@ -136,8 +136,10 @@ body {
   grid-template:
     'main join' 1fr
     'stripes stripes' auto / 1.15fr 1fr;
-  gap: 32px 64px;
-  padding: 56px 72px 40px;
+  gap: min(32px, 3vh) 64px;
+  /* Vertical sizes in the lobby are capped by the viewport height: identical at 1080p,
+     smaller on shorter screens (laptops, 768p projectors) so nothing overflows. */
+  padding: min(56px, 5.2vh) 72px min(40px, 3.7vh);
   background:
     radial-gradient(ellipse 60% 70% at 85% 30%, rgb(60 195 211 / 0.1), transparent 70%),
     radial-gradient(ellipse 50% 50% at 10% 100%, rgb(240 83 58 / 0.1), transparent 70%), var(--bg);
@@ -190,7 +192,7 @@ body {
 }
 .lobby-kicker {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: min(1.9rem, 2.8vh);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -199,7 +201,7 @@ body {
 .lobby-title {
   margin: 8px 0 0;
   font-family: var(--font-display);
-  font-size: 6.6rem;
+  font-size: min(6.6rem, 9.8vh);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -219,8 +221,8 @@ body {
   padding-right: 0.08em;
 }
 .lobby-lede {
-  margin: 20px 0 0;
-  font-size: 2.4rem;
+  margin: min(20px, 1.9vh) 0 0;
+  font-size: min(2.4rem, 3.6vh);
   color: var(--muted);
   max-width: 22ch;
   line-height: 1.25;
@@ -229,11 +231,11 @@ body {
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-top: 44px;
+  margin-top: min(32px, 3vh);
 }
 .lobby-count-number {
   font-family: var(--font-display);
-  font-size: 7rem;
+  font-size: min(7rem, 10.4vh);
   font-weight: 800;
   line-height: 0.9;
   font-variant-numeric: tabular-nums lining-nums;
@@ -247,18 +249,18 @@ body {
   }
 }
 .lobby-count-label {
-  font-size: 2.2rem;
+  font-size: min(2.2rem, 3.3vh);
   font-weight: 600;
   line-height: 1.1;
   color: var(--muted);
 }
 .lobby-roles {
   list-style: none;
-  margin: 32px 0 0;
+  margin: min(20px, 1.9vh) 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 18px;
+  gap: min(14px, 1.3vh) 18px;
   max-width: 900px;
 }
 .lobby-roles li {
@@ -266,12 +268,12 @@ body {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 14px 22px;
+  padding: min(14px, 1.3vh) 22px;
   border-radius: 999px;
   background: rgb(14 34 48 / 0.75);
   border: 2px solid var(--role-color);
   backdrop-filter: blur(6px);
-  font-size: 1.9rem;
+  font-size: min(1.9rem, 2.8vh);
 }
 .role-elite {
   --role-color: #c08457;
@@ -284,6 +286,12 @@ body {
 }
 .role-militant {
   --role-color: var(--ok);
+}
+.role-agriculteur {
+  --role-color: #d9c45a;
+}
+.role-journaliste {
+  --role-color: #f08aa8;
 }
 .role-icon {
   width: 1.9rem;
@@ -1756,7 +1764,7 @@ body.pointer-idle {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 .choices-head {
   display: flex;
@@ -1765,8 +1773,8 @@ body.pointer-idle {
 }
 .ring {
   position: relative;
-  width: 7.5rem;
-  height: 7.5rem;
+  width: 5.5rem;
+  height: 5.5rem;
   flex-shrink: 0;
 }
 .ring .ring-track {
@@ -1781,7 +1789,7 @@ body.pointer-idle {
 }
 .ring-count {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 2.1rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) both;
@@ -1815,7 +1823,7 @@ body.pointer-idle {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 6px;
 }
 .role-bars li {
   display: grid;
@@ -1823,7 +1831,7 @@ body.pointer-idle {
     'badge name' auto
     'badge bar' auto / auto 1fr;
   align-items: center;
-  gap: 6px 14px;
+  gap: 4px 14px;
   transition: opacity 0.5s;
 }
 .role-bars li.waiting {
@@ -1833,26 +1841,26 @@ body.pointer-idle {
   grid-area: badge;
   display: grid;
   place-items: center;
-  width: 3.6rem;
-  height: 3.6rem;
-  border-radius: 14px;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 12px;
   background: var(--role-color);
   color: var(--ink);
 }
 .role-badge svg {
-  width: 2rem;
-  height: 2rem;
+  width: 1.7rem;
+  height: 1.7rem;
 }
 .role-name {
   grid-area: name;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   line-height: 1.1;
 }
 .diverging {
   grid-area: bar;
   position: relative;
-  height: 1.5rem;
+  height: 1.2rem;
   border-radius: 999px;
   background: var(--card-track);
 }
@@ -1885,11 +1893,11 @@ body.pointer-idle {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 14px;
+  padding-top: 8px;
   border-top: 2px dashed var(--card-track);
 }
 .era-trend svg {
-  width: 13rem;
+  width: 9rem;
   overflow: visible;
 }
 .trend-arc {
@@ -1911,7 +1919,7 @@ body.pointer-idle {
   fill: var(--ink);
 }
 .trend-label {
-  margin-top: 6px;
+  margin-top: 2px;
   font-family: var(--font-display);
   font-size: 1.6rem;
   font-weight: 700;
@@ -2315,18 +2323,18 @@ aside {
 .vote-panel {
   flex: 1;
   display: grid;
-  /* The hemicycle gets the larger half: it is the live part of the vote. */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  /* Text on the left, live hemicycle and the majority rule on the right. */
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   align-items: center;
-  gap: 48px;
+  gap: 40px;
   border-radius: 28px;
-  padding: 44px 56px;
+  padding: 36px 48px;
   animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 .vote-main {
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 20px;
   min-width: 0;
 }
 .vote-kicker {
@@ -2342,13 +2350,13 @@ aside {
 .vote-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 4rem;
+  font-size: 3.4rem;
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
 .vote-text {
   margin: 0;
-  font-size: 2.4rem;
+  font-size: 2.1rem;
   line-height: 1.3;
 }
 .vote-options {
@@ -2356,18 +2364,19 @@ aside {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 18px;
+  /* One per line: negotiated options are full sentences (compromises). */
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 .vote-options li {
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 16px 22px;
+  padding: 12px 20px;
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 3px 0 var(--card-track);
-  font-size: 2.1rem;
+  font-size: 1.8rem;
   font-weight: 700;
   line-height: 1.2;
   animation: reveal 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -2941,4 +2950,82 @@ aside {
   font-size: 2.4rem;
   font-weight: 700;
   color: var(--sand);
+}
+
+/* ---------- Groups of countries ---------- */
+.region-riche {
+  --region-color: #e2795b;
+}
+.region-emergent {
+  --region-color: #e2b23b;
+}
+.region-developpement {
+  --region-color: #4fb0e8;
+}
+.lobby-count-label small {
+  display: block;
+  margin-top: 6px;
+  font-size: min(1.5rem, 2.2vh);
+  font-weight: 600;
+  color: var(--ocean);
+}
+.lobby-world {
+  list-style: none;
+  margin: min(28px, 2.6vh) 0 0;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+  max-width: 900px;
+}
+.lobby-world li {
+  flex: 1 1 0;
+  /* Never narrower than its label; the extra width is shared by player count. */
+  min-width: max-content;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: min(12px, 1.1vh) 20px;
+  background: var(--region-color);
+  color: var(--bg);
+  white-space: nowrap;
+  font-size: min(1.45rem, 2.15vh);
+  font-weight: 700;
+  line-height: 1.1;
+  transition: flex-grow 0.8s cubic-bezier(0.3, 1.2, 0.5, 1);
+}
+.lobby-world li:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.lobby-world li:last-child {
+  border-radius: 0 999px 999px 0;
+}
+.world-count {
+  font-family: var(--font-display);
+  font-size: min(1.9rem, 2.8vh);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  animation: pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+/* Majority rule under the hemicycle during a negotiation. */
+.vote-side .hemicycle {
+  width: 88%;
+}
+.vote-rule {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+/* Negotiation result in the era summary. */
+.deal-status {
+  margin: 4px 0 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--warn);
+}
+.deal-status.adopted {
+  color: var(--ok-ink);
 }

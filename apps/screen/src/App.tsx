@@ -23,7 +23,7 @@ const HAS_WEBGL = webglAvailable();
 
 export function App() {
   const [view, setView] = useState<ScreenView | null>(null);
-  // Option labels of the current vote, kept for the feedback phase (see Feedback.tsx).
+  // Option labels of the current vote, kept for the vote count played after it closes.
   const voteOptions = useRef<OptionView[]>([]);
   if (view?.vote) voteOptions.current = view.vote.options;
 
@@ -86,11 +86,7 @@ export function App() {
     return (
       <div className="layout full-layout" style={heatStyle}>
         <PhaseHeader view={view} />
-        {view.phase === 'feedback' ? (
-          <Feedback view={view} voteOptions={voteOptions.current} />
-        ) : (
-          <Ending view={view} />
-        )}
+        {view.phase === 'feedback' ? <Feedback view={view} /> : <Ending view={view} />}
         {reveal && view.lastVoteResult?.voteId === reveal && (
           <VoteReveal
             key={reveal}

@@ -1,0 +1,297 @@
+# Agriculteur·rices. Ce que le rôle attend : Ta ferme doit rester rentable, quelle que soit la météo.
+# Cause et victime à la fois : l'agriculture pèse environ un quart des émissions mondiales (engrais,
+# élevage, déforestation importée), et c'est le premier métier touché par les sécheresses.
+# Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: agriculteur_engrais
+  roles: [agriculteur]
+  title: Les engrais
+  text: Le prix des engrais azotés a doublé, mais sans eux tes rendements de blé baissent d'un quart. Leur fabrication et leur épandage émettent beaucoup de gaz à effet de serre.
+  options:
+    - id: engrais
+      label: Garder la même dose d'engrais
+      outcome: Belle récolte. L'azote en trop finit dans l'air et dans la rivière.
+      effects: { emissions: 3, gdp: 1 }
+      score: 4
+    - id: legumineuses
+      label: Alterner avec des légumineuses (pois, luzerne) qui fixent l'azote
+      outcome: Une année de transition à moindre rendement. Tes sols revivent.
+      effects: { emissions: -2 }
+      score: 1
+    - id: fumier
+      label: Échanger ton fumier avec l'éleveur voisin
+      outcome: Ça sent fort et ça demande de l'organisation. Ta facture d'engrais baisse de moitié.
+      effects: { emissions: -1, employment: 1 }
+      score: 2
+
+- id: agriculteur_pret
+  roles: [agriculteur]
+  regions: [riche, emergent]
+  title: Rendez-vous à la banque
+  text: Ton voisin part à la retraite. La banque te propose un prêt sur 25 ans pour reprendre ses terres.
+  options:
+    - id: agrandir
+      label: Racheter et passer en grandes cultures intensives
+      outcome: 300 hectares, un tracteur géant, et des dettes jusqu'à ta retraite.
+      effects: { emissions: 2, deforestation: 1, gdp: 1 }
+      score: 4
+    - id: installer
+      label: Laisser les terres à un·e jeune qui veut s'installer en bio
+      outcome: Tu gagnes un voisin, pas des hectares.
+      effects: { emissions: -1, employment: 2 }
+      score: 1
+    - id: agrivoltaisme
+      label: Reprendre une partie et y installer des panneaux solaires au-dessus des cultures
+      outcome: Un revenu stable qui ne dépend pas de la météo. Les moutons broutent à l'ombre.
+      effects: { emissions: -2, gdp: 1 }
+      score: 3
+
+- id: agriculteur_supermarche
+  roles: [agriculteur]
+  regions: [riche, emergent]
+  title: La centrale d'achat
+  text: La grande surface qui achète ton lait impose une nouvelle baisse de prix. En dessous, tu vends à perte.
+  options:
+    - id: intensifier
+      label: Accepter et produire plus pour compenser
+      outcome: Plus de vaches, plus de soja importé pour les nourrir, et le même revenu.
+      effects: { emissions: 2, deforestation: 2 }
+      score: 3
+    - id: vente_directe
+      label: Transformer à la ferme et vendre en direct
+      outcome: Fromages, marchés, livraisons. Tu travailles 70 heures par semaine, mais tu fixes tes prix.
+      effects: { emissions: -1, employment: 1, wellbeing: 1 }
+      score: 2
+    - id: colere
+      label: Rejoindre le blocage des tracteurs devant la préfecture
+      outcome: Les tracteurs démarrent à 5 h du matin. Direction la préfecture.
+      effects: { approval: -1 }
+      score: 3
+      sends: { card: politique_blocage_agricole, toRole: politique }
+
+- id: agriculteur_haies
+  roles: [agriculteur]
+  title: Les haies
+  text: Les haies de ta ferme gênent tes machines. Les arracher te ferait gagner 4 hectares et des heures de travail.
+  options:
+    - id: arracher
+      label: Arracher les haies
+      outcome: Tes parcelles sont immenses. Au premier orage, la terre part avec l'eau.
+      effects: { deforestation: 3, emissions: 1, gdp: 1 }
+      score: 4
+    - id: garder
+      label: Les garder telles quelles
+      effects: {}
+      score: 2
+    - id: planter
+      label: Planter des haies et des arbres dans tes champs (agroforesterie)
+      outcome: Les oiseaux reviennent et mangent les ravageurs. Les arbres rapporteront dans 15 ans.
+      effects: { deforestation: -3, emissions: -1, capture: 2 }
+      score: 1
+
+# --- 2026–2035 ---
+- id: agriculteur_soja
+  roles: [agriculteur]
+  regions: [riche]
+  eras: [2026, 2030, 2035, 2040]
+  title: Nourrir le troupeau
+  text: Tes 200 vaches mangent du soja importé du Brésil, pas cher et efficace. Une partie vient de terres prises sur la forêt amazonienne.
+  options:
+    - id: soja
+      label: Continuer le soja importé
+      outcome: Le lait coule. Quelque part, une forêt brûle pour toi.
+      effects: { deforestation: 4, emissions: 1 }
+      score: 4
+    - id: herbe
+      label: Repasser au pâturage et à la luzerne de la ferme
+      outcome: Moins de lait par vache, mais presque plus rien à acheter.
+      effects: { deforestation: -2, emissions: -1 }
+      score: 2
+    - id: reduire
+      label: Réduire le troupeau et mieux valoriser chaque litre
+      outcome: Moins de vaches, un lait mieux payé. Ta banque est sceptique.
+      effects: { deforestation: -1, emissions: -2, gdp: -1 }
+      score: 1
+
+- id: agriculteur_glyphosate
+  roles: [agriculteur]
+  eras: [2026, 2030, 2035]
+  title: Le désherbage
+  text: Les mauvaises herbes envahissent tes champs. L'herbicide chimique est rapide et pas cher. Tes voisins se plaignent pour leurs enfants.
+  options:
+    - id: chimique
+      label: Pulvériser l'herbicide
+      outcome: Un passage, et c'est réglé. Les abeilles du voisin, elles, disparaissent.
+      effects: { wellbeing: -2, gdp: 1 }
+      score: 4
+    - id: mecanique
+      label: Désherber mécaniquement
+      outcome: Trois passages de tracteur au lieu d'un. Plus de gazole, plus d'heures.
+      effects: { emissions: 1, employment: 1 }
+      score: 2
+    - id: couverts
+      label: Couvrir le sol en permanence avec des plantes compagnes
+      outcome: Il faut tout réapprendre. Au bout de trois ans, les mauvaises herbes reculent.
+      effects: { emissions: -2, wellbeing: 1 }
+      score: 1
+
+- id: agriculteur_succession
+  roles: [agriculteur]
+  regions: [riche, emergent]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Qui reprendra la ferme ?
+  text: Tes enfants ne veulent pas reprendre la ferme. Trois acheteurs se présentent.
+  options:
+    - id: lotissement
+      label: Vendre au promoteur pour un lotissement
+      outcome: Dix fois le prix agricole. Les bulldozers arrivent au printemps.
+      effects: { deforestation: 3, emissions: 1, gdp: 1 }
+      score: 5
+    - id: fonds
+      label: Vendre au fonds d'investissement agro-industriel
+      outcome: Ta ferme rejoint 5 000 hectares gérés depuis un bureau.
+      effects: { emissions: 2, employment: -1 }
+      score: 4
+    - id: jeune
+      label: Vendre moins cher à un·e jeune agriculteur·rice
+      outcome: Tu lui apprends tout pendant deux ans. Ta retraite sera modeste.
+      effects: { employment: 1, wellbeing: 1 }
+      score: 1
+
+# --- 2040–2050 ---
+- id: agriculteur_secheresse
+  roles: [agriculteur]
+  eras: [2040, 2045, 2050, 2060]
+  title: Troisième été sans pluie
+  text: Ton maïs grille sur pied. La nappe est basse et les autorités limitent l'irrigation.
+  options:
+    - id: forage
+      label: Creuser un forage plus profond, sans autorisation
+      outcome: Ton maïs est sauvé. Le puits du village s'assèche en août.
+      effects: { wellbeing: -2, gdp: 1 }
+      score: 4
+    - id: sorgho
+      label: Passer au sorgho et aux cultures qui résistent à la sécheresse
+      outcome: Moins rentable, mais ça pousse sans arrosage.
+      effects: { emissions: -1, wellbeing: 1 }
+      score: 2
+    - id: assurance
+      label: Laisser la récolte et toucher l'assurance
+      outcome: L'assurance paie… cette année. Ta prime va tripler.
+      effects: { gdp: -1 }
+      score: 3
+
+- id: agriculteur_methaniseur
+  roles: [agriculteur]
+  regions: [riche, emergent]
+  eras: [2035, 2040, 2045, 2050]
+  title: Le méthaniseur
+  text: Une entreprise te propose un méthaniseur, qui transforme les déchets agricoles en gaz. Pour qu'il soit rentable, il faudrait le nourrir aussi avec du maïs cultivé exprès.
+  options:
+    - id: gros
+      label: Un grand méthaniseur nourri au maïs
+      outcome: Gros revenus garantis 20 ans. Tes champs nourrissent une machine, plus des gens.
+      effects: { emissions: 1, deforestation: 1, gdp: 2 }
+      score: 4
+    - id: petit
+      label: Un petit méthaniseur avec seulement tes effluents
+      outcome: Moins rentable. Tu chauffes ta ferme et l'école du village.
+      effects: { emissions: -2 }
+      score: 2
+    - id: non
+      label: Refuser
+      effects: {}
+      score: 1
+
+- id: agriculteur_proteines
+  roles: [agriculteur]
+  regions: [riche, emergent]
+  eras: [2045, 2050, 2060, 2070]
+  title: La viande de labo arrive
+  text: Les steaks cultivés en laboratoire sont devenus moins chers que la viande. Tes ventes de bœuf chutent.
+  options:
+    - id: lobby
+      label: Faire interdire l'appellation « viande » pour ces produits
+      outcome: Ton syndicat fait le siège du ministère.
+      effects: { emissions: 1 }
+      score: 3
+      sends: { card: politique_blocage_agricole, toRole: politique }
+    - id: legumes_secs
+      label: Te reconvertir dans les lentilles, pois chiches et haricots
+      outcome: Nouvelles machines, nouveaux clients. Ça marche mieux que prévu.
+      effects: { emissions: -3, deforestation: -1 }
+      score: 2
+    - id: haut_de_gamme
+      label: Garder un petit troupeau à l'herbe, haut de gamme
+      outcome: Moins de bêtes, mieux payées. Une viande qui devient un plat de fête.
+      effects: { emissions: -1 }
+      score: 3
+
+# --- 2060–2090 ---
+- id: agriculteur_grele
+  roles: [agriculteur]
+  eras: [2060, 2070, 2080, 2090]
+  title: Récolte détruite
+  text: Un orage de grêle a détruit toute ta récolte en dix minutes. C'est la troisième fois en cinq ans.
+  options:
+    - id: defricher
+      label: Défricher le bois au bout de tes terres pour cultiver plus
+      outcome: Plus de surface pour compenser. Moins d'arbres pour retenir l'eau.
+      effects: { deforestation: 3, gdp: 1 }
+      score: 4
+    - id: diversifier
+      label: "Diversifier : vergers, maraîchage, élevage, pour ne pas tout perdre d'un coup"
+      outcome: Plus de travail, mais jamais plus tout à la fois.
+      effects: { wellbeing: 1, employment: 1 }
+      score: 2
+    - id: vendre
+      label: Vendre tes terres à un groupe industriel
+      outcome: Tu pars. Les terres sont rachetées pour une ferme-usine sous serres.
+      effects: { emissions: 2, employment: -1 }
+      score: 3
+
+- id: agriculteur_nouvelles_cultures
+  roles: [agriculteur]
+  regions: [riche]
+  eras: [2060, 2070, 2080, 2090]
+  title: Des oliviers en Bourgogne
+  text: Le climat de ta région ressemble maintenant à celui de l'Andalousie il y a 50 ans. Ce que ton grand-père plantait ne pousse plus.
+  options:
+    - id: serres
+      label: Cultiver sous serres climatisées
+      outcome: Rendements garantis. La facture d'électricité aussi.
+      effects: { emissions: 3, gdp: 1 }
+      score: 4
+    - id: mediterraneen
+      label: Planter oliviers, amandiers et pistachiers
+      outcome: Les premiers fruits dans sept ans. Il faut tenir jusque-là.
+      effects: { emissions: -1, deforestation: -1, capture: 1 }
+      score: 2
+    - id: semences
+      label: Sélectionner tes propres semences avec d'autres paysan·nes
+      outcome: Lent et collectif. Vos variétés résistent mieux que celles du commerce.
+      effects: { wellbeing: 1, employment: 1 }
+      score: 1
+
+- id: agriculteur_eau_ville
+  roles: [agriculteur]
+  eras: [2070, 2080, 2090]
+  title: La ville veut ton eau
+  text: La ville voisine manque d'eau potable. Elle propose de racheter tes droits de pompage à un très bon prix.
+  options:
+    - id: vendre
+      label: Vendre tes droits d'eau
+      outcome: Tu touches une fortune et passes en culture sèche.
+      effects: { wellbeing: 1 }
+      score: 4
+    - id: garder
+      label: Les garder pour irriguer
+      outcome: Tes cultures sont sauvées. La ville rationne ses habitants.
+      effects: { wellbeing: -2, gdp: 1 }
+      score: 3
+    - id: partager
+      label: Négocier un partage avec la ville et les autres fermes
+      outcome: Des mois de réunions. Personne n'a tout, tout le monde a assez.
+      effects: { wellbeing: 2 }
+      score: 2

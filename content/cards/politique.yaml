@@ -1,0 +1,294 @@
+# Politiques. Ce que le rôle attend : Tes électeurs te jugeront sur l'économie et ta popularité.
+# Peu nombreux mais leur vote compte triple. Voir docs/CONTENU.md.
+
+# --- Toutes les ères ---
+- id: politique_budget
+  roles: [politique]
+  title: Budget
+  text: Tu dois choisir la priorité du budget de l'année. Les élections approchent.
+  options:
+    - id: routes
+      label: Routes et aides à l'industrie
+      outcome: Les rubans sont coupés devant les caméras.
+      effects: { emissions: 3, gdp: 3, approval: 2 }
+      score: 4
+    - id: social
+      label: Santé et éducation
+      outcome: Résultats dans dix ans. Pas avant les élections.
+      effects: { wellbeing: 3, approval: 1 }
+      score: 3
+    - id: transition
+      label: Rénovation des écoles et trains du quotidien
+      outcome: Des chantiers partout, des factures en baisse. On te reproche les travaux.
+      effects: { emissions: -3, employment: 2, approval: -1 }
+      score: 1
+
+- id: politique_carburant
+  roles: [politique]
+  title: Le prix de l'essence flambe
+  text: Le prix du carburant a doublé en un an. Des routes sont bloquées partout dans le pays.
+  options:
+    - id: bloquer
+      label: Baisser les taxes sur le carburant pour tout le monde
+      outcome: Les routes se débloquent. L'État perd des milliards, surtout au profit des plus gros consommateurs.
+      effects: { emissions: 2, approval: 3, gdp: -1 }
+      score: 4
+    - id: cheque
+      label: Un chèque énergie réservé aux ménages modestes
+      outcome: Moins visible, plus juste. Les classes moyennes se sentent oubliées.
+      effects: { wellbeing: 1, approval: 1 }
+      score: 3
+    - id: alternatives
+      label: Tenir le prix et financer bus et covoiturage à la campagne
+      outcome: Tu deviens « l'élu·e qui ne comprend pas la France des campagnes ».
+      effects: { emissions: -3, approval: -3, employment: 1 }
+      score: 1
+
+- id: politique_autoroute
+  roles: [politique]
+  eras: [2026, 2030, 2035, 2040, 2045, 2050]
+  title: Projet d'autoroute
+  text: Une autoroute doit relier deux villes moyennes. Elle ferait gagner 15 minutes et traverserait une zone humide protégée.
+  options:
+    - id: lancer
+      label: Lancer le chantier
+      outcome: Les élus locaux t'applaudissent. Des militants s'installent dans les arbres.
+      effects: { emissions: 2, deforestation: 3, employment: 2, approval: 1 }
+      score: 4
+    - id: train
+      label: Abandonner et rénover la ligne de train existante
+      outcome: Moins spectaculaire. Le train gagne 10 minutes et la zone humide est sauvée.
+      effects: { emissions: -2, deforestation: -1, approval: -1 }
+      score: 2
+    - id: reporter
+      label: Lancer une nouvelle étude de trois ans
+      outcome: Tu as reporté le problème à ton successeur.
+      effects: {}
+      score: 3
+
+# --- 2026–2035 ---
+- id: politique_mix
+  roles: [politique]
+  eras: [2026, 2030, 2035]
+  title: Le mix électrique
+  text: La demande d'électricité va doubler (voitures, pompes à chaleur, data centers). Il faut décider d'où elle viendra.
+  options:
+    - id: gaz
+      label: Des centrales à gaz, prêtes en 3 ans
+      outcome: Rapide et rassurant. Tu dépends des importations de gaz pour 40 ans.
+      effects: { emissions: 5, gdp: 2, approval: 1 }
+      score: 4
+    - id: nucleaire
+      label: De nouveaux réacteurs nucléaires, prêts en 15 ans
+      outcome: Un débat national houleux. Les premiers réacteurs arriveront après ton mandat.
+      effects: { emissions: -2, gdp: -1, approval: -1 }
+      score: 2
+    - id: renouvelables
+      label: Solaire, éolien, stockage et sobriété
+      outcome: Des éoliennes partout, et autant de recours en justice contre elles.
+      effects: { emissions: -3, employment: 2, approval: -2 }
+      score: 1
+
+- id: politique_cop
+  roles: [politique]
+  eras: [2026, 2030, 2035, 2040, 2045]
+  title: Sommet international sur le climat
+  text: Tu représentes ton pays au sommet. Les caméras du monde entier sont braquées sur toi.
+  options:
+    - id: promesse
+      label: Annoncer un objectif ambitieux pour 2050, sans mesure contraignante
+      outcome: Standing ovation. Rien ne t'oblige à quoi que ce soit avant 2050.
+      effects: { approval: 2, awareness: 1 }
+      score: 4
+    - id: contraignant
+      label: Signer un accord contraignant, avec sanctions
+      outcome: Ton opposition hurle à la perte de souveraineté. Les émissions baissent vraiment.
+      effects: { emissions: -4, gdp: -1, approval: -2 }
+      score: 1
+    - id: absent
+      label: Ne pas y aller, il y a une crise intérieure
+      outcome: Ta chaise vide fait la une des journaux étrangers.
+      effects: { approval: -1 }
+      score: 2
+
+- id: politique_passoires
+  roles: [politique]
+  regions: [riche]
+  eras: [2026, 2030, 2035, 2040]
+  title: Passoires thermiques
+  text: La loi interdit bientôt de louer les logements les plus mal isolés. Les propriétaires menacent de retirer des milliers de logements du marché.
+  options:
+    - id: repousser
+      label: Repousser l'échéance de 5 ans
+      outcome: Les propriétaires sont soulagés. Les locataires continuent de grelotter.
+      effects: { emissions: 1, approval: 2, wellbeing: -1 }
+      score: 4
+    - id: tenir
+      label: Tenir l'échéance
+      outcome: Quelques logements quittent le marché. Des milliers sont rénovés.
+      effects: { emissions: -3, approval: -2, employment: 1 }
+      score: 1
+    - id: subventionner
+      label: Tenir l'échéance et payer 70 % des travaux
+      outcome: Ça marche. Ça coûte très cher.
+      effects: { emissions: -3, gdp: -2, employment: 2, approval: 1 }
+      score: 2
+
+- id: politique_contrat_transition
+  roles: [politique]
+  eras: [2026, 2030, 2035, 2040, 2045, 2050]
+  title: Pacte avec l'industrie
+  text: Un grand groupe industriel réclame des aides publiques pour moderniser ses usines.
+  options:
+    - id: sans_condition
+      label: Donner les aides sans condition
+      outcome: Le patron te remercie à la télé. Les emplois sont « sauvés ».
+      effects: { emissions: 1, gdp: 1, approval: 1 }
+      score: 4
+    - id: conditions
+      label: Proposer des aides contre des objectifs climat
+      outcome: Tu envoies un contrat au groupe. À lui de signer.
+      effects: {}
+      score: 2
+      sends: { card: elite_contrat_transition, toRole: elite }
+    - id: refuser
+      label: Refuser, l'argent public a d'autres priorités
+      outcome: Le groupe annonce 800 suppressions de postes.
+      effects: { employment: -2, approval: -1 }
+      score: 1
+
+# --- 2040–2050 ---
+- id: politique_agriculture
+  roles: [politique]
+  regions: [riche, emergent]
+  eras: [2040, 2045, 2050, 2060]
+  title: Colère agricole
+  text: Des tracteurs bloquent la capitale. Les agriculteurs réclament la suppression des normes environnementales (haies, pesticides, zones humides).
+  options:
+    - id: supprimer
+      label: Suspendre les normes
+      outcome: Les tracteurs repartent. Les haies sont arrachées au printemps.
+      effects: { deforestation: 2, emissions: 1, approval: 3 }
+      score: 4
+    - id: accompagner
+      label: Payer les agriculteurs pour leur transition agroécologique
+      outcome: Coûteux, lent, mais les revenus agricoles se stabilisent.
+      effects: { deforestation: -2, emissions: -1, gdp: -1, employment: 1 }
+      score: 2
+    - id: tenir
+      label: Tenir bon sans rien céder
+      outcome: Le blocage dure trois semaines. Ta cote s'effondre à la campagne.
+      effects: { approval: -3 }
+      score: 1
+
+- id: politique_eau
+  roles: [politique]
+  regions: [riche]
+  eras: [2040, 2045, 2050, 2060, 2070]
+  title: Le partage de l'eau
+  text: Les nappes phréatiques sont au plus bas. Les grands céréaliers veulent des méga-bassines pour irriguer le maïs. Les petits paysans et les communes s'y opposent.
+  options:
+    - id: bassines
+      label: Autoriser les méga-bassines
+      outcome: Les grandes exploitations sont sauvées cette année. Les rivières en aval s'assèchent.
+      effects: { gdp: 1, wellbeing: -1, approval: 1 }
+      score: 3
+    - id: quotas
+      label: Quotas d'eau pour tous et aide pour changer de cultures
+      outcome: Moins de maïs, plus de sorgho. Tout le monde râle un peu.
+      effects: { wellbeing: 1, gdp: -1 }
+      score: 2
+    - id: laisser
+      label: Laisser les préfets décider au cas par cas
+      outcome: Chaque département fait différemment. Les conflits se multiplient.
+      effects: { wellbeing: -1 }
+      score: 3
+
+- id: politique_impot_climat
+  roles: [politique]
+  eras: [2045, 2050, 2060, 2070]
+  title: Payer l'adaptation
+  text: Digues, hôpitaux climatisés, reconstruction après les tempêtes… L'adaptation coûte de plus en plus cher. Il faut trouver l'argent.
+  options:
+    - id: dette
+      label: Emprunter, on verra plus tard
+      outcome: La dette grimpe. Les marchés commencent à s'inquiéter.
+      effects: { gdp: -1, approval: 1 }
+      score: 4
+    - id: pollueurs
+      label: Taxer les plus grandes fortunes et les profits des pollueurs
+      outcome: Les plus riches menacent de partir. Le budget est bouclé.
+      effects: { emissions: -2, wellbeing: 1, gdp: -1 }
+      score: 2
+    - id: couper
+      label: Couper dans les autres services publics
+      outcome: Les écoles et les hôpitaux trinquent.
+      effects: { wellbeing: -3, approval: -2 }
+      score: 1
+
+# --- 2060–2090 ---
+- id: politique_urgence
+  roles: [politique]
+  eras: [2060, 2070, 2080, 2090]
+  title: Canicule meurtrière
+  text: Une canicule de trois semaines fait des milliers de victimes. Le réseau électrique est au bord de la rupture.
+  options:
+    - id: clim
+      label: Subventionner des climatiseurs pour tous
+      outcome: Les gens dorment mieux. Le réseau saute deux fois, les centrales à gaz tournent à fond.
+      effects: { emissions: 3, wellbeing: 1, approval: 3 }
+      score: 4
+    - id: refuges
+      label: Ouvrir des refuges climatisés publics et adapter les horaires de travail
+      outcome: Les plus fragiles sont protégés. Les entreprises protestent contre les horaires.
+      effects: { wellbeing: 2, gdp: -1 }
+      score: 2
+    - id: rationner
+      label: Rationner l'électricité et interdire les usages non essentiels
+      outcome: Plus de piscines, plus de patinoires. Ta popularité fond plus vite que la banquise.
+      effects: { emissions: -3, approval: -4 }
+      score: 1
+
+- id: politique_frontieres
+  roles: [politique]
+  eras: [2060, 2070, 2080, 2090]
+  title: Réfugiés climatiques
+  text: Des centaines de milliers de personnes fuient des régions devenues invivables. Une partie arrive à tes frontières.
+  options:
+    - id: fermer
+      label: Fermer les frontières
+      outcome: Ta cote remonte dans les sondages. Des camps se forment de l'autre côté.
+      effects: { approval: 2, wellbeing: -2 }
+      score: 4
+    - id: payer
+      label: Payer les pays voisins pour qu'ils les retiennent
+      outcome: Le problème disparaît des écrans. Pas de la réalité.
+      effects: { wellbeing: -1, gdp: -1, approval: 1 }
+      score: 3
+    - id: accueil
+      label: Organiser l'accueil et l'accès au travail
+      outcome: Ton opposition t'accuse d'« appel d'air ». Dans dix ans, ils paieront des impôts.
+      effects: { employment: 2, wellbeing: 1, approval: -3 }
+      score: 1
+
+- id: politique_voile_solaire
+  roles: [politique]
+  eras: [2060, 2070, 2080, 2090]
+  title: Refroidir la planète ?
+  text: Un pays voisin annonce qu'il va injecter des aérosols dans le ciel pour faire baisser la température. Cela pourrait dérégler la mousson en Asie.
+  options:
+    - id: rejoindre
+      label: Le soutenir et y participer
+      outcome: La température baisse un peu. Les émissions, elles, continuent.
+      effects: { emissions: 2, wellbeing: 1, approval: 1 }
+      score: 4
+    - id: traite
+      label: Exiger un traité international d'abord
+      outcome: Des années de négociations. Le monde regarde.
+      effects: { awareness: 2 }
+      score: 2
+    - id: interdire
+      label: S'y opposer et accélérer la baisse des émissions
+      outcome: On te reproche de « laisser les gens mourir de chaud par principe ».
+      effects: { emissions: -3, approval: -2 }
+      score: 1

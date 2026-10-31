@@ -12,14 +12,17 @@ import {
   BASELINE_DEFORESTATION,
   BASELINE_EMISSIONS,
   BASELINE_GDP_GROWTH,
+  CAPTURE_SENSITIVITY,
   CLIMATE_SENSITIVITY,
   DEFORESTATION_SENSITIVITY,
   EMISSIONS_SENSITIVITY,
+  MAX_CAPTURE_RATE,
   PREINDUSTRIAL_CO2,
   SOCIETY_SENSITIVITY,
   TEMPERATURE_INERTIA,
   TIPPING_POINTS,
 } from './config.ts';
+import type { DecisionWeight } from './regions.ts';
 
 /** Rates in config.ts that are not yearly are calibrated on this era length. */
 const REFERENCE_ERA_YEARS = 20;
@@ -28,7 +31,7 @@ const GT_PER_PPM = 7.8;
 /** Share of emitted CO2 staying in the atmosphere at first (the rest goes to oceans and plants). */
 const AIRBORNE_FRACTION = 0.75;
 /** Share of the CO2 excess over pre-industrial absorbed back by natural sinks each year. */
-const CO2_SINK = 0.012;
+const CO2_SINK = 0.014;
 
 /** Today's world (2026). `climate` overrides it with real measurements (see the server). */
 export function initialWorld(climate: Partial<Climate> = {}): World {
@@ -44,6 +47,7 @@ export function initialWorld(climate: Partial<Climate> = {}): World {
     },
     society: { gdp: 100, employment: 60, wellbeing: 55, approval: 50, awareness: 35 },
     emissionsFactor: 1,
+    captureRate: 0,
     tippingPoints: [],
     history: [],
   };
@@ -51,11 +55,18 @@ export function initialWorld(climate: Partial<Climate> = {}): World {
 
 const clamp = (v: number, lo = 0, hi = 100) => Math.min(hi, Math.max(lo, v));
 
-/** Mean of each effect key over a list of decisions (missing keys count as 0). */
-export function meanEffects(decisions: Effects[], playerCount: number): Required<Effects> {
+/** One individual choice. `weight` scales each effect (see regionWeights); missing = 1. */
+export interface Decision {
+  effects: Effects;
+  weight?: DecisionWeight;
+}
+
+/** Weighted mean of each effect key over a list of decisions (missing keys count as 0). */
+export function meanEffects(decisions: Decision[], playerCount: number): Required<Effects> {
   const keys: EffectKey[] = [
     'emissions',
     'deforestation',
+    'capture',
     'gdp',
     'employment',
     'wellbeing',
@@ -64,13 +75,14 @@ export function meanEffects(decisions: Effects[], playerCount: number): Required
   ];
   const n = Math.max(1, playerCount);
   const out = {} as Required<Effects>;
-  for (const k of keys) out[k] = decisions.reduce((s, d) => s + (d[k] ?? 0), 0) / n;
+  for (const k of keys)
+    out[k] = decisions.reduce((s, d) => s + (d.effects[k] ?? 0) * (d.weight?.[k] ?? 1), 0) / n;
   return out;
 }
 
 export interface EraInput {
   /** One entry per individual choice made this era. */
-  decisions: Effects[];
+  decisions: Decision[];
   /** Number of players (inactive players dilute the average). */
   playerCount: number;
   /** Effects of collective votes, applied at full strength. */
@@ -100,7 +112,13 @@ export function resolveEra(world: World, input: EraInput): EraResult {
     0.05,
     world.emissionsFactor * (1 + avg.emissions * EMISSIONS_SENSITIVITY),
   );
-  const emissions = (BASELINE_EMISSIONS[eraIndex] ?? 0) * emissionsFactor;
+  // Removal capacity lasts, like planted forests or capture plants (missing in old saves).
+  const captureRate = Math.min(
+    MAX_CAPTURE_RATE,
+    Math.max(0, (world.captureRate ?? 0) + avg.capture * CAPTURE_SENSITIVITY),
+  );
+  // Net emissions (Gt/yr): negative once removals exceed what is still emitted.
+  const emissions = (BASELINE_EMISSIONS[eraIndex] ?? 0) * emissionsFactor - captureRate;
 
   const c = { ...world.climate };
   const crossedBefore = new Set(world.tippingPoints);
@@ -151,6 +169,7 @@ export function resolveEra(world: World, input: EraInput): EraResult {
       climate: c,
       society: s,
       emissionsFactor,
+      captureRate,
       tippingPoints: [...world.tippingPoints, ...newTippingPoints],
       history: [
         ...world.history,
